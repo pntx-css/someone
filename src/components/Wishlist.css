@@ -1,0 +1,335 @@
+.wishlist-section {
+  min-height: 100vh;
+  padding: 5rem 1.5rem 8rem;
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(255, 255, 255, 0.62), transparent 34%),
+    radial-gradient(ellipse at 88% 82%, rgba(249, 213, 229, 0.55), transparent 38%),
+    var(--color-pink-50);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.wishlist-heading {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.wishlist-eyebrow {
+  color: var(--color-pink-500);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.wishlist-heading h2 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: 0.7rem;
+}
+
+.wishlist-intro {
+  max-width: 34rem;
+  color: var(--color-dark);
+  line-height: 1.7;
+}
+
+.wishlist-envelope-stage {
+  position: relative;
+  width: min(100%, 520px);
+  min-height: 380px;
+  perspective: 1000px;
+}
+
+.wishlist-envelope-back {
+  position: absolute;
+  inset: auto 0 0;
+  height: 245px;
+  border: 1px solid rgba(131, 24, 67, 0.12);
+  border-radius: 5px;
+  background:
+    repeating-linear-gradient(0deg, rgba(131, 24, 67, 0.018) 0 1px, transparent 1px 5px),
+    #f6cfdf;
+  box-shadow: 0 20px 45px rgba(131, 24, 67, 0.13);
+  opacity: 0;
+  transform: translateY(28px) scale(0.94);
+  transition:
+    opacity 420ms ease 240ms,
+    transform 620ms cubic-bezier(0.2, 0.7, 0.25, 1) 240ms;
+  clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+}
+
+.wishlist-paper {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  min-height: 340px;
+  padding: 2.2rem 2.5rem 1.3rem;
+  border: 1px solid rgba(131, 24, 67, 0.12);
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(0deg, rgba(131, 24, 67, 0.025) 0 1px, transparent 1px 6px),
+    linear-gradient(90deg, transparent 0 2.5rem, rgba(236, 72, 153, 0.14) 2.5rem 2.56rem, transparent 2.56rem),
+    #fffdfb;
+  box-shadow: 0 14px 36px rgba(131, 24, 67, 0.11);
+  display: flex;
+  flex-direction: column;
+  transform-origin: center bottom;
+  transition:
+    transform 720ms cubic-bezier(0.25, 0.75, 0.25, 1),
+    opacity 380ms ease 330ms,
+    clip-path 720ms cubic-bezier(0.25, 0.75, 0.25, 1);
+}
+
+.wishlist-label {
+  margin: 0 0 0.8rem 0.4rem;
+  color: var(--color-pink-900);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-style: italic;
+}
+
+.wishlist-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  padding: 0.2rem 0.4rem;
+  color: var(--color-dark);
+  background: transparent;
+  font: 1rem/1.9 'Space Grotesk', sans-serif;
+}
+
+.wishlist-textarea::placeholder {
+  color: rgba(131, 24, 67, 0.48);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+
+.wishlist-textarea:focus-visible {
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.35);
+}
+
+.wishlist-textarea:disabled {
+  opacity: 0.72;
+}
+
+.wishlist-paper-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed rgba(131, 24, 67, 0.2);
+}
+
+.wishlist-count {
+  color: rgba(131, 24, 67, 0.62);
+  font: 0.68rem 'DM Mono', monospace;
+}
+
+.wishlist-submit {
+  border: 1px solid var(--color-pink-900);
+  border-radius: 2px;
+  padding: 0.7rem 1.4rem;
+  background: var(--color-pink-900);
+  color: var(--color-light);
+  font: 500 0.78rem 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.wishlist-submit:hover:not(:disabled) {
+  background: #651238;
+  transform: translateY(-2px);
+}
+
+.wishlist-submit:focus-visible {
+  outline: 3px solid rgba(236, 72, 153, 0.42);
+  outline-offset: 3px;
+}
+
+.wishlist-submit:disabled {
+  cursor: wait;
+}
+
+.wishlist-feedback {
+  min-height: 1.2rem;
+  padding-top: 0.35rem;
+  color: #a32150;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.wishlist-feedback.is-visible {
+  opacity: 1;
+}
+
+.wishlist-envelope {
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0;
+  height: 245px;
+  pointer-events: none;
+}
+
+.wishlist-envelope-flap,
+.wishlist-envelope-pocket {
+  position: absolute;
+  inset: 0;
+}
+
+.wishlist-envelope-flap--left {
+  background: #f9dce7;
+  clip-path: polygon(0 0, 53% 55%, 0 100%);
+  transform: translateX(-8%);
+  opacity: 0;
+  transition: transform 480ms ease 320ms, opacity 240ms ease 320ms;
+}
+
+.wishlist-envelope-flap--right {
+  background: #f3c5d8;
+  clip-path: polygon(100% 0, 47% 55%, 100% 100%);
+  transform: translateX(8%);
+  opacity: 0;
+  transition: transform 480ms ease 320ms, opacity 240ms ease 320ms;
+}
+
+.wishlist-envelope-flap--top {
+  z-index: 2;
+  inset: 0 0 auto;
+  height: 58%;
+  background: #f8d8e5;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform: rotateX(90deg);
+  transform-origin: top center;
+  opacity: 0;
+  transition: transform 520ms ease 570ms, opacity 180ms ease 570ms;
+}
+
+.wishlist-envelope-pocket {
+  z-index: 3;
+  background:
+    linear-gradient(145deg, transparent 49.5%, rgba(131, 24, 67, 0.08) 50%, transparent 50.5%),
+    linear-gradient(215deg, transparent 49.5%, rgba(131, 24, 67, 0.08) 50%, transparent 50.5%),
+    #f8d8e5;
+  clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+  opacity: 0;
+  transition: opacity 300ms ease 460ms;
+}
+
+.wishlist-envelope-seal {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 50%;
+  color: var(--color-pink-900);
+  font-size: 1.2rem;
+  opacity: 0;
+  transform: translate(-50%, -40%) scale(0.6);
+  transition: opacity 260ms ease 850ms, transform 260ms ease 850ms;
+}
+
+.wishlist-envelope-stage--success .wishlist-paper {
+  clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+  transform: translateY(35px) scale(0.92, 0.68) rotateX(12deg);
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.wishlist-envelope-stage--success .wishlist-paper {
+  opacity: 0;
+}
+
+.wishlist-envelope-stage--success .wishlist-envelope-back {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.wishlist-envelope-stage--success .wishlist-envelope-flap--left,
+.wishlist-envelope-stage--success .wishlist-envelope-flap--right {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.wishlist-envelope-stage--success .wishlist-envelope-flap--top {
+  opacity: 1;
+  transform: rotateX(0);
+}
+
+.wishlist-envelope-stage--success .wishlist-envelope-pocket,
+.wishlist-envelope-stage--success .wishlist-envelope-seal {
+  opacity: 1;
+}
+
+.wishlist-envelope-stage--success .wishlist-envelope-seal {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.wishlist-confirmation {
+  min-height: 1.7rem;
+  margin-top: 0.5rem;
+  color: var(--color-pink-900);
+  font-family: 'Playfair Display', serif;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 300ms ease 850ms, transform 300ms ease 850ms;
+}
+
+.wishlist-confirmation.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.wishlist-mock-note {
+  margin-top: 0.8rem;
+  color: rgba(59, 23, 39, 0.58);
+  font: 0.68rem 'DM Mono', monospace;
+}
+
+@media (max-width: 600px) {
+  .wishlist-section {
+    min-height: auto;
+    padding: 4rem 1rem 7rem;
+  }
+
+  .wishlist-envelope-stage {
+    min-height: 355px;
+  }
+
+  .wishlist-paper {
+    min-height: 320px;
+    padding: 1.8rem 1.25rem 1rem;
+  }
+
+  .wishlist-textarea {
+    min-height: 165px;
+    font-size: 0.95rem;
+  }
+
+  .wishlist-envelope-back,
+  .wishlist-envelope {
+    height: 225px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wishlist-paper,
+  .wishlist-envelope-back,
+  .wishlist-envelope-flap,
+  .wishlist-envelope-pocket,
+  .wishlist-envelope-seal,
+  .wishlist-feedback,
+  .wishlist-confirmation,
+  .wishlist-submit {
+    transition-duration: 0.01ms;
+    transition-delay: 0ms;
+  }
+}

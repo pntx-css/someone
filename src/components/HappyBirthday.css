@@ -1,0 +1,124 @@
+.hb-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-pink-50);
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Title */
+.hb-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--color-pink-900);
+  margin-bottom: 0.5rem;
+  animation: titleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  letter-spacing: 2px;
+}
+
+.hb-subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--color-pink-500);
+  margin-bottom: 3rem;
+  animation: titleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+/* Music selection */
+.music-prompt {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  color: var(--color-pink-900);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: titleReveal 0.8s ease 0.6s forwards;
+}
+
+.music-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 380px;
+  opacity: 0;
+  animation: titleReveal 0.8s ease 0.8s forwards;
+}
+
+.music-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-light);
+  border: 2px solid var(--color-pink-100);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+}
+
+.music-card:hover {
+  border-color: var(--color-pink-500);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.12);
+}
+
+.music-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: var(--color-pink-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+.music-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.music-card-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-pink-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-card-artist {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--color-pink-500);
+  margin-top: 2px;
+}
+
+/* Keyframes */
+@keyframes titleReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .hb-title {
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+  }
+  .music-list {
+    max-width: 100%;
+  }
+  .music-card {
+    padding: 0.85rem 1rem;
+  }
+}

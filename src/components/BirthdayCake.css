@@ -1,0 +1,93 @@
+.cake-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-pink-50);
+  padding: 2rem;
+  transition: opacity 1s ease, transform 1s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.cake-container.completed-anim {
+  opacity: 0;
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+.cake-instruction {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--color-pink-900);
+  margin-bottom: 2.5rem;
+  text-align: center;
+  animation: fadeIn 1s ease;
+}
+
+.cake-svg {
+  width: 100%;
+  max-width: 300px;
+  overflow: visible;
+  filter: drop-shadow(0 12px 24px rgba(131, 24, 67, 0.12));
+  animation: cakeFloat 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cake-cat {
+  position: absolute;
+  bottom: 12%;
+  right: 8%;
+  opacity: 0.7;
+}
+
+/* Candle interaction */
+.candle-flame.clickable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.candle-flame.clickable:hover .flame-glow {
+  filter: brightness(1.2);
+}
+
+.flame-glow {
+  transform-origin: center bottom;
+  animation: flicker 1.8s infinite alternate ease-in-out;
+}
+
+/* Smoke animation */
+.smoke-path {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  animation: smokeRise 1.4s ease-out forwards;
+}
+
+/* Keyframes */
+@keyframes cakeFloat {
+  from { opacity: 0; transform: translateY(25px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes flicker {
+  0% { transform: scaleY(1) rotate(-1deg); }
+  50% { transform: scaleY(1.05) rotate(0.5deg); }
+  100% { transform: scaleY(0.97) rotate(-0.5deg); }
+}
+
+@keyframes smokeRise {
+  0% { stroke-dashoffset: 20; opacity: 0.6; }
+  60% { opacity: 0.8; }
+  100% { stroke-dashoffset: 0; opacity: 0; transform: translateY(-3px); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .cake-svg {
+    max-width: 220px;
+  }
+  .cake-instruction {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}

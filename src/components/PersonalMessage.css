@@ -1,0 +1,65 @@
+.letter-container {
+  min-height: 100vh;
+  background-color: var(--color-pink-50);
+  display: flex;
+  justify-content: center;
+  padding: 4rem 1rem 8rem 1rem; /* Extra padding at bottom for music player */
+}
+
+.letter-paper {
+  background-color: var(--color-light);
+  width: 100%;
+  max-width: 650px;
+  padding: 4rem 3rem;
+  box-shadow: 0 10px 40px rgba(131, 24, 67, 0.08), 
+              0 1px 3px rgba(131, 24, 67, 0.05);
+  border-radius: 4px;
+  position: relative;
+  /* Subtle handmade texture/border effect */
+  border: 1px solid rgba(236, 72, 153, 0.1);
+}
+
+/* Scrapbook tape decoration */
+.letter-paper::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 120px;
+  height: 25px;
+  background-color: rgba(249, 213, 229, 0.6); /* Soft pink tape */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  z-index: 10;
+}
+
+.letter-content {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  line-height: 2;
+  color: var(--color-pink-900);
+  white-space: pre-wrap; /* Preserve line breaks from text */
+}
+
+.letter-content p {
+  margin-bottom: 1.5rem;
+}
+
+.letter-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Editorial drop cap for the first letter if we want, but let's keep it simple first */
+
+@media (max-width: 768px) {
+  .letter-container {
+    padding: 2rem 1rem 7rem 1rem;
+  }
+  .letter-paper {
+    padding: 3rem 1.5rem;
+  }
+  .letter-content {
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+}

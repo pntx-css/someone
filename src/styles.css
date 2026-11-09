@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&display=swap');
+
+:root {
+  --color-pink-50: #FCE7F3;
+  --color-pink-100: #F9D5E5;
+  --color-pink-500: #EC4899;
+  --color-pink-900: #831843;
+  --color-dark: #3B1727;
+  --color-light: #FFF8FA;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  font-family: 'Space Grotesk', sans-serif;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  overflow-x: hidden;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  color: var(--color-pink-900);
+}
+
+code, pre, .mono {
+  font-family: 'DM Mono', monospace;
+}
