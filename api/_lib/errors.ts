@@ -9,7 +9,7 @@ export const reportApiError = (res: ApiResponse, error: unknown): void => {
     res,
     status,
     status === 503
-      ? 'Service is temporarily unavailable. Please try again later.'
-      : 'The request could not be completed.'
+      ? 'Layanan sedang tidak tersedia. Coba lagi sebentar ya.'
+      : 'Verifikasi sedang bermasalah. Coba lagi sebentar ya.'
   );
 };

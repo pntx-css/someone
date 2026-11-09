@@ -29,7 +29,9 @@ export const supabaseFetch = async (
   const key = credential === 'anon' ? anonKey() : serviceRoleKey();
   const headers = new Headers(options.headers);
   headers.set('apikey', key);
-  if (!headers.has('Authorization')) headers.set('Authorization', `Bearer ${key}`);
+  if (!headers.has('Authorization') && !key.startsWith('sb_')) {
+    headers.set('Authorization', `Bearer ${key}`);
+  }
   if (options.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }

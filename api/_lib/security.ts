@@ -106,8 +106,7 @@ export const consumeRateLimit = async (
 ): Promise<boolean> => {
   const isLocalDevelopment =
     process.env.NODE_ENV !== 'production' &&
-    process.env.VERCEL !== '1' &&
-    (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY);
+    process.env.VERCEL !== '1';
 
   if (isLocalDevelopment) {
     if (!warnedAboutLocalRateLimit) {
