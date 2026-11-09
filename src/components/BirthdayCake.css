@@ -47,6 +47,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.candle-flame.clickable:focus-visible {
+  outline: none;
+}
+
+.candle-flame.clickable:focus-visible rect {
+  stroke: var(--color-pink-900);
+  stroke-width: 0.7;
+}
+
 .candle-flame.clickable:hover .flame-glow {
   filter: brightness(1.2);
 }

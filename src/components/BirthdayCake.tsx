@@ -66,6 +66,15 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
         <g
           className="candle-flame clickable"
           onClick={() => handleCandleClick(index)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              handleCandleClick(index);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Matikan lilin ${index + 1}`}
           key={index}
         >
           <rect x={p.hitBox.x} y={p.hitBox.y} width={p.hitBox.w} height={p.hitBox.h} fill="transparent" className="clickable" />
@@ -95,8 +104,8 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
         className="cake-svg"
         viewBox="0 0 36 36"
         xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-        role="img"
+        role="group"
+        aria-label="Kue ulang tahun dengan tiga lilin interaktif"
         preserveAspectRatio="xMidYMid meet"
       >
         {/* Plate bottom */}

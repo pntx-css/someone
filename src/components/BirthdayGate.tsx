@@ -77,13 +77,13 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
 
         <div className="wheels-row">
           <div className="wheel-col" style={{ width: '80px' }}>
-            <ScrollWheel options={DAYS} value={day} onChange={setDay} />
+            <ScrollWheel options={DAYS} value={day} onChange={setDay} label="Tanggal" />
           </div>
           <div className="wheel-col" style={{ width: '130px' }}>
-            <ScrollWheel options={MONTHS} value={month} onChange={setMonth} />
+            <ScrollWheel options={MONTHS} value={month} onChange={setMonth} label="Bulan" />
           </div>
           <div className="wheel-col" style={{ width: '90px' }}>
-            <ScrollWheel options={YEARS} value={year} onChange={setYear} />
+            <ScrollWheel options={YEARS} value={year} onChange={setYear} label="Tahun" />
           </div>
         </div>
 
@@ -94,9 +94,14 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
 
       {error && (
         <div className="error-popup-overlay">
-          <div className="error-popup">
-            <p>{error}</p>
-            <button className="error-popup-btn" onClick={() => setError('')}>
+          <div
+            className="error-popup"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="birthday-error-message"
+          >
+            <p id="birthday-error-message">{error}</p>
+            <button className="error-popup-btn" onClick={() => setError('')} autoFocus>
               OK
             </button>
           </div>

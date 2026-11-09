@@ -64,23 +64,27 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song }) => {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play().then(() => setIsPlaying(true));
+      audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     }
   }, [isPlaying]);
 
-  const handleProgressClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const audio = audioRef.current;
-    if (!audio || !audio.duration) return;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const pct = clickX / rect.width;
-    audio.currentTime = pct * audio.duration;
-  }, []);
+  const handleProgressChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const audio = audioRef.current;
+      if (!audio || !audio.duration) return;
+      audio.currentTime = (Number(event.currentTarget.value) / 100) * audio.duration;
+    },
+    []
+  );
 
   return (
     <div className="music-player">
-      <button className="player-btn" onClick={togglePlay}>
+      <button
+        className="player-btn"
+        type="button"
+        onClick={togglePlay}
+        aria-label={isPlaying ? 'Jeda musik' : 'Putar musik'}
+      >
         {isPlaying ? '❚❚' : '▶'}
       </button>
 
@@ -88,15 +92,19 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song }) => {
         <div className="player-song-name">
           {song.title} — {song.artist}
         </div>
-        <div className="player-progress-bar" onClick={handleProgressClick}>
-          <div
-            className="player-progress-fill"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        <input
+          className="player-progress-bar"
+          type="range"
+          min="0"
+          max="100"
+          step="0.1"
+          value={progress}
+          onChange={handleProgressChange}
+          aria-label={`Posisi lagu ${song.title}`}
+        />
       </div>
 
-      <div className="player-time">
+      <div className="player-time" aria-live="off">
         {formatTime(currentTime)}/{formatTime(duration)}
       </div>
     </div>

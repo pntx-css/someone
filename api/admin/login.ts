@@ -78,7 +78,6 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
         ? Math.max(60, Math.min(result.expires_in, 60 * 60))
         : 60 * 60;
     setCookie(res, ADMIN_SESSION_COOKIE, result.access_token, maxAge);
-    setCookie(res, ADMIN_SESSION_COOKIE, result.access_token, maxAge);
     res.status(200).json({ authenticated: true });
   } catch (error) {
     reportApiError(res, error);
