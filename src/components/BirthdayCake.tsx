@@ -60,8 +60,10 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
 
     if (state === 'flame') {
       return (
-        <g
-          className="candle-flame clickable"
+        <path
+          className="flame-glow clickable"
+          d={p.flame}
+          fill="#FAAA35"
           onClick={() => handleCandleClick(index)}
           onKeyDown={(event) => {
             if (event.key === 'Enter' || event.key === ' ') {
@@ -73,9 +75,8 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
           tabIndex={0}
           aria-label={`Matikan lilin ${index + 1}`}
           key={index}
-        >
-          <path className="flame-glow" d={p.flame} fill="#FAAA35" />
-        </g>
+          pointerEvents="visiblePainted"
+        />
       );
     }
 

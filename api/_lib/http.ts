@@ -1,28 +1,7 @@
-export interface ApiRequest {
-  method?: string;
-  body?: unknown;
-  query?: Record<string, string | string[] | undefined>;
-  headers: {
-    accept?: string;
-    cookie?: string;
-    'content-type'?: string;
-    host?: string;
-    origin?: string;
-    'x-forwarded-for'?: string;
-    'x-forwarded-host'?: string;
-  };
-  socket: {
-    remoteAddress?: string;
-  };
-}
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export interface ApiResponse {
-  getHeader(name: string): string | number | readonly string[] | undefined;
-  setHeader(name: string, value: string | number | readonly string[]): this;
-  status(code: number): this;
-  json(body: unknown): this;
-  send(body: string): this;
-}
+export type ApiRequest = VercelRequest;
+export type ApiResponse = VercelResponse;
 
 export const jsonError = (res: ApiResponse, status: number, error: string) =>
   res.status(status).json({ error });
@@ -55,8 +34,9 @@ export const requireSameOrigin = (req: ApiRequest, res: ApiResponse): boolean =>
 
 export const requestBody = (req: ApiRequest): Record<string, unknown> | null => {
   if (!req.headers['content-type']?.toLowerCase().includes('application/json')) return null;
-  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) return null;
-  return req.body as Record<string, unknown>;
+  const body: unknown = req.body;
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return null;
+  return body as Record<string, unknown>;
 };
 
 export const requestIp = (req: ApiRequest): string => {

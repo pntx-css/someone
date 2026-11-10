@@ -42,16 +42,16 @@
 }
 
 /* Candle interaction */
-.candle-flame.clickable {
+.flame-glow.clickable {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.candle-flame.clickable:focus-visible {
+.flame-glow.clickable:focus {
   outline: none;
 }
 
-.candle-flame.clickable:hover .flame-glow {
+.flame-glow.clickable:hover {
   filter: brightness(1.2);
 }
 
