@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { ApiRequest, ApiResponse } from './http.js';
 import { jsonError, readCookie, requestIp, setCookie } from './http.js';
-import { supabaseFetch } from './supabase.js';
+import { SupabaseRequestError, supabaseFetch } from './supabase.js';
 
 export const BIRTHDAY_COOKIE = 'birthday_session';
 export const ADMIN_GATE_COOKIE = 'admin_birthday_gate';
@@ -134,7 +134,9 @@ export const consumeRateLimit = async (
       p_window_seconds: windowSeconds,
     }),
   });
-  if (!response.ok) throw new Error('Request rate limit could not be checked.');
+  if (!response.ok) {
+    throw new SupabaseRequestError('Request rate limit could not be checked.', response.status);
+  }
   return (await response.json()) === true;
 };
 

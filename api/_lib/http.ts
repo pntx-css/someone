@@ -1,12 +1,24 @@
-import type { IncomingMessage, ServerResponse } from 'node:http';
-
-export interface ApiRequest extends IncomingMessage {
+export interface ApiRequest {
   method?: string;
   body?: unknown;
   query?: Record<string, string | string[] | undefined>;
+  headers: {
+    accept?: string;
+    cookie?: string;
+    'content-type'?: string;
+    host?: string;
+    origin?: string;
+    'x-forwarded-for'?: string;
+    'x-forwarded-host'?: string;
+  };
+  socket: {
+    remoteAddress?: string;
+  };
 }
 
-export interface ApiResponse extends ServerResponse {
+export interface ApiResponse {
+  getHeader(name: string): string | number | readonly string[] | undefined;
+  setHeader(name: string, value: string | number | readonly string[]): this;
   status(code: number): this;
   json(body: unknown): this;
   send(body: string): this;

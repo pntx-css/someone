@@ -41,19 +41,16 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
     {
       flame: 'M10.336 6.667c-1.162 0-2.076-.532-2.445-1.423c-.321-.773-.479-2.45 2.058-4.986a.547.547 0 0 1 .774 0c2.537 2.537 2.378 4.213 2.058 4.986c-.369.891-1.283 1.423-2.445 1.423z',
       smoke: 'M 10.336 4 Q 9 2, 10.8 0.5 T 9.8 -1.5',
-      hitBox: { x: 5.5, y: -1, w: 10, h: 10 },
     },
     // Center candle (x=18)
     {
       flame: 'M18 9.952c-1.162 0-2.076-.532-2.445-1.423c-.321-.773-.479-2.45 2.058-4.986a.547.547 0 0 1 .774 0c2.537 2.537 2.378 4.213 2.058 4.986c-.369.891-1.283 1.423-2.445 1.423z',
       smoke: 'M 18 7.3 Q 16.5 5.3, 18.8 3.8 T 17.5 1.5',
-      hitBox: { x: 13.5, y: 2.5, w: 10, h: 10 },
     },
     // Right candle (x=25.664)
     {
       flame: 'M25.664 6.667c-1.162 0-2.076-.532-2.445-1.423c-.32-.773-.479-2.45 2.058-4.986a.547.547 0 0 1 .774 0c2.537 2.537 2.378 4.213 2.058 4.986c-.369.891-1.283 1.423-2.445 1.423z',
       smoke: 'M 25.664 4 Q 24 2, 26.5 0.5 T 25.2 -1.5',
-      hitBox: { x: 20.5, y: -1, w: 10, h: 10 },
     },
   ];
 
@@ -77,7 +74,6 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
           aria-label={`Matikan lilin ${index + 1}`}
           key={index}
         >
-          <rect x={p.hitBox.x} y={p.hitBox.y} width={p.hitBox.w} height={p.hitBox.h} fill="transparent" className="clickable" />
           <path className="flame-glow" d={p.flame} fill="#FAAA35" />
         </g>
       );

@@ -36,7 +36,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       return;
     }
 
-    if (configuredBirthdayMatches(date, 'ADMIN_BIRTHDAY_DATE')) {
+    if (
+      process.env.ADMIN_BIRTHDAY_DATE &&
+      configuredBirthdayMatches(date, 'ADMIN_BIRTHDAY_DATE')
+    ) {
       setCookie(
         res,
         ADMIN_GATE_COOKIE,
