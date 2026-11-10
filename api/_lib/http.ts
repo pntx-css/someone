@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 export interface ApiRequest extends IncomingMessage {
+  method?: string;
   body?: unknown;
   query?: Record<string, string | string[] | undefined>;
 }
