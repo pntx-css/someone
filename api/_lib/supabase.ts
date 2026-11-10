@@ -165,13 +165,22 @@ const responseError = (
 ): { code?: string; message?: string } => {
   if (!value || typeof value !== 'object') return {};
   const record = value as Record<string, unknown>;
-  const code = typeof record.code === 'string' ? record.code : undefined;
+  const code =
+    typeof record.code === 'string'
+      ? record.code
+      : typeof record.error_code === 'string'
+        ? record.error_code
+        : undefined;
   const message =
     typeof record.message === 'string'
       ? record.message
-      : typeof record.error_description === 'string'
-        ? record.error_description
-        : undefined;
+      : typeof record.msg === 'string'
+        ? record.msg
+        : typeof record.error_description === 'string'
+          ? record.error_description
+          : typeof record.error === 'string'
+            ? record.error
+            : undefined;
   return { code, message };
 };
 

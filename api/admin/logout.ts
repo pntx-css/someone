@@ -10,7 +10,7 @@ import {
   ADMIN_GATE_COOKIE,
   ADMIN_SESSION_COOKIE,
 } from '../_lib/security.js';
-import { supabaseFetch } from '../_lib/supabase.js';
+import { supabaseError, supabaseFetch } from '../_lib/supabase.js';
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   if (req.method !== 'POST') {
@@ -28,7 +28,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
         'anon'
       );
       if (!response.ok && response.status !== 401) {
-        throw new Error('Supabase Auth logout could not be completed.');
+        throw await supabaseError(response, 'POST /auth/v1/logout');
       }
     }
     clearBirthdaySessionCookie(res, ADMIN_SESSION_COOKIE);

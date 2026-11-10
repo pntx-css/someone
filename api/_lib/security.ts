@@ -169,9 +169,17 @@ export const requireAdmin = async (req: ApiRequest, res: ApiResponse): Promise<b
     jsonError(res, 401, 'Your admin session has expired. Please sign in again.');
     return false;
   }
-  if (!response.ok) throw new Error('Could not verify the administrator session.');
+  if (!response.ok) throw await supabaseError(response, 'GET /auth/v1/user');
 
-  const user: unknown = await response.json();
+  let user: unknown;
+  try {
+    user = await response.json();
+  } catch (error) {
+    throw supabaseResponseError(
+      'GET /auth/v1/user',
+      error instanceof Error ? error.message : 'The response body was not valid JSON.'
+    );
+  }
   if (!isAdminUser(user)) {
     clearBirthdaySessionCookie(res, ADMIN_SESSION_COOKIE);
     jsonError(res, 403, 'This account does not have administrator access.');

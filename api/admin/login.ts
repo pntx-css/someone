@@ -13,7 +13,7 @@ import {
   consumeRateLimit,
   isAdminUser,
 } from '../_lib/security.js';
-import { supabaseFetch } from '../_lib/supabase.js';
+import { supabaseError, supabaseFetch, supabaseResponseError } from '../_lib/supabase.js';
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   if (req.method !== 'POST') {
@@ -56,12 +56,26 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
     );
 
     if (response.status === 400 || response.status === 401) {
+      const authError = await supabaseError(response, 'POST /auth/v1/token');
+      if (/invalid api key|missing api key/i.test(authError.diagnosticMessage ?? '')) {
+        throw authError;
+      }
       jsonError(res, 401, 'Email atau password tidak cocok.');
       return;
     }
-    if (!response.ok) throw new Error('Supabase Auth sign-in failed.');
+    if (!response.ok) {
+      throw await supabaseError(response, 'POST /auth/v1/token');
+    }
 
-    const authResult: unknown = await response.json();
+    let authResult: unknown;
+    try {
+      authResult = await response.json();
+    } catch (error) {
+      throw supabaseResponseError(
+        'POST /auth/v1/token',
+        error instanceof Error ? error.message : 'The response body was not valid JSON.'
+      );
+    }
     if (
       !authResult ||
       typeof authResult !== 'object' ||
