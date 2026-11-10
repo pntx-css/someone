@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { ApiRequest, ApiResponse } from './http.js';
 import { jsonError, readCookie, requestIp, setCookie } from './http.js';
-import { SupabaseRequestError, supabaseFetch } from './supabase.js';
+import { supabaseError, supabaseFetch, supabaseResponseError } from './supabase.js';
 
 export const BIRTHDAY_COOKIE = 'birthday_session';
 export const ADMIN_GATE_COOKIE = 'admin_birthday_gate';
@@ -126,6 +126,7 @@ export const consumeRateLimit = async (
     return current.count <= limit;
   }
 
+  const operation = 'POST /rest/v1/rpc/consume_request_limit';
   const response = await supabaseFetch('/rest/v1/rpc/consume_request_limit', {
     method: 'POST',
     body: JSON.stringify({
@@ -134,10 +135,21 @@ export const consumeRateLimit = async (
       p_window_seconds: windowSeconds,
     }),
   });
-  if (!response.ok) {
-    throw new SupabaseRequestError('Request rate limit could not be checked.', response.status);
+  if (!response.ok) throw await supabaseError(response, operation);
+
+  let result: unknown;
+  try {
+    result = await response.json();
+  } catch (error) {
+    throw supabaseResponseError(
+      operation,
+      error instanceof Error ? error.message : 'The response body was not valid JSON.'
+    );
   }
-  return (await response.json()) === true;
+  if (typeof result !== 'boolean') {
+    throw supabaseResponseError(operation, 'The RPC response was not a JSON boolean.');
+  }
+  return result;
 };
 
 export const requireAdmin = async (req: ApiRequest, res: ApiResponse): Promise<boolean> => {
