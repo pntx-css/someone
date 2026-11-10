@@ -142,7 +142,10 @@ export const supabaseFetch = async (
   try {
     return await fetch(new URL(path, url), { ...options, headers });
   } catch (error) {
-    const cause = error instanceof Error && error.cause instanceof Error ? error.cause : error;
+    const cause =
+      error instanceof Error && 'cause' in error && error.cause instanceof Error
+        ? error.cause
+        : error;
     const diagnosticMessage = cause instanceof Error ? cause.message : String(cause);
     const code =
       cause && typeof cause === 'object' && 'code' in cause && typeof cause.code === 'string'
