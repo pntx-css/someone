@@ -1,26 +1,40 @@
 import React from 'react';
 import { personalMessage } from '../data/message';
-import { CatIllustration } from './CatIllustration';
 import './PersonalMessage.css';
 
 interface PersonalMessageProps {
   onNext: () => void;
 }
 
+const renderPersonalMessage = (): React.ReactNode[] => {
+  const kaomojiPattern = /\([^()\n]*[^\p{ASCII}][^()\n]*\)/gu;
+  const content: React.ReactNode[] = [];
+  let lastIndex = 0;
+
+  for (const match of personalMessage.matchAll(kaomojiPattern)) {
+    const index = match.index;
+    if (index > lastIndex) content.push(personalMessage.slice(lastIndex, index));
+    content.push(
+      <span className="letter-kaomoji" key={index}>
+        {match[0]}
+      </span>
+    );
+    lastIndex = index + match[0].length;
+  }
+
+  if (lastIndex < personalMessage.length) {
+    content.push(personalMessage.slice(lastIndex));
+  }
+
+  return content;
+};
+
 export const PersonalMessage: React.FC<PersonalMessageProps> = ({ onNext }) => {
   return (
     <div className="letter-container" style={{ position: 'relative' }}>
-      {/* Cat decorations */}
-      <div className="cat-deco cat-mobile-visible" style={{ position: 'absolute', bottom: '2rem', right: '5%', opacity: 0.85 }}>
-        <CatIllustration pose="sleeping" color="orange" size={90} />
-      </div>
-      <div className="cat-deco" style={{ position: 'absolute', top: '3rem', left: '3%', opacity: 0.7 }}>
-        <CatIllustration pose="sitting" color="white" size={55} />
-      </div>
-
       <div className="letter-paper">
         <div className="letter-content">
-          {personalMessage}
+          {renderPersonalMessage()}
         </div>
         <div style={{ textAlign: 'center', marginTop: '3rem' }}>
           <button 

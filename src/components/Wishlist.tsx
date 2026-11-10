@@ -3,7 +3,11 @@ import './Wishlist.css';
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
 
-export const Wishlist: React.FC = () => {
+interface WishlistProps {
+  onBack: () => void;
+}
+
+export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [validationMessage, setValidationMessage] = useState('');
@@ -114,6 +118,14 @@ export const Wishlist: React.FC = () => {
       <p className={`wishlist-confirmation ${isSent ? 'is-visible' : ''}`} aria-live="polite">
         {isSent && 'Pesanmu berhasil dikirim dan dilipat rapi. Terima kasih sudah berbagi ♡'}
       </p>
+      <button
+        className="wishlist-back"
+        type="button"
+        onClick={onBack}
+        disabled={isSubmitting}
+      >
+        KEMBALI
+      </button>
     </section>
   );
 };

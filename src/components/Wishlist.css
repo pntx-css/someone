@@ -141,12 +141,19 @@
   font: 500 0.78rem 'DM Mono', monospace;
   letter-spacing: 0.08em;
   cursor: pointer;
-  transition: background-color 180ms ease, transform 180ms ease;
+  transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
 
 .wishlist-submit:hover:not(:disabled) {
   background: #651238;
+  box-shadow: 0 5px 12px rgba(101, 18, 56, 0.2);
   transform: translateY(-2px);
+}
+
+.wishlist-submit:active:not(:disabled),
+.wishlist-back:active:not(:disabled) {
+  box-shadow: none;
+  transform: scale(0.96);
 }
 
 .wishlist-submit:focus-visible {
@@ -288,6 +295,35 @@
   transform: translateY(0);
 }
 
+.wishlist-back {
+  margin-top: 1rem;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid var(--color-pink-900);
+  border-radius: 2px;
+  background: rgba(255, 248, 250, 0.9);
+  color: #651238;
+  font: 500 0.78rem 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.wishlist-back:hover:not(:disabled) {
+  background: #fff;
+  box-shadow: 0 5px 12px rgba(101, 18, 56, 0.12);
+  transform: translateY(-2px);
+}
+
+.wishlist-back:focus-visible {
+  outline: 3px solid rgba(236, 72, 153, 0.42);
+  outline-offset: 3px;
+}
+
+.wishlist-back:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
 .wishlist-mock-note {
   margin-top: 0.8rem;
   color: rgba(59, 23, 39, 0.58);
@@ -328,7 +364,8 @@
   .wishlist-envelope-seal,
   .wishlist-feedback,
   .wishlist-confirmation,
-  .wishlist-submit {
+  .wishlist-submit,
+  .wishlist-back {
     transition-duration: 0.01ms;
     transition-delay: 0ms;
   }

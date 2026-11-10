@@ -41,6 +41,10 @@
   white-space: pre-wrap; /* Preserve line breaks from text */
 }
 
+.letter-kaomoji {
+  font-family: sans-serif;
+}
+
 .letter-content p {
   margin-bottom: 1.5rem;
 }

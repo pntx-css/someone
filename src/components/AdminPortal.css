@@ -8,13 +8,82 @@
     var(--color-pink-50);
 }
 
-.admin-loading {
+.admin-loading-skeleton {
+  display: grid;
+  gap: 1rem;
   max-width: 700px;
   margin: 18vh auto;
-  color: var(--color-pink-900);
-  text-align: center;
-  font-family: 'Playfair Display', serif;
-  font-size: 1.25rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid rgba(131, 24, 67, 0.12);
+  background: #fffdfb;
+  box-shadow: 0 18px 48px rgba(131, 24, 67, 0.08);
+}
+
+.admin-skeleton {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgba(131, 24, 67, 0.08);
+}
+
+.admin-skeleton::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.78) 50%,
+    transparent 80%
+  );
+  content: '';
+  transform: translateX(-100%);
+  animation: admin-skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+.admin-skeleton--eyebrow {
+  width: 7rem;
+  height: 0.7rem;
+}
+
+.admin-skeleton--title {
+  width: min(22rem, 75%);
+  height: 2.8rem;
+}
+
+.admin-skeleton--line {
+  width: 100%;
+  height: 0.9rem;
+}
+
+.admin-skeleton--line-short {
+  width: 62%;
+}
+
+.admin-message-skeletons {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-message-skeleton {
+  display: grid;
+  gap: 0.9rem;
+  padding: clamp(1rem, 4vw, 1.5rem);
+  border: 1px solid rgba(131, 24, 67, 0.12);
+  background: #fffdfb;
+  box-shadow: 0 8px 24px rgba(131, 24, 67, 0.055);
+}
+
+.admin-skeleton--meta {
+  width: 42%;
+  height: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+@keyframes admin-skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
 }
 
 .admin-back-link {
@@ -105,7 +174,11 @@
   font: 500 0.74rem 'DM Mono', monospace;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: background-color 160ms ease, transform 160ms ease, opacity 160ms ease;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
 }
 
 .admin-primary-button {
@@ -116,7 +189,31 @@
 .admin-primary-button:hover:not(:disabled),
 .admin-logout-button:hover:not(:disabled) {
   background: #651238;
+  box-shadow: 0 5px 12px rgba(101, 18, 56, 0.18);
   transform: translateY(-1px);
+}
+
+.admin-secondary-button:hover:not(:disabled) {
+  box-shadow: 0 5px 12px rgba(101, 18, 56, 0.1);
+  transform: translateY(-1px);
+}
+
+.admin-primary-button:active:not(:disabled),
+.admin-secondary-button:active:not(:disabled),
+.admin-logout-button:active:not(:disabled),
+.admin-delete-button:active:not(:disabled),
+.admin-text-button:active:not(:disabled) {
+  box-shadow: none;
+  transform: scale(0.97);
+}
+
+.admin-primary-button:focus-visible,
+.admin-secondary-button:focus-visible,
+.admin-logout-button:focus-visible,
+.admin-delete-button:focus-visible,
+.admin-text-button:focus-visible {
+  outline: 3px solid rgba(236, 72, 153, 0.42);
+  outline-offset: 3px;
 }
 
 .admin-primary-button:disabled,
@@ -254,6 +351,7 @@
 
 .admin-text-button,
 .admin-delete-button {
+  display: inline-block;
   border: 0;
   padding: 0.45rem 0;
   color: var(--color-pink-900);
@@ -277,6 +375,19 @@
   border: 1px dashed rgba(131, 24, 67, 0.25);
   color: rgba(59, 23, 39, 0.72);
   text-align: center;
+}
+
+.admin-text-button,
+.admin-delete-button {
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.admin-text-button:hover {
+  color: #651238;
+}
+
+.admin-delete-button:hover {
+  color: #7d173c;
 }
 
 .admin-pagination {
@@ -383,10 +494,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .admin-skeleton::after {
+    animation: none;
+  }
+
   .admin-primary-button,
   .admin-secondary-button,
   .admin-logout-button,
-  .admin-delete-button {
+  .admin-delete-button,
+  .admin-text-button {
     transition-duration: 0.01ms;
   }
 }

@@ -55,6 +55,13 @@
   text-overflow: ellipsis;
 }
 
+.player-status {
+  color: #8d1843;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
 .player-progress-bar {
   appearance: none;
   width: 100%;

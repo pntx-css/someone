@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { CatIllustration } from './CatIllustration';
 import './BirthdayCake.css';
 
 type CandleState = 'flame' | 'smoke' | 'extinguished';
@@ -131,11 +130,6 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
         {renderCandle(1)}
         {renderCandle(2)}
       </svg>
-
-      {/* Decorative cat near cake */}
-      <div className="cake-cat">
-        <CatIllustration pose="sitting" color="black" size={100} />
-      </div>
     </div>
   );
 };

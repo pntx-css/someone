@@ -18,38 +18,73 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song }) => {
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackMessage, setPlaybackMessage] = useState('');
 
   // Create audio element once and persist it
   useEffect(() => {
     const audio = new Audio(song.file);
+    audio.preload = 'metadata';
     audioRef.current = audio;
 
-    audio.addEventListener('loadedmetadata', () => {
+    const handleLoadedMetadata = () => {
       setDuration(audio.duration);
-    });
+      setPlaybackMessage('');
+    };
 
-    audio.addEventListener('timeupdate', () => {
+    const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
       if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
       }
-    });
+    };
 
-    audio.addEventListener('ended', () => {
+    const handleEnded = () => {
       setIsPlaying(false);
       setProgress(0);
       setCurrentTime(0);
-    });
+    };
+
+    const handleError = () => {
+      const code = audio.error?.code;
+      console.error('Music file failed to load', { file: song.file, mediaErrorCode: code });
+      setIsPlaying(false);
+      setPlaybackMessage(
+        code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
+          ? 'Format file musik tidak didukung browser.'
+          : 'File musik tidak dapat dimuat. Coba muat ulang halaman.'
+      );
+    };
+
+    const handlePlayFailure = (error: unknown) => {
+      setIsPlaying(false);
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        setPlaybackMessage('Autoplay diblokir browser. Tekan tombol putar untuk memulai musik.');
+        return;
+      }
+
+      console.error('Music playback failed', {
+        file: song.file,
+        errorName: error instanceof Error ? error.name : 'UnknownError',
+      });
+      setPlaybackMessage('Musik belum dapat diputar. Coba tekan tombol putar lagi.');
+    };
+
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
     // Autoplay after user selects
     audio.play().then(() => {
       setIsPlaying(true);
-    }).catch(() => {
-      // Browser blocked autoplay, user can click play
-      setIsPlaying(false);
-    });
+      setPlaybackMessage('');
+    }).catch(handlePlayFailure);
 
     return () => {
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
       audio.pause();
       audio.src = '';
       audio.remove();
@@ -64,9 +99,25 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song }) => {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+          setPlaybackMessage('');
+        })
+        .catch((error: unknown) => {
+          setIsPlaying(false);
+          if (error instanceof DOMException && error.name === 'NotAllowedError') {
+            setPlaybackMessage('Browser memblokir pemutaran. Coba tekan tombol putar lagi.');
+            return;
+          }
+          console.error('Music playback failed', {
+            file: song.file,
+            errorName: error instanceof Error ? error.name : 'UnknownError',
+          });
+          setPlaybackMessage('Musik belum dapat diputar. Coba tekan tombol putar lagi.');
+        });
     }
-  }, [isPlaying]);
+  }, [isPlaying, song.file]);
 
   const handleProgressChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +153,11 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song }) => {
           onChange={handleProgressChange}
           aria-label={`Posisi lagu ${song.title}`}
         />
+        {playbackMessage && (
+          <p className="player-status" role="status">
+            {playbackMessage}
+          </p>
+        )}
       </div>
 
       <div className="player-time" aria-live="off">

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { memories } from '../data/memories';
-import { CatIllustration } from './CatIllustration';
 import './Memories.css';
 
 export const Memories: React.FC = () => {
@@ -19,15 +18,16 @@ export const Memories: React.FC = () => {
       const height = timeline.clientHeight;
       const center = width / 2;
       const amplitude = Math.min(width * (width <= 600 ? 0.03 : 0.1), 150);
-      const segmentHeight = height / 4;
-      let d = `M ${center} 0`;
+      const startY = Math.min(window.innerHeight / 2, height);
+      const segmentHeight = (height - startY) / 4;
+      let d = `M ${center} ${startY}`;
 
       for (let segment = 0; segment < 4; segment += 1) {
         const direction = segment % 2 === 0 ? 1 : -1;
-        const nextY = (segment + 1) * segmentHeight;
+        const nextY = startY + (segment + 1) * segmentHeight;
         const controlY = segmentHeight / 3;
         const controlX = center + direction * amplitude;
-        d += ` C ${center} ${segment * segmentHeight + controlY}, ${controlX} ${nextY - controlY}, ${center} ${nextY}`;
+        d += ` C ${center} ${startY + segment * segmentHeight + controlY}, ${controlX} ${nextY - controlY}, ${center} ${nextY}`;
       }
 
       setSvgSize({ width, height });
@@ -38,7 +38,22 @@ export const Memories: React.FC = () => {
 
     const resizeObserver = new ResizeObserver(updateSize);
     resizeObserver.observe(timeline);
-    return () => resizeObserver.disconnect();
+    window.addEventListener('resize', updateSize);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateSize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const timeline = timelineRef.current;
+      if (!timeline) return;
+
+      const top = window.scrollY + timeline.getBoundingClientRect().top;
+      window.scrollTo({ top, behavior: 'auto' });
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
@@ -80,12 +95,13 @@ export const Memories: React.FC = () => {
       const viewportHeight = window.innerHeight;
       const viewportCenterY = viewportHeight / 2;
       const targetY = viewportCenterY - rect.top;
+      const pathStartY = path.getPointAtLength(0).y;
       const pathEndY = path.getPointAtLength(pathLength).y;
       let distance = 0;
 
       if (targetY >= pathEndY) {
         distance = pathLength;
-      } else if (targetY > 0) {
+      } else if (targetY > pathStartY) {
         let start = 0;
         let end = pathLength;
 
@@ -110,8 +126,7 @@ export const Memories: React.FC = () => {
           Math.PI +
         45;
 
-      const hasReachedViewportCenter = rect.top <= viewportCenterY;
-      const isVisible = hasReachedViewportCenter && rect.bottom > 0;
+      const isVisible = targetY >= pathStartY && rect.bottom > 0;
       plane.style.opacity = isVisible ? '1' : '0';
       plane.style.transform = `translate3d(${point.x}px, ${point.y}px, 0) translate(-50%, -50%) rotate(${angle}deg)`;
     };
@@ -134,10 +149,6 @@ export const Memories: React.FC = () => {
 
   return (
     <div className="memories-container" style={{ position: 'relative' }}>
-      {/* Cat deco near title */}
-      <div className="cat-deco cat-mobile-visible" style={{ position: 'absolute', top: '1.5rem', right: '8%', opacity: 0.75 }}>
-        <CatIllustration pose="waving" color="orange" size={65} />
-      </div>
       <img className="memory-footsteps" src="/assets/cats/jejak_kaki.svg" alt="" aria-hidden="true" />
 
       <h2 className="memories-title" style={{ position: 'relative', zIndex: 10 }}>Our Memories</h2>
@@ -178,16 +189,6 @@ export const Memories: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Cat at bottom of memories */}
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '2rem', position: 'relative', zIndex: 10 }}>
-        <CatIllustration pose="sleeping" color="black" size={100} />
-      </div>
-
-      {/* Peeking cat on left side */}
-      <div className="cat-deco" style={{ position: 'absolute', bottom: '30%', left: '2%', opacity: 0.6 }}>
-        <CatIllustration pose="peeking" color="white" size={55} />
       </div>
     </div>
   );

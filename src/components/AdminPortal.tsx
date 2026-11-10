@@ -268,9 +268,7 @@ export const AdminPortal: React.FC = () => {
     setError('');
     try {
       await apiJson('/api/admin/logout', { method: 'POST' });
-      setMessages([]);
-      setStage('birthday');
-      setNotice('Kamu sudah logout.');
+      window.location.assign('/');
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Logout belum berhasil.');
     } finally {
@@ -281,7 +279,12 @@ export const AdminPortal: React.FC = () => {
   if (stage === 'checking') {
     return (
       <main className="admin-page">
-        <p className="admin-loading" role="status">Memeriksa sesi admin...</p>
+        <section className="admin-loading-skeleton" role="status" aria-label="Memeriksa sesi admin">
+          <span className="admin-skeleton admin-skeleton--eyebrow" />
+          <span className="admin-skeleton admin-skeleton--title" />
+          <span className="admin-skeleton admin-skeleton--line" />
+          <span className="admin-skeleton admin-skeleton--line admin-skeleton--line-short" />
+        </section>
       </main>
     );
   }
@@ -419,7 +422,16 @@ export const AdminPortal: React.FC = () => {
 
       <section className="admin-message-list" aria-label="Daftar wishlist">
         {isLoading ? (
-          <p className="admin-empty-state" role="status">Memuat wishlist...</p>
+          <div className="admin-message-skeletons" role="status" aria-label="Memuat wishlist">
+            {Array.from({ length: 3 }, (_, index) => (
+              <article className="admin-message-skeleton" key={index} aria-hidden="true">
+                <span className="admin-skeleton admin-skeleton--meta" />
+                <span className="admin-skeleton admin-skeleton--line" />
+                <span className="admin-skeleton admin-skeleton--line" />
+                <span className="admin-skeleton admin-skeleton--line admin-skeleton--line-short" />
+              </article>
+            ))}
+          </div>
         ) : messages.length === 0 ? (
           <p className="admin-empty-state">Belum ada wishlist.</p>
         ) : (

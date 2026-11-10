@@ -1,0 +1,72 @@
+.birthday-journey {
+  position: relative;
+  isolation: isolate;
+}
+
+.journey-cat-decorations {
+  position: absolute;
+  z-index: 800;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.journey-cat-decoration {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  position: absolute;
+  display: block;
+  width: clamp(110px, 19.53vw, 150px);
+  aspect-ratio: 1;
+  line-height: 0;
+  opacity: 0.16;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 180ms ease;
+}
+
+.journey-cat-decoration:hover {
+  transform: scale(1.06);
+}
+
+.journey-cat-decoration:active {
+  transform: scale(0.96);
+}
+
+.journey-cat-decoration img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.journey-cat-decoration .journey-cat-decoration-smile {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.journey-cat-decoration.is-smiling img:first-child {
+  opacity: 0;
+}
+
+.journey-cat-decoration.is-smiling .journey-cat-decoration-smile {
+  opacity: 1;
+}
+
+.journey-cat-decoration:focus-visible {
+  outline: 2px solid var(--color-pink-500);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .journey-cat-decoration {
+    width: 110px;
+    opacity: 0.12;
+  }
+}

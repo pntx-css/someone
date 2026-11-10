@@ -1,7 +1,7 @@
 .memories-container {
   min-height: 100vh;
   background-color: var(--color-pink-50);
-  padding: 4rem 2rem 8rem;
+  padding: 0 2rem 8rem;
   overflow-x: clip;
   position: relative;
   container-type: inline-size;
@@ -33,7 +33,7 @@
   display: flex;
   flex-direction: column;
   gap: 7rem;
-  padding: 4rem 0;
+  padding: 1rem 0 4rem;
   position: relative;
   isolation: isolate;
 }
@@ -220,17 +220,17 @@
 
 @media (max-width: 600px) {
   .memories-container {
-    padding: 3rem 1rem 6rem;
+    padding: 0 1rem 6rem;
   }
 
   .memories-title {
     font-size: 2.2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .memories-timeline {
     gap: 4.5rem;
-    padding: 3rem 0;
+    padding: 1rem 0 3rem;
   }
 
   .memory-row--size-0 .memory-card {
@@ -265,6 +265,7 @@
     width: 36px;
     height: 36px;
   }
+
 }
 
 @media (prefers-reduced-motion: reduce) {

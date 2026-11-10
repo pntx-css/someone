@@ -1,7 +1,6 @@
 import React from 'react';
 import { songs } from '../data/music';
 import type { Song } from '../data/music';
-import { CatIllustration } from './CatIllustration';
 import './HappyBirthday.css';
 
 interface HappyBirthdayProps {
@@ -32,10 +31,6 @@ export const HappyBirthday: React.FC<HappyBirthdayProps> = ({ onSelectSong }) =>
         ))}
       </div>
 
-      {/* Cat decoration */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', opacity: 0.75 }}>
-        <CatIllustration pose="walking" color="orange" size={80} />
-      </div>
     </div>
   );
 };
