@@ -1,7 +1,8 @@
 {
   "framework": "vite",
   "rewrites": [
-    { "source": "/admin", "destination": "/" }
+    { "source": "/admin", "destination": "/" },
+    { "source": "/api/:path*", "destination": "/api/handler?__api_path=:path*" }
   ],
   "headers": [
     {

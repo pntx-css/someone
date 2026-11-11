@@ -53,7 +53,7 @@ const localApi = () => ({
           }
         }
 
-        const { default: handler } = await server.ssrLoadModule('/api/[...path].ts')
+        const { default: handler } = await server.ssrLoadModule('/api/handler.ts')
         const apiResponse = res as LocalApiResponse
         apiResponse.status = function status(code: number) {
           this.statusCode = code

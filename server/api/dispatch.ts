@@ -34,7 +34,11 @@ export default async function dispatchApiRequest(
   req: ApiRequest,
   res: ApiResponse
 ): Promise<void> {
-  const pathname = new URL(req.url ?? '/', 'http://localhost').pathname;
+  const rewrittenPath = req.query?.__api_path;
+  const routePath = Array.isArray(rewrittenPath) ? rewrittenPath[0] : rewrittenPath;
+  const pathname = routePath
+    ? `/api/${routePath.replace(/^\/+/, '')}`
+    : new URL(req.url ?? '/', 'http://localhost').pathname;
   const handler = staticRoutes[pathname];
   if (handler) {
     await handler(req, res);
