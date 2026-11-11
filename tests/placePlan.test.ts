@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { validatePlacePlanVisits } from '../api/_lib/placePlan.ts';
+import { validatePlacePlanVisits } from '../server/api/_lib/placePlan.ts';
 
 const validVisit = {
   name: 'Mie Serasi UNS',

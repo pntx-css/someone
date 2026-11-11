@@ -6,5 +6,5 @@
     "moduleResolution": "nodenext",
     "types": ["node"]
   },
-  "include": ["api/**/*.ts"]
+  "include": ["api/**/*.ts", "server/api/**/*.ts"]
 }
