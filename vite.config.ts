@@ -27,19 +27,27 @@ const localApi = () => ({
         const path = requestUrl.pathname
         let modulePath: string
         const idMatch = path.match(/^\/api\/admin\/messages\/([^/]+)$/)
+        const planIdMatch = path.match(/^\/api\/admin\/plans\/([^/]+)$/)
         if (path === '/api/birthday/verify') modulePath = '/api/birthday/verify.ts'
         else if (path === '/api/wishlist') modulePath = '/api/wishlist/index.ts'
+        else if (path === '/api/place-plans') modulePath = '/api/place-plans/index.ts'
         else if (path === '/api/admin/birthday/verify') modulePath = '/api/admin/birthday/verify.ts'
         else if (path === '/api/admin/login') modulePath = '/api/admin/login.ts'
         else if (path === '/api/admin/session') modulePath = '/api/admin/session.ts'
         else if (path === '/api/admin/gate') modulePath = '/api/admin/gate.ts'
         else if (path === '/api/admin/logout') modulePath = '/api/admin/logout.ts'
         else if (path === '/api/admin/messages') modulePath = '/api/admin/messages/index.ts'
+        else if (path === '/api/admin/plans') modulePath = '/api/admin/plans/index.ts'
         else if (path === '/api/admin/export') modulePath = '/api/admin/export.ts'
         else if (idMatch) {
           modulePath = '/api/admin/messages/[id].ts'
           const query = Object.fromEntries(requestUrl.searchParams.entries())
           query.id = decodeURIComponent(idMatch[1])
+          ;(req as LocalApiRequest).query = query
+        } else if (planIdMatch) {
+          modulePath = '/api/admin/plans/[id].ts'
+          const query = Object.fromEntries(requestUrl.searchParams.entries())
+          query.id = decodeURIComponent(planIdMatch[1])
           ;(req as LocalApiRequest).query = query
         } else {
           res.statusCode = 404

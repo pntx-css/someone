@@ -293,6 +293,71 @@
   gap: 1rem;
 }
 
+.admin-plans-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(131, 24, 67, 0.18);
+}
+
+.admin-plans-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.admin-plans-header h2 {
+  margin: 0.4rem 0 0.5rem;
+  color: var(--color-pink-900);
+  font-size: clamp(1.7rem, 5vw, 2.3rem);
+}
+
+.admin-plan-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-plan-card {
+  padding: clamp(1rem, 4vw, 1.5rem);
+  border: 1px solid rgba(131, 24, 67, 0.12);
+  background: #fffdfb;
+  box-shadow: 0 8px 24px rgba(131, 24, 67, 0.055);
+}
+
+.admin-plan-visits {
+  display: grid;
+  gap: 0.65rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-plan-visits li {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(131, 24, 67, 0.1);
+}
+
+.admin-plan-visits time {
+  color: var(--color-pink-900);
+  font: 0.78rem 'DM Mono', monospace;
+}
+
+.admin-plan-visits span {
+  overflow-wrap: anywhere;
+  font-family: 'Playfair Display', serif;
+}
+
+.admin-plan-visits a {
+  color: #a32150;
+  font-size: 0.78rem;
+  text-underline-offset: 3px;
+}
+
 .admin-message {
   padding: clamp(1rem, 4vw, 1.5rem);
   border: 1px solid rgba(131, 24, 67, 0.12);
@@ -473,6 +538,19 @@
   .admin-dashboard-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-plans-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-plan-visits li {
+    grid-template-columns: 3.8rem minmax(0, 1fr);
+  }
+
+  .admin-plan-visits a {
+    grid-column: 2;
   }
 
   .admin-header-actions {

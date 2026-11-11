@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import './Wishlist.css';
+
+const SpecialChapter = lazy(() =>
+  import('./SpecialChapter').then((module) => ({ default: module.SpecialChapter }))
+);
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -126,6 +130,9 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
       >
         KEMBALI
       </button>
+      <Suspense fallback={null}>
+        <SpecialChapter wishlistSent={isSent} />
+      </Suspense>
     </section>
   );
 };

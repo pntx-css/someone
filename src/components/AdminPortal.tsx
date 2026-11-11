@@ -17,6 +17,25 @@ interface MessagePage {
   total: number | null;
 }
 
+interface SavedPlaceVisit {
+  name: string;
+  time: string;
+  mapsUrl: string;
+}
+
+interface PlacePlanSubmission {
+  id: string;
+  visits: SavedPlaceVisit[];
+  created_at: string;
+}
+
+interface PlacePlanPage {
+  plans: PlacePlanSubmission[];
+  page: number;
+  pageSize: number;
+  total: number | null;
+}
+
 class AdminApiError extends Error {
   readonly status: number;
 
@@ -75,21 +94,45 @@ export const AdminPortal: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [messages, setMessages] = useState<WishlistMessage[]>([]);
+  const [plans, setPlans] = useState<PlacePlanSubmission[]>([]);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
+  const [planPage, setPlanPage] = useState(0);
+  const [planTotal, setPlanTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [arePlansLoading, setArePlansLoading] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<WishlistMessage | null>(null);
+  const [deletePlanTarget, setDeletePlanTarget] = useState<PlacePlanSubmission | null>(null);
 
   const returnToAccess = async () => {
     setMessages([]);
+    setPlans([]);
     try {
       const gate = await apiJson<{ verified: boolean }>('/api/admin/gate');
       setStage(gate.verified ? 'login' : 'birthday');
     } catch {
       setStage('birthday');
+    }
+  };
+
+  const loadPlans = async (targetPage: number) => {
+    setArePlansLoading(true);
+    setError('');
+    try {
+      const result = await apiJson<PlacePlanPage>(`/api/admin/plans?page=${targetPage}`);
+      setPlans(result.plans);
+      setPlanPage(result.page);
+      setPlanTotal(result.total ?? 0);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Rencana belum berhasil dimuat.');
+      if (requestError instanceof AdminApiError && requestError.status === 401) {
+        await returnToAccess();
+      }
+    } finally {
+      setArePlansLoading(false);
     }
   };
 
@@ -120,7 +163,7 @@ export const AdminPortal: React.FC = () => {
         await apiJson<{ authenticated: boolean }>('/api/admin/session');
         if (active) {
           setStage('dashboard');
-          await loadMessages(0);
+          await Promise.all([loadMessages(0), loadPlans(0)]);
         }
       } catch {
         try {
@@ -172,7 +215,7 @@ export const AdminPortal: React.FC = () => {
       });
       setPassword('');
       setStage('dashboard');
-      await loadMessages(0);
+      await Promise.all([loadMessages(0), loadPlans(0)]);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Login belum berhasil.');
       if (requestError instanceof AdminApiError && requestError.status === 401) {
@@ -220,6 +263,26 @@ export const AdminPortal: React.FC = () => {
       await loadMessages(nextPage);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Pesan belum berhasil dihapus.');
+      if (requestError instanceof AdminApiError && requestError.status === 401) {
+        await returnToAccess();
+      }
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleDeletePlan = async () => {
+    if (!deletePlanTarget) return;
+    setIsBusy(true);
+    setError('');
+    try {
+      await apiJson(`/api/admin/plans/${deletePlanTarget.id}`, { method: 'DELETE' });
+      setNotice('Rencana perjalanan berhasil dihapus.');
+      setDeletePlanTarget(null);
+      const nextPage = plans.length === 1 && planPage > 0 ? planPage - 1 : planPage;
+      await loadPlans(nextPage);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Rencana belum berhasil dihapus.');
       if (requestError instanceof AdminApiError && requestError.status === 401) {
         await returnToAccess();
       }
@@ -491,6 +554,90 @@ export const AdminPortal: React.FC = () => {
         </button>
       </nav>
 
+      <section className="admin-plans-section" aria-labelledby="admin-plans-title">
+        <header className="admin-plans-header">
+          <div>
+            <p className="admin-eyebrow">saved by guests</p>
+            <h2 id="admin-plans-title">Our Little Plans</h2>
+            <p className="admin-dashboard-subtitle">
+              {planTotal} rencana tersimpan · admin menentukan berapa lama data disimpan
+            </p>
+          </div>
+          <button
+            className="admin-secondary-button"
+            type="button"
+            onClick={() => void loadPlans(planPage)}
+            disabled={arePlansLoading || isBusy}
+          >
+            MUAT ULANG
+          </button>
+        </header>
+        {arePlansLoading ? (
+          <div className="admin-message-skeletons" role="status" aria-label="Memuat rencana">
+            {Array.from({ length: 2 }, (_, index) => (
+              <article className="admin-message-skeleton" key={index} aria-hidden="true">
+                <span className="admin-skeleton admin-skeleton--meta" />
+                <span className="admin-skeleton admin-skeleton--line" />
+                <span className="admin-skeleton admin-skeleton--line-short" />
+              </article>
+            ))}
+          </div>
+        ) : plans.length === 0 ? (
+          <p className="admin-empty-state">Belum ada rencana perjalanan yang disimpan.</p>
+        ) : (
+          <div className="admin-plan-list">
+            {plans.map((plan) => (
+              <article className="admin-plan-card" key={plan.id}>
+                <div className="admin-message-topline">
+                  <time dateTime={plan.created_at}>{formatDate(plan.created_at)}</time>
+                  <span>{plan.visits.length} tempat</span>
+                </div>
+                <ol className="admin-plan-visits">
+                  {plan.visits.map((visit, index) => (
+                    <li key={`${visit.time}-${visit.name}-${index}`}>
+                      <time>{visit.time}</time>
+                      <span>{visit.name}</span>
+                      <a href={visit.mapsUrl} target="_blank" rel="noopener noreferrer">
+                        Buka Google Maps ↗
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+                <div className="admin-message-actions">
+                  <button
+                    className="admin-delete-button"
+                    type="button"
+                    onClick={() => setDeletePlanTarget(plan)}
+                    disabled={isBusy}
+                  >
+                    Hapus rencana
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+        <nav className="admin-pagination" aria-label="Navigasi daftar rencana">
+          <button
+            className="admin-secondary-button"
+            type="button"
+            onClick={() => void loadPlans(planPage - 1)}
+            disabled={planPage === 0 || arePlansLoading}
+          >
+            Sebelumnya
+          </button>
+          <span>Halaman {planPage + 1} dari {Math.max(1, Math.ceil(planTotal / 30))}</span>
+          <button
+            className="admin-secondary-button"
+            type="button"
+            onClick={() => void loadPlans(planPage + 1)}
+            disabled={(planPage + 1) * 30 >= planTotal || arePlansLoading}
+          >
+            Berikutnya
+          </button>
+        </nav>
+      </section>
+
       {deleteTarget && (
         <div className="admin-dialog-backdrop" role="presentation">
           <section
@@ -515,6 +662,38 @@ export const AdminPortal: React.FC = () => {
                 className="admin-delete-button admin-delete-button--confirm"
                 type="button"
                 onClick={() => void handleDelete()}
+                disabled={isBusy}
+              >
+                {isBusy ? 'MENGHAPUS...' : 'HAPUS'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+      {deletePlanTarget && (
+        <div className="admin-dialog-backdrop" role="presentation">
+          <section
+            className="admin-confirm-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="admin-delete-plan-title"
+            aria-describedby="admin-delete-plan-description"
+          >
+            <h2 id="admin-delete-plan-title">Hapus rencana perjalanan ini?</h2>
+            <p id="admin-delete-plan-description">Rencana yang dihapus tidak dapat dikembalikan.</p>
+            <div className="admin-dialog-actions">
+              <button
+                className="admin-secondary-button"
+                type="button"
+                onClick={() => setDeletePlanTarget(null)}
+                disabled={isBusy}
+              >
+                BATAL
+              </button>
+              <button
+                className="admin-delete-button admin-delete-button--confirm"
+                type="button"
+                onClick={() => void handleDeletePlan()}
                 disabled={isBusy}
               >
                 {isBusy ? 'MENGHAPUS...' : 'HAPUS'}
