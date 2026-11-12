@@ -1,22 +1,36 @@
 .letter-container {
   min-height: 100vh;
-  background-color: var(--color-pink-50);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(232, 213, 181, 0.5), transparent 20rem),
+    radial-gradient(circle at 88% 78%, rgba(217, 154, 167, 0.15), transparent 24rem),
+    var(--color-pink-50);
   display: flex;
   justify-content: center;
-  padding: 4rem 1rem 8rem 1rem; /* Extra padding at bottom for music player */
+  padding: clamp(2.5rem, 7vw, 4.5rem) 1rem 8rem;
 }
 
 .letter-paper {
-  background-color: var(--color-light);
+  background:
+    repeating-linear-gradient(0deg, rgba(89, 65, 62, 0.012) 0, rgba(89, 65, 62, 0.012) 1px, transparent 1px, transparent 5px),
+    linear-gradient(135deg, #fffefa, var(--color-light) 55%, #fffaf4);
   width: 100%;
-  max-width: 650px;
-  padding: 4rem 3rem;
-  box-shadow: 0 10px 40px rgba(131, 24, 67, 0.08), 
-              0 1px 3px rgba(131, 24, 67, 0.05);
-  border-radius: 4px;
+  max-width: 740px;
+  padding: clamp(3rem, 6vw, 4.5rem) clamp(1.35rem, 6vw, 4rem);
+  box-shadow: var(--shadow-paper);
+  border-radius: var(--radius-paper);
   position: relative;
-  /* Subtle handmade texture/border effect */
-  border: 1px solid rgba(236, 72, 153, 0.1);
+  border: 1px solid var(--color-line);
+  isolation: isolate;
+}
+
+.letter-paper::after {
+  content: '';
+  position: absolute;
+  inset: 0.65rem;
+  border: 1px solid rgba(168, 93, 112, 0.12);
+  border-radius: calc(var(--radius-paper) * 0.6);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Scrapbook tape decoration */
@@ -31,22 +45,29 @@
   background-color: rgba(249, 213, 229, 0.6); /* Soft pink tape */
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   z-index: 10;
+  border: 1px solid rgba(168, 93, 112, 0.12);
 }
 
 .letter-content {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.15rem;
-  line-height: 2;
-  color: var(--color-pink-900);
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-body);
+  font-size: clamp(0.98rem, 1.15vw, 1.08rem);
+  line-height: 1.85;
+  color: var(--color-dark);
   text-align: justify;
   text-justify: inter-word;
   text-align-last: left;
   hyphens: auto;
   white-space: pre-wrap; /* Preserve line breaks from text */
+  overflow-wrap: anywhere;
 }
 
 .letter-kaomoji {
-  font-family: sans-serif;
+  /* Keep unusual/kaomoji characters legible even when Caveat has no glyph. */
+  font-family: var(--font-body);
+  font-size: 1em;
+  font-style: normal;
 }
 
 .letter-content p {
@@ -63,11 +84,21 @@
   .letter-container {
     padding: 2rem 1rem 7rem 1rem;
   }
-  .letter-paper {
-    padding: 3rem 1.5rem;
-  }
   .letter-content {
-    font-size: 1.05rem;
-    line-height: 1.8;
+    line-height: 1.75;
+  }
+}
+
+@media (max-width: 420px) {
+  .letter-container {
+    padding-inline: 0.75rem;
+  }
+
+  .letter-paper {
+    padding-inline: 1.1rem;
+  }
+
+  .letter-paper::after {
+    inset: 0.45rem;
   }
 }

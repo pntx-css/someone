@@ -18,8 +18,9 @@
 }
 
 .cake-instruction {
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3.8vw, 2rem);
+  line-height: 1.15;
   color: var(--color-pink-900);
   margin-bottom: 2.5rem;
   text-align: center;
@@ -84,7 +85,7 @@
     max-width: 220px;
   }
   .cake-instruction {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     margin-bottom: 1.5rem;
   }
 }

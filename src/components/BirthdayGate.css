@@ -3,7 +3,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-pink-50);
+  background:
+    radial-gradient(circle at 16% 18%, rgba(232, 213, 181, 0.55), transparent 20rem),
+    radial-gradient(circle at 86% 80%, rgba(168, 181, 160, 0.2), transparent 22rem),
+    var(--color-pink-50);
   padding: 1rem;
   transition: opacity 1s ease, transform 1s ease;
   overflow: hidden;
@@ -18,9 +21,9 @@
 .gate-content {
   background-color: var(--color-light);
   padding: 3rem 2rem;
-  border-radius: 12px;
-  border: 1px solid var(--color-pink-100);
-  box-shadow: 0 10px 30px rgba(131, 24, 67, 0.05);
+  border-radius: 1.25rem;
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-paper);
   text-align: center;
   max-width: 500px;
   width: 100%;
@@ -48,16 +51,19 @@
 }
 
 .gate-title {
-  font-size: 2.2rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4.5vw, 2.8rem);
+  line-height: 1.12;
+  letter-spacing: 0.01em;
   margin-bottom: 0.5rem;
   color: var(--color-pink-900);
 }
 
 .gate-subtitle {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   color: var(--color-dark);
   margin-bottom: 2rem;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-hand);
   opacity: 0.8;
 }
 
@@ -77,7 +83,7 @@
 }
 
 .wheel-label {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.75rem;
   text-transform: uppercase;
   color: var(--color-pink-900);
@@ -185,7 +191,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(252, 231, 243, 0.7);
+  background: rgba(89, 65, 62, 0.42);
+  backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,18 +203,30 @@
 .error-popup {
   background-color: var(--color-light);
   padding: 2rem 2.5rem;
-  border-radius: 16px;
-  border: 1px solid var(--color-pink-500);
-  box-shadow: 0 10px 40px rgba(131, 24, 67, 0.1);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(168, 93, 112, 0.35);
+  box-shadow: 0 22px 64px rgba(89, 65, 62, 0.24);
   text-align: center;
   max-width: 350px;
   width: 90%;
   animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.error-popup::before {
+  content: '';
+  position: absolute;
+  width: 7rem;
+  height: 1.1rem;
+  top: -0.55rem;
+  left: 50%;
+  border: 1px solid rgba(168, 93, 112, 0.14);
+  background: rgba(232, 213, 181, 0.76);
+  transform: translateX(-50%) rotate(-2deg);
+}
+
 .error-popup p {
   color: var(--color-pink-900);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-body);
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
   line-height: 1.5;
@@ -218,8 +237,8 @@
   color: var(--color-light);
   border: none;
   padding: 0.75rem 2.5rem;
-  border-radius: 50px;
-  font-family: 'Space Grotesk', sans-serif;
+  border-radius: 999px;
+  font-family: var(--font-body);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -229,6 +248,8 @@
   background-color: var(--color-pink-500);
   transform: translateY(-2px);
 }
+
+.error-popup-btn:active { transform: scale(0.97); }
 
 @keyframes popUp {
   from { transform: scale(0.9); opacity: 0; }
@@ -241,8 +262,8 @@
   border: none;
   padding: 1rem 2rem;
   font-size: 1.1rem;
-  border-radius: 50px;
-  font-family: 'Space Grotesk', sans-serif;
+  border-radius: 999px;
+  font-family: var(--font-body);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -257,7 +278,7 @@
 }
 
 .gate-btn:active {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 @media (max-width: 480px) {
@@ -265,7 +286,7 @@
     gap: 0.25rem;
   }
   .gate-title {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
   .gate-content {
     padding: 2rem 1rem;

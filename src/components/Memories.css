@@ -1,7 +1,10 @@
 .memories-container {
   min-height: 100vh;
   background-color: var(--color-pink-50);
-  padding: 0 2rem 8rem;
+  padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 4vw, 2rem) 8rem;
+  background:
+    radial-gradient(circle at 8% 18%, rgba(232, 213, 181, 0.45), transparent 22rem),
+    var(--color-pink-50);
   overflow-x: clip;
   position: relative;
   container-type: inline-size;
@@ -9,8 +12,11 @@
 
 .memories-title {
   text-align: center;
-  font-family: 'Playfair Display', serif;
-  font-size: 3rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: 0.01em;
   color: var(--color-pink-900);
   margin-bottom: 4rem;
   opacity: 0;
@@ -121,7 +127,7 @@
 
 .memory-frame {
   background: var(--color-light);
-  padding: 0.9rem 0.9rem 3.6rem;
+  padding: 0.9rem;
   border: 1px solid rgba(131, 24, 67, 0.08);
   border-radius: 2px;
   box-shadow:
@@ -155,19 +161,14 @@
 
 .memory-img {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+  height: auto;
   border-radius: 1px;
   display: block;
   background-color: var(--color-pink-100);
 }
 
 .memory-text {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.65rem 0.7rem;
+  padding: 0.75rem 0.2rem 0.15rem;
   text-align: center;
 }
 
@@ -180,7 +181,8 @@
 }
 
 .memory-detail {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-hand);
+  font-size: 1rem;
   font-size: 0.7rem;
   color: var(--color-pink-500);
 }
@@ -224,7 +226,7 @@
   }
 
   .memories-title {
-    font-size: 2.2rem;
+    font-size: 1.9rem;
     margin-bottom: 1.5rem;
   }
 
@@ -250,7 +252,11 @@
   }
 
   .memory-frame {
-    padding: 0.55rem 0.55rem 3rem;
+    padding: 0.55rem;
+  }
+
+  .memory-text {
+    padding-top: 0.55rem;
   }
 
   .memory-caption {

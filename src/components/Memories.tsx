@@ -19,10 +19,11 @@ export const Memories: React.FC = () => {
       const center = width / 2;
       const amplitude = Math.min(width * (width <= 600 ? 0.03 : 0.1), 150);
       const startY = Math.min(window.innerHeight / 2, height);
-      const segmentHeight = (height - startY) / 4;
+      const segmentCount = Math.max(1, memories.length - 1);
+      const segmentHeight = (height - startY) / segmentCount;
       let d = `M ${center} ${startY}`;
 
-      for (let segment = 0; segment < 4; segment += 1) {
+      for (let segment = 0; segment < segmentCount; segment += 1) {
         const direction = segment % 2 === 0 ? 1 : -1;
         const nextY = startY + (segment + 1) * segmentHeight;
         const controlY = segmentHeight / 3;
@@ -36,11 +37,13 @@ export const Memories: React.FC = () => {
 
     updateSize();
 
-    const resizeObserver = new ResizeObserver(updateSize);
-    resizeObserver.observe(timeline);
+    const resizeObserver = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(updateSize);
+    resizeObserver?.observe(timeline);
     window.addEventListener('resize', updateSize);
     return () => {
-      resizeObserver.disconnect();
+      resizeObserver?.disconnect();
       window.removeEventListener('resize', updateSize);
     };
   }, []);
@@ -61,6 +64,11 @@ export const Memories: React.FC = () => {
     if (!timeline) return;
 
     const cards = timeline.querySelectorAll<HTMLElement>('.memory-card');
+    if (typeof IntersectionObserver === 'undefined') {
+      cards.forEach((card) => card.classList.add('visible'));
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -180,7 +188,14 @@ export const Memories: React.FC = () => {
             <div className="memory-card" style={{ '--rot': `${memory.rotation}deg` } as React.CSSProperties}>
               <div className="memory-frame">
                 <div className={`tape ${index % 2 !== 0 ? 'tape-alt' : ''}`} aria-hidden="true" />
-                <img src={memory.image} alt={memory.caption} className="memory-img" loading="lazy" />
+                <img
+                  src={memory.image}
+                  alt={memory.caption}
+                  className="memory-img"
+                  width={memory.width}
+                  height={memory.height}
+                  loading="lazy"
+                />
                 <div className="memory-text">
                   <h3 className="memory-caption">{memory.caption}</h3>
                   <p className="memory-detail">{memory.detail}</p>

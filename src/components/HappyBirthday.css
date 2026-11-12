@@ -4,16 +4,21 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-pink-50);
+  background:
+    radial-gradient(circle at 20% 18%, rgba(232, 213, 181, 0.54), transparent 20rem),
+    radial-gradient(circle at 86% 82%, rgba(168, 181, 160, 0.2), transparent 18rem),
+    var(--color-pink-50);
   padding: 2rem;
   text-align: center;
 }
 
 /* Title */
 .hb-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 3.5rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 5vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
   color: var(--color-pink-900);
   margin-bottom: 0.5rem;
   animation: titleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -22,8 +27,8 @@
 }
 
 .hb-subtitle {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.9rem;
+  font-family: var(--font-hand);
+  font-size: 1.55rem;
   color: var(--color-pink-500);
   margin-bottom: 3rem;
   animation: titleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
@@ -32,7 +37,7 @@
 
 /* Music selection */
 .music-prompt {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   color: var(--color-pink-900);
   margin-bottom: 1.5rem;
@@ -57,7 +62,7 @@
   padding: 1rem 1.25rem;
   background-color: var(--color-light);
   border: 2px solid var(--color-pink-100);
-  border-radius: 14px;
+  border-radius: var(--radius-paper);
   cursor: pointer;
   transition: all 0.25s ease;
   text-align: left;
@@ -68,6 +73,8 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(236, 72, 153, 0.12);
 }
+
+.music-card:active { transform: scale(0.98); }
 
 .music-card-icon {
   width: 42px;
@@ -87,7 +94,7 @@
 }
 
 .music-card-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--color-pink-900);
@@ -97,7 +104,8 @@
 }
 
 .music-card-artist {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-hand);
+  font-size: 1rem;
   font-size: 0.75rem;
   color: var(--color-pink-500);
   margin-top: 2px;
@@ -112,8 +120,7 @@
 /* Responsive */
 @media (max-width: 480px) {
   .hb-title {
-    font-size: 2.2rem;
-    letter-spacing: 1px;
+    font-size: 1.8rem;
   }
   .music-list {
     max-width: 100%;

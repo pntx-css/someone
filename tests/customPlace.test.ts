@@ -29,7 +29,9 @@ test('default place cards use the provided names and coordinates', () => {
       { title: 'Solo Square', latitude: -7.560842310271578, longitude: 110.78852662557664 },
     ]
   );
-  assert.equal(specialPlaces.length + specialPlacePlaceholders.length, 6);
+  assert.equal(specialPlaces.length, 3);
+  assert.equal(specialPlacePlaceholders.length, 5);
+  assert.equal(specialPlaces.length + specialPlacePlaceholders.length, 8);
 });
 
 test('parses coordinate query parameters and supported Maps URL formats', () => {

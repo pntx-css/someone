@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LngLatBounds, Map as MapLibreMap, Marker, Popup, setWorkerUrl } from 'maplibre-gl';
-import type { Feature, LineString } from 'geojson';
+import { LngLatBounds, Map as MapLibreMap, Marker, setWorkerUrl } from 'maplibre-gl';
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import {
   getProgressiveEmptyCardCount,
@@ -34,14 +33,6 @@ interface PlanSubmissionVisit {
   name: string;
   time: string;
   mapsUrl: string;
-}
-
-interface RouteInfo {
-  placeIds: string[];
-  status: 'routed' | 'fallback';
-  geometry: Feature<LineString> | null;
-  distanceMeters: number;
-  durationSeconds: number | null;
 }
 
 interface SpecialChapterProps {
@@ -78,39 +69,6 @@ const haversineDistance = (from: Coordinates, to: Coordinates): number => {
     Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2
   );
   return 6_371_000 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
-};
-
-const formatDistance = (meters: number): string =>
-  meters >= 1000 ? `${(meters / 1000).toFixed(1)} km` : `${Math.round(meters)} m`;
-
-const formatDuration = (seconds: number): string => {
-  const minutes = Math.max(1, Math.round(seconds / 60));
-  return `${minutes} menit`;
-};
-
-const createPopup = (place: MapPlace, plannedTime?: string): HTMLElement => {
-  const content = document.createElement('div');
-  content.className = 'special-map-popup';
-  const title = document.createElement('strong');
-  title.textContent = place.name;
-  content.append(title);
-  if (place.description) {
-    const description = document.createElement('p');
-    description.textContent = place.description;
-    content.append(description);
-  }
-  if (plannedTime) {
-    const time = document.createElement('p');
-    time.textContent = `Waktu kunjungan: ${plannedTime}`;
-    content.append(time);
-  }
-  const link = document.createElement('a');
-  link.href = place.mapsUrl;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  link.textContent = 'Buka Google Maps';
-  content.append(link);
-  return content;
 };
 
 const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
@@ -305,7 +263,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
             required
           />
           <p id="custom-place-hint" className="special-field-hint">
-            Link HTTPS Google Maps, termasuk link pendek, bisa digunakan. Marker dan rute tersedia jika link memuat koordinat.
+            Tempel link Google Maps untuk menyimpan tempat ini.
           </p>
           <label htmlFor="custom-place-name">Nama tempat <span>(opsional)</span></label>
           <input
@@ -350,7 +308,6 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
   const [planningPlaceId, setPlanningPlaceId] = useState<string | null>(null);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
   const [isAddingPlace, setIsAddingPlace] = useState(false);
-  const [route, setRoute] = useState<RouteInfo | null>(null);
   const [isSubmittingPlan, setIsSubmittingPlan] = useState(false);
   const [savedPlanSignature, setSavedPlanSignature] = useState('');
   const [planSubmissionError, setPlanSubmissionError] = useState('');
@@ -392,10 +349,6 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
     ),
     [selectedPlaces]
   );
-  const activeRoute = route?.placeIds.length === mappedPlaces.length &&
-    route.placeIds.every((placeId, index) => placeId === mappedPlaces[index]?.id)
-    ? route
-    : null;
   const planPayload = useMemo<PlanSubmissionVisit[]>(
     () => orderedVisits.flatMap((visit) => {
       const place = allPlaces.find((item) => item.id === visit.placeId);
@@ -427,16 +380,10 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
             attribution: '© OpenStreetMap contributors',
           },
         },
-        layers: [{ id: 'osm-raster', type: 'raster', source: 'osm' }],
+        layers: [{ id: 'osm-raster', type: 'raster', source: 'osm', paint: { 'raster-saturation': -0.8, 'raster-brightness-max': 0.96 } }],
       },
       center: [110.82, -7.56],
       zoom: 11,
-      minZoom: 10,
-      maxZoom: 17,
-      maxBounds: [
-        [110.65, -7.75],
-        [111.05, -7.42],
-      ],
     });
     mapRef.current = map;
     map.once('load', () => setMapReady(true));
@@ -449,119 +396,30 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
   }, [wishlistSent]);
 
   useEffect(() => {
-    if (mappedPlaces.length < 2) {
-      return;
-    }
-
-    const fallbackDistance = mappedPlaces.slice(1).reduce(
-      (total, place, index) => total + haversineDistance(mappedPlaces[index].coordinates, place.coordinates),
-      0
-    );
-    const controller = new AbortController();
-    const coordinates = mappedPlaces
-      .map(({ coordinates: placeCoordinates }) => `${placeCoordinates.longitude},${placeCoordinates.latitude}`)
-      .join(';');
-    const placeIds = mappedPlaces.map(({ id }) => id);
-
-    void fetch(
-      `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=false`,
-      { signal: controller.signal }
-    )
-      .then(async (response) => {
-        if (!response.ok) throw new Error('Routing service tidak tersedia.');
-        const result: unknown = await response.json();
-        if (!result || typeof result !== 'object') throw new Error('Respons routing tidak valid.');
-        const routes = (result as { routes?: unknown }).routes;
-        if (!Array.isArray(routes) || !routes[0] || typeof routes[0] !== 'object') {
-          throw new Error('Rute tidak ditemukan.');
-        }
-        const firstRoute = routes[0] as {
-          distance?: unknown;
-          duration?: unknown;
-          geometry?: unknown;
-        };
-        const geometry = firstRoute.geometry as Feature<LineString> | undefined;
-        if (
-          typeof firstRoute.distance !== 'number' ||
-          typeof firstRoute.duration !== 'number' ||
-          !geometry ||
-          geometry.type !== 'Feature' ||
-          geometry.geometry?.type !== 'LineString'
-        ) {
-          throw new Error('Data rute tidak lengkap.');
-        }
-        if (controller.signal.aborted) return;
-        setRoute({
-          placeIds,
-          status: 'routed',
-          geometry,
-          distanceMeters: firstRoute.distance,
-          durationSeconds: firstRoute.duration,
-        });
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) {
-          setRoute({
-            placeIds,
-            status: 'fallback',
-            geometry: null,
-            distanceMeters: fallbackDistance,
-            durationSeconds: null,
-          });
-        }
-      });
-    return () => controller.abort();
-  }, [mappedPlaces]);
-
-  useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
     markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = mappedPlaces.map((place) => {
+    markersRef.current = mappedPlaces.map((place, index) => {
       const markerElement = document.createElement('button');
       markerElement.type = 'button';
       markerElement.className = 'special-map-marker';
-      markerElement.setAttribute('aria-label', `Lihat ${place.name} di peta`);
-      markerElement.dataset.placeId = place.id;
+      markerElement.innerHTML = `<span>${index + 1}</span>`;
+      markerElement.setAttribute('aria-label', `Atur waktu ${place.name}`);
+      markerElement.addEventListener('click', () => setPlanningPlaceId(place.id));
       return new Marker({ element: markerElement, anchor: 'bottom' })
         .setLngLat([place.coordinates.longitude, place.coordinates.latitude])
-        .setPopup(
-          new Popup({ offset: 24 }).setDOMContent(
-            createPopup(place, plannedVisits.find((visit) => visit.placeId === place.id)?.time)
-          )
-        )
         .addTo(map);
     });
-
     if (mappedPlaces.length === 1) {
       const [place] = mappedPlaces;
-      map.flyTo({
-        center: [place.coordinates.longitude, place.coordinates.latitude],
-        zoom: 13,
-        essential: false,
-      });
+      map.flyTo({ center: [place.coordinates.longitude, place.coordinates.latitude], zoom: 13, essential: false });
     } else if (mappedPlaces.length > 1) {
       const bounds = new LngLatBounds();
-      mappedPlaces.forEach(({ coordinates: placeCoordinates }) =>
-        bounds.extend([placeCoordinates.longitude, placeCoordinates.latitude])
-      );
-      map.fitBounds(bounds, { padding: 64, maxZoom: 13, duration: 500 });
+      mappedPlaces.forEach((place) => bounds.extend([place.coordinates.longitude, place.coordinates.latitude]));
+      map.fitBounds(bounds, { padding: 56, maxZoom: 13, duration: 500 });
     }
+  }, [mapReady, mappedPlaces]);
 
-    const sourceId = 'custom-place-route';
-    const layerId = 'custom-place-route-line';
-    if (map.getLayer(layerId)) map.removeLayer(layerId);
-    if (map.getSource(sourceId)) map.removeSource(sourceId);
-    if (activeRoute?.status === 'routed' && activeRoute.geometry) {
-      map.addSource(sourceId, { type: 'geojson', data: activeRoute.geometry });
-      map.addLayer({
-        id: layerId,
-        type: 'line',
-        source: sourceId,
-        paint: { 'line-color': '#c24578', 'line-width': 4, 'line-opacity': 0.82 },
-      });
-    }
-  }, [activeRoute, mapReady, mappedPlaces, plannedVisits]);
 
   const closeForm = useCallback(() => {
     setIsAddingPlace(false);
@@ -584,7 +442,6 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
       setPlaces((current) =>
         current.map((place) => (place.id === editingPlaceId ? { ...draft, id: place.id } : place))
       );
-      setRoute(null);
     } else {
       if (places.length >= MAX_CUSTOM_PLACES) return 'Maksimal 3 tempat custom.';
       setPlaces((current) => [...current, { ...draft, id: crypto.randomUUID() }]);
@@ -596,7 +453,6 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
   const deletePlace = (placeId: string) => {
     setPlaces((current) => current.filter((place) => place.id !== placeId));
     setPlannedVisits((current) => current.filter((visit) => visit.placeId !== placeId));
-    setRoute(null);
   };
 
   const closePlanningDialog = useCallback(() => setPlanningPlaceId(null), []);
@@ -608,13 +464,11 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
         ? current.map((visit) => visit.placeId === placeId ? { ...visit, time } : visit)
         : [...current, { placeId, time }];
     });
-    setRoute(null);
     closePlanningDialog();
   };
 
   const removeVisit = (placeId: string) => {
     setPlannedVisits((current) => current.filter((visit) => visit.placeId !== placeId));
-    setRoute(null);
     closePlanningDialog();
   };
 
@@ -683,18 +537,16 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
   return (
     <section className="special-chapter" aria-labelledby="special-chapter-title">
       <header className="special-chapter-heading">
-        <p className="special-eyebrow">our little places</p>
         <h2 id="special-chapter-title">Special Chapter</h2>
-        <p>Pilih tempat rekomendasi atau simpan tempat pilihanmu sendiri untuk hari kecil kita.</p>
+        <p>our little plan, just for us.</p>
       </header>
 
       <section className="special-defaults" aria-labelledby="special-defaults-title">
         <div className="special-section-heading">
           <div>
-            <p className="special-eyebrow">little places to discover</p>
             <h3 id="special-defaults-title">Tempat pilihan</h3>
           </div>
-          <span className="special-placeholder-count">3 tempat pilihan · klik kartu untuk atur waktu</span>
+          <span className="special-placeholder-count">8 saran</span>
         </div>
         <div className="special-default-grid">
           {specialPlaces.map((place, index) => {
@@ -708,7 +560,12 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
                   onClick={() => setPlanningPlaceId(place.id)}
                 >
                   <span className="special-placeholder-number">0{index + 1}</span>
-                  <span className="special-card-heart" aria-hidden="true">{visit ? '✓' : '♡'}</span>
+                  <span className="special-card-heart" aria-hidden="true">
+                    <svg viewBox="0 0 32 32" focusable="false">
+                      <path d="M16 27S4.5 20.3 4.5 11.7C4.5 7.8 7.2 5 10.8 5c2.2 0 4.2 1.1 5.2 2.9C17 6.1 19 5 21.2 5c3.6 0 6.3 2.8 6.3 6.7C27.5 20.3 16 27 16 27Z" />
+                      {visit && <path className="special-card-check" d="m10.7 15.7 3.2 3.1 7-7" />}
+                    </svg>
+                  </span>
                   <h4>{place.title}</h4>
                   <p>{place.description}</p>
                   <span className="special-custom-badge">{visit ? `Direncanakan · ${visit.time}` : 'Tempat pilihan'}</span>
@@ -724,13 +581,14 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
               </article>
             );
           })}
-          {specialPlacePlaceholders.map((place, index) => (
-            <article className="special-placeholder-card" key={place.id}>
-              <span className="special-placeholder-number">0{index + specialPlaces.length + 1}</span>
-              <span className="special-placeholder-art" aria-hidden="true">♡</span>
+          {specialPlacePlaceholders.map((place) => (
+            <article className="special-place-placeholder" key={place.id}>
+              <span className="special-placeholder-number">
+                {place.id.slice(-2)}
+              </span>
+              <span className="special-place-placeholder-mark" aria-hidden="true">＋</span>
               <h4>{place.title}</h4>
-              <p>Detail tempat akan ditambahkan.</p>
-              <span className="special-coming-soon">PLACEHOLDER</span>
+              <p>Rekomendasi tempat akan ditambahkan.</p>
             </article>
           ))}
         </div>
@@ -739,15 +597,10 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
       <section className="special-custom-section" aria-labelledby="special-custom-title">
         <div className="special-section-heading">
           <div>
-            <p className="special-eyebrow">your own little discoveries</p>
             <h3 id="special-custom-title">Tempat custom</h3>
           </div>
           <span className="special-placeholder-count">{places.length}/{MAX_CUSTOM_PLACES} tempat</span>
         </div>
-        <p className="special-section-note">
-          Tempat custom hanya tersimpan di memori halaman ini dan tidak disimpan ke akun. Saat beberapa tempat dipilih,
-          koordinatnya dikirim ke layanan routing OSRM publik untuk mencari rute. Peta memuat tile OpenStreetMap.
-        </p>
         <div className="special-custom-grid">
           {places.map((place) => {
             const visit = plannedVisits.find((item) => item.placeId === place.id);
@@ -760,7 +613,12 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
                   aria-pressed={isSelected}
                   onClick={() => setPlanningPlaceId(place.id)}
                 >
-                  <span className="special-card-heart" aria-hidden="true">{isSelected ? '✓' : '♡'}</span>
+                  <span className="special-card-heart" aria-hidden="true">
+                    <svg viewBox="0 0 32 32" focusable="false">
+                      <path d="M16 27S4.5 20.3 4.5 11.7C4.5 7.8 7.2 5 10.8 5c2.2 0 4.2 1.1 5.2 2.9C17 6.1 19 5 21.2 5c3.6 0 6.3 2.8 6.3 6.7C27.5 20.3 16 27 16 27Z" />
+                      {isSelected && <path className="special-card-check" d="m10.7 15.7 3.2 3.1 7-7" />}
+                    </svg>
+                  </span>
                   <h4>{place.name}</h4>
                   {place.description && <p>{place.description}</p>}
                   <span className="special-custom-badge">
@@ -796,31 +654,16 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
         <div className="special-map-panel">
           <div className="special-section-heading">
             <div>
-              <p className="special-eyebrow">a map for us</p>
-              <h3>Peta tempat pilihan</h3>
+              <h3>Our Map</h3>
             </div>
           </div>
-          <div ref={mapContainerRef} className="special-map" aria-label="Peta tempat custom pilihan" />
-          <p className="special-route-status" aria-live="polite">
-            {selectedPlaces.length === 0 && 'Pilih kartu tempat untuk melihatnya di peta.'}
-            {mappedPlaces.length === 0 && selectedPlaces.length > 0 &&
-              'Link tempat yang dipilih tidak memuat koordinat, jadi tidak bisa ditampilkan di peta.'}
-            {mappedPlaces.length === 1 && 'Pilih tempat lain dengan koordinat untuk melihat rute antar-tempat.'}
-            {mappedPlaces.length > 1 && !activeRoute && 'Mencari rute jalan...'}
-            {mappedPlaces.length > 1 && activeRoute?.status === 'routed' &&
-              `Rute OSRM: ${formatDistance(activeRoute.distanceMeters)} · sekitar ${formatDuration(activeRoute.durationSeconds ?? 0)}.`}
-            {mappedPlaces.length > 1 && activeRoute?.status === 'fallback' &&
-              `Rute jalan tidak tersedia. Perkiraan jarak garis lurus: ${formatDistance(activeRoute.distanceMeters)}.`}
-            {mappedPlaces.length < selectedPlaces.length && mappedPlaces.length > 0 &&
-              ' Beberapa tempat tidak ditampilkan karena link-nya tidak memuat koordinat.'}
-          </p>
+          <div ref={mapContainerRef} className="special-map" aria-label="Peta OpenStreetMap tempat yang direncanakan" />
         </div>
 
         <div className="special-plan-panel">
           <div className="special-section-heading">
             <div>
-              <p className="special-eyebrow">make a little memory</p>
-              <h3>Our Little Plan</h3>
+              <h3>Our Plan</h3>
             </div>
           </div>
           <div className="special-clock" role="group" aria-label="Jam analog tempat yang direncanakan">
@@ -850,7 +693,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
             <span className="special-clock-label special-clock-label--9">9</span>
           </div>
           {orderedVisits.length === 0 ? (
-            <p className="special-empty-plan">Klik kartu tempat pilihan atau custom untuk menambahkan waktu kunjungan.</p>
+            <p className="special-empty-plan">Pilih tempat untuk mulai.</p>
           ) : (
             <ol className="special-plan-list">
               {orderedVisits.map((visit) => {
@@ -890,9 +733,6 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
               {[...new Set(visitWarnings)].map((warning) => <li key={warning}>{warning}</li>)}
             </ul>
           )}
-          <p className="special-plan-disclaimer">
-            Saat disimpan, nama tempat, waktu, dan link Google Maps dikirim ke dashboard admin. Data tersimpan sampai admin menghapusnya.
-          </p>
           {planSubmissionError && <p className="special-plan-submit-feedback is-error" role="alert">{planSubmissionError}</p>}
           {planSubmissionNotice && (
             <p className="special-plan-submit-feedback" role="status">{planSubmissionNotice}</p>
@@ -909,9 +749,6 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
                 ? 'RENCANA TERKIRIM'
                 : 'SIMPAN RENCANA'}
           </button>
-          <p className="special-plan-disclaimer">
-            Rencana akan tersimpan di dashboard admin sampai admin menghapusnya. Estimasi perjalanan memakai jarak garis lurus dan kecepatan rata-rata; kondisi jalan dapat berbeda.
-          </p>
         </div>
       </section>
 

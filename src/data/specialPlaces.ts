@@ -36,7 +36,9 @@ export const specialPlaces: DefaultPlace[] = [
 ];
 
 export const specialPlacePlaceholders: DefaultPlacePlaceholder[] = [
-  { id: 'recommendation-4', title: 'Tempat pilihan 4' },
-  { id: 'recommendation-5', title: 'Tempat pilihan 5' },
-  { id: 'recommendation-6', title: 'Tempat pilihan 6' },
+  { id: 'recommendation-4', title: 'Saran tempat 04' },
+  { id: 'recommendation-5', title: 'Saran tempat 05' },
+  { id: 'recommendation-6', title: 'Saran tempat 06' },
+  { id: 'recommendation-7', title: 'Saran tempat 07' },
+  { id: 'recommendation-8', title: 'Saran tempat 08' },
 ];

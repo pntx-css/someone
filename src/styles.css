@@ -1,12 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:opsz,wght@9..40,400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 
 :root {
-  --color-pink-50: #FCE7F3;
-  --color-pink-100: #F9D5E5;
-  --color-pink-500: #EC4899;
-  --color-pink-900: #831843;
-  --color-dark: #3B1727;
-  --color-light: #FFF8FA;
+  /* Birthday Journey — shared editorial scrapbook tokens */
+  --color-canvas: #FFF8F0;
+  --color-blush: #F8DDE3;
+  --color-rose: #D99AA7;
+  --color-berry: #A85D70;
+  --color-ink: #59413E;
+  --color-sage: #A8B5A0;
+  --color-paper: #FFFCF7;
+  --color-tape: #E8D5B5;
+  --color-line: rgba(89, 65, 62, 0.16);
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-chapter: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', Arial, sans-serif;
+  --font-hand: 'Caveat', cursive;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-6: 3rem;
+  --radius-paper: 0.35rem;
+  --shadow-paper: 0 16px 42px rgba(89, 65, 62, 0.11), 0 2px 6px rgba(89, 65, 62, 0.06);
+  --ease-soft: cubic-bezier(0.2, 0.7, 0.25, 1);
+  --motion-fast: 180ms;
+  --motion-standard: 320ms;
+  /* Compatibility aliases keep every existing chapter within the new palette. */
+  --color-pink-50: var(--color-canvas);
+  --color-pink-100: var(--color-blush);
+  --color-pink-500: var(--color-rose);
+  --color-pink-900: var(--color-berry);
+  --color-dark: var(--color-ink);
+  --color-light: var(--color-paper);
 }
 
 * {
@@ -15,8 +40,14 @@
   padding: 0;
 }
 
+html {
+  background: var(--color-canvas);
+  scroll-behavior: smooth;
+}
+
 body, html {
-  font-family: 'Space Grotesk', sans-serif;
+  min-width: 320px;
+  font-family: var(--font-body);
   background-color: var(--color-light);
   color: var(--color-dark);
   overflow-x: hidden;
@@ -28,12 +59,23 @@ body, html {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   color: var(--color-pink-900);
 }
 
 code, pre, .mono {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-body);
+  letter-spacing: 0.04em;
+}
+
+button, input, textarea, select { font: inherit; }
+button { touch-action: manipulation; }
+
+.birthday-journey > :not(.music-player) { animation: journey-enter var(--motion-standard) var(--ease-soft) both; }
+
+@keyframes journey-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {

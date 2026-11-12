@@ -27,8 +27,12 @@
 }
 
 .special-chapter-heading h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: 0.01em;
   margin-bottom: 0.6rem;
-  font-size: clamp(2.2rem, 6vw, 3.5rem);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
 }
 
 .special-chapter-heading > p:last-child,
@@ -84,22 +88,54 @@
   gap: 1rem;
 }
 
-.special-placeholder-card,
 .special-custom-card,
+.special-place-placeholder,
 .special-empty-card,
 .special-map-panel,
 .special-plan-panel {
   border: 1px solid rgba(131, 24, 67, 0.13);
-  border-radius: 8px;
-  background: rgba(255, 253, 251, 0.84);
-  box-shadow: 0 12px 32px rgba(131, 24, 67, 0.07);
+  border-radius: var(--radius-paper);
+  background: var(--color-paper);
+  box-shadow: var(--shadow-paper);
 }
 
-.special-placeholder-card {
+.special-place-placeholder {
   position: relative;
+  display: flex;
   min-height: 220px;
-  padding: 1.4rem 1.25rem 1.2rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1.25rem;
   overflow: hidden;
+  border-style: dashed;
+  background:
+    radial-gradient(circle at 85% 22%, rgba(232, 213, 181, 0.3), transparent 7rem),
+    var(--color-paper);
+}
+
+.special-place-placeholder-mark {
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: 0.85rem 0 0.6rem;
+  place-items: center;
+  border: 1px solid rgba(168, 93, 112, 0.2);
+  border-radius: 50%;
+  color: var(--color-berry);
+  font-size: 1.25rem;
+}
+
+.special-place-placeholder h4 {
+  color: var(--color-berry);
+  font: 600 1.05rem var(--font-display);
+}
+
+.special-place-placeholder p {
+  margin-top: 0.3rem;
+  color: rgba(59, 23, 39, 0.62);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .special-placeholder-number {
@@ -107,38 +143,19 @@
   font: 0.72rem 'DM Mono', monospace;
 }
 
-.special-placeholder-art {
-  display: grid;
-  width: 2.8rem;
-  height: 2.8rem;
-  margin: 1.2rem 0 0.75rem;
-  place-items: center;
-  border: 1px solid rgba(194, 69, 120, 0.2);
-  border-radius: 50%;
-  color: #c24578;
-  background: #fff3f8;
-  font-size: 1.2rem;
+.special-card-heart svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
-.special-placeholder-card h4,
 .special-custom-card h4 {
   color: #831843;
   font: 600 1.15rem 'Playfair Display', serif;
-}
-
-.special-placeholder-card p {
-  margin-top: 0.4rem;
-  color: rgba(59, 23, 39, 0.6);
-  font-size: 0.83rem;
-}
-
-.special-coming-soon {
-  position: absolute;
-  top: 1.4rem;
-  right: 1.2rem;
-  color: rgba(131, 24, 67, 0.52);
-  font: 0.57rem 'DM Mono', monospace;
-  letter-spacing: 0.08em;
 }
 
 .special-section-note {
@@ -149,17 +166,27 @@
 .special-custom-card {
   min-width: 0;
   padding: 0.4rem 1rem 1rem;
-  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  overflow: hidden;
+  border-color: rgba(131, 24, 67, 0.13);
+  background: var(--color-paper);
+  box-shadow: 0 10px 26px rgba(89, 65, 62, 0.08), 0 2px 5px rgba(89, 65, 62, 0.04);
+  transition: border-color 240ms ease, background-color 240ms ease, box-shadow 240ms ease;
 }
 
 .special-custom-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 35px rgba(131, 24, 67, 0.12);
+  border-color: rgba(217, 154, 167, 0.72);
+  box-shadow: 0 14px 30px rgba(89, 65, 62, 0.11), 0 2px 6px rgba(89, 65, 62, 0.05);
 }
 
 .special-custom-card.is-selected {
-  border-color: rgba(194, 69, 120, 0.75);
-  box-shadow: 0 0 0 2px rgba(194, 69, 120, 0.1), 0 12px 32px rgba(131, 24, 67, 0.08);
+  border-color: #D99AA7;
+  background: #FFF8F0;
+  box-shadow: 0 12px 28px rgba(168, 93, 112, 0.12), 0 2px 5px rgba(89, 65, 62, 0.05);
+}
+
+.special-custom-card:has(.special-card-select:focus-visible) {
+  border-color: #A85D70;
+  box-shadow: 0 12px 28px rgba(168, 93, 112, 0.16), 0 2px 5px rgba(89, 65, 62, 0.05);
 }
 
 .special-card-select {
@@ -173,10 +200,17 @@
   color: var(--color-dark);
   text-align: left;
   cursor: pointer;
+  border-radius: calc(var(--radius-paper) - 1px);
+  outline: none;
+  transition: opacity 200ms ease;
 }
 
 .special-card-select:active {
-  transform: scale(0.99);
+  opacity: 0.82;
+}
+
+.special-card-select:focus-visible {
+  outline: none;
 }
 
 .special-card-select h4 {
@@ -196,8 +230,23 @@
   position: absolute;
   top: 1rem;
   right: 0;
-  color: #c24578;
-  font-size: 1.2rem;
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-berry);
+  background: var(--color-blush);
+  transition: transform var(--motion-fast) var(--ease-soft), background-color var(--motion-fast) ease;
+}
+
+.special-card-check { fill: none; stroke-width: 2.2; }
+
+.special-card-select:hover .special-card-heart,
+.special-card-select[aria-pressed='true'] .special-card-heart {
+  background: var(--color-rose);
+  color: var(--color-paper);
+  transform: rotate(-7deg) scale(1.08);
 }
 
 .special-custom-badge {
@@ -306,45 +355,41 @@
 
 .special-map {
   width: 100%;
-  height: 390px;
+  height: 340px;
   overflow: hidden;
-  border: 1px solid rgba(131, 24, 67, 0.16);
-  border-radius: 5px;
-  background: #f9eaf0;
+  border: 1px solid rgba(131, 24, 67, 0.14);
+  border-radius: 1rem;
+  background: #f6e8e2;
+}
+
+.special-map .maplibregl-canvas {
+  filter: saturate(0.45) sepia(0.12) brightness(1.06) contrast(0.9);
 }
 
 .special-map-marker {
-  width: 1.4rem;
-  height: 1.4rem;
-  border: 3px solid #fff;
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border: 3px solid #fffaf7;
   border-radius: 50% 50% 50% 0;
   background: #c24578;
-  box-shadow: 0 2px 8px rgba(59, 23, 39, 0.35);
-  transform: rotate(-45deg);
+  box-shadow: 0 4px 10px rgba(89, 65, 62, 0.22);
+  color: #fff;
+  font: 600 0.8rem var(--font-body);
   cursor: pointer;
+  transform: rotate(-45deg);
 }
 
-.special-map-popup {
-  min-width: 9rem;
-  color: #3b1727;
-  font-family: 'Space Grotesk', sans-serif;
-}
-
-.special-map-popup strong {
-  color: #831843;
-  font-family: 'Playfair Display', serif;
-}
-
-.special-map-popup p {
-  margin: 0.3rem 0;
-  font-size: 0.78rem;
-}
-
-.special-map-popup a {
+.special-map-marker span {
   display: inline-block;
-  margin-top: 0.25rem;
-  color: #a32150;
-  font-size: 0.75rem;
+  transform: rotate(45deg);
+}
+
+.special-map-marker:hover,
+.special-map-marker:focus-visible {
+  background: #a85d70;
+  transform: rotate(-45deg) scale(1.1);
 }
 
 .special-route-status,
@@ -548,7 +593,8 @@
   display: grid;
   place-items: center;
   padding: 1rem;
-  background: rgba(48, 16, 31, 0.54);
+  background: rgba(89, 65, 62, 0.48);
+  backdrop-filter: blur(6px);
   animation: special-fade-in 180ms ease both;
 }
 
@@ -559,12 +605,24 @@
   overflow: auto;
   padding: 2rem;
   border: 1px solid rgba(131, 24, 67, 0.16);
-  border-radius: 8px;
+  border-radius: 1.25rem;
   background:
-    radial-gradient(ellipse at top right, rgba(249, 213, 229, 0.55), transparent 45%),
-    #fffafd;
-  box-shadow: 0 24px 70px rgba(48, 16, 31, 0.28);
+    radial-gradient(ellipse at top right, rgba(232, 213, 181, 0.62), transparent 45%),
+    var(--color-paper);
+  box-shadow: 0 24px 70px rgba(89, 65, 62, 0.28);
   animation: special-dialog-in 220ms cubic-bezier(0.2, 0.7, 0.25, 1) both;
+}
+
+.special-place-dialog::before {
+  content: '';
+  position: absolute;
+  top: -0.6rem;
+  left: 50%;
+  width: 6.5rem;
+  height: 1.15rem;
+  border: 1px solid rgba(168, 93, 112, 0.15);
+  background: rgba(232, 213, 181, 0.78);
+  transform: translateX(-50%) rotate(1.5deg);
 }
 
 .special-place-dialog h3 {
@@ -721,6 +779,31 @@
 
   .special-map {
     height: 340px;
+  }
+}
+
+@media (max-width: 520px) {
+  .special-chapter {
+    padding-inline: 1rem;
+  }
+
+  .special-default-grid,
+  .special-custom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .special-default-grid .special-custom-card,
+  .special-place-placeholder {
+    min-height: 0;
+  }
+
+  .special-default-grid .special-card-select {
+    min-height: 150px;
+  }
+
+  .special-place-dialog {
+    width: min(100%, 30rem);
+    max-height: calc(100dvh - 2rem);
   }
 }
 
