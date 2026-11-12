@@ -8,7 +8,7 @@ import {
   type Coordinates,
   type CustomPlaceDraft,
 } from '../data/customPlace';
-import { specialPlaces, specialPlacePlaceholders } from '../data/specialPlaces';
+import { specialPlaces} from '../data/specialPlaces';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './SpecialChapter.css';
 
@@ -581,16 +581,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
               </article>
             );
           })}
-          {specialPlacePlaceholders.map((place) => (
-            <article className="special-place-placeholder" key={place.id}>
-              <span className="special-placeholder-number">
-                {place.id.slice(-2)}
-              </span>
-              <span className="special-place-placeholder-mark" aria-hidden="true">＋</span>
-              <h4>{place.title}</h4>
-              <p>Rekomendasi tempat akan ditambahkan.</p>
-            </article>
-          ))}
+        
         </div>
       </section>
 

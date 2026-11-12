@@ -1,16 +1,16 @@
-import pict1 from '../assets/pict1.jpg';
-import pict2 from '../assets/pict2.jpg';
-import pict3 from '../assets/pict3.jpg';
-import pict4 from '../assets/pict4.jpg';
-import pict5 from '../assets/pict5.jpg';
-import pict6 from '../assets/pict6.jpg';
-import pict7 from '../assets/pict7.jpg';
-import pict8 from '../assets/pict8.jpg';
-import pict9 from '../assets/pict9.jpg';
-import pict10 from '../assets/pict10.jpg';
-import pict11 from '../assets/pict11.jpg';
-import pict12 from '../assets/pict12.jpeg';
-import pict13 from '../assets/pict13.jpg';
+import pict1 from '../assets/pict1.webp';
+import pict2 from '../assets/pict2.webp';
+import pict3 from '../assets/pict3.webp';
+import pict4 from '../assets/pict4.webp';
+import pict5 from '../assets/pict5.webp';
+import pict6 from '../assets/pict6.webp';
+import pict7 from '../assets/pict7.webp';
+import pict8 from '../assets/pict8.webp';
+import pict9 from '../assets/pict9.webp';
+import pict10 from '../assets/pict10.webp';
+import pict11 from '../assets/pict11.webp';
+import pict12 from '../assets/pict12.webp';
+import pict13 from '../assets/pict13.webp';
 
 export type MemorySide = 'left' | 'right';
 
