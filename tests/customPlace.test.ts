@@ -4,7 +4,7 @@ import {
   getProgressiveEmptyCardCount,
   parseGoogleMapsUrl,
 } from '../src/data/customPlace.ts';
-import { specialPlaces, specialPlacePlaceholders } from '../src/data/specialPlaces.ts';
+import { specialPlaces } from '../src/data/specialPlaces.ts';
 
 test('progressively exposes one empty slot until three places are registered', () => {
   assert.equal(getProgressiveEmptyCardCount(0), 1);
@@ -26,12 +26,14 @@ test('default place cards use the provided names and coordinates', () => {
     [
       { title: 'Mie Serasi UNS', latitude: -7.552372784489211, longitude: 110.85986399489016 },
       { title: 'Mie Ayam Worth It', latitude: -7.550042383516451, longitude: 110.86104288324695 },
-      { title: 'Solo Square', latitude: -7.560842310271578, longitude: 110.78852662557664 },
+      { title: 'Solo Square XXI', latitude: -7.560842310271578, longitude: 110.78852662557664 },
+      { title: 'Dikichi Solo', latitude: -7.543494, longitude: 110.770035 },
+      { title: 'Rokaville', latitude: -7.565221, longitude: 110.820577 },
+      { title: 'Momoyo Coyudan', latitude: -7.574012, longitude: 110.821605 },
+      { title: 'Seblak Preanger', latitude: -7.553735, longitude: 110.763795 },
     ]
   );
-  assert.equal(specialPlaces.length, 3);
-  assert.equal(specialPlacePlaceholders.length, 5);
-  assert.equal(specialPlaces.length + specialPlacePlaceholders.length, 8);
+  assert.equal(specialPlaces.length, 7);
 });
 
 test('parses coordinate query parameters and supported Maps URL formats', () => {
