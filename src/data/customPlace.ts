@@ -3,7 +3,8 @@ export interface Coordinates {
   longitude: number;
 }
 
-export interface CustomPlaceDraft extends Coordinates {
+export interface CustomPlaceDraft {
+  coordinates: Coordinates | null;
   mapsUrl: string;
   name: string;
   description: string;
@@ -31,12 +32,12 @@ const parseCoordinatePair = (value: string): Coordinates | null => {
     longitude < -180 ||
     longitude > 180
   ) {
-    throw new Error('Koordinat pada link berada di luar rentang yang valid.');
+    return null;
   }
   return { latitude, longitude };
 };
 
-export const parseGoogleMapsUrl = (value: string): Coordinates => {
+export const parseGoogleMapsUrl = (value: string): Coordinates | null => {
   let url: URL;
   try {
     url = new URL(value.trim());
@@ -45,18 +46,17 @@ export const parseGoogleMapsUrl = (value: string): Coordinates => {
   }
 
   const hostname = url.hostname.toLowerCase();
-  if (hostname === 'maps.app.goo.gl' || hostname === 'goo.gl') {
-    throw new Error(
-      'Link pendek belum didukung. Buka tempat di Google Maps, pilih Bagikan, lalu salin link lengkap yang memuat koordinat.'
-    );
-  }
+  const isShortMapsLink = hostname === 'maps.app.goo.gl' ||
+    (hostname === 'goo.gl' && url.pathname.startsWith('/maps'));
   if (
     url.protocol !== 'https:' ||
     url.username ||
     url.password ||
     (url.port && url.port !== '443') ||
-    !GOOGLE_MAPS_HOST.test(hostname) ||
-    (!hostname.startsWith('maps.') && !url.pathname.startsWith('/maps'))
+    (!isShortMapsLink && (
+      !GOOGLE_MAPS_HOST.test(hostname) ||
+      (!hostname.startsWith('maps.') && !url.pathname.startsWith('/maps'))
+    ))
   ) {
     throw new Error('Gunakan link HTTPS dari Google Maps, bukan dari situs lain.');
   }
@@ -85,7 +85,5 @@ export const parseGoogleMapsUrl = (value: string): Coordinates => {
     if (coordinates) return coordinates;
   }
 
-  throw new Error(
-    'Koordinat tidak ditemukan. Gunakan link Google Maps lengkap yang memuat koordinat, bukan link hasil pencarian atau link pendek.'
-  );
+  return null;
 };

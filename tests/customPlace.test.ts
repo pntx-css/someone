@@ -59,24 +59,12 @@ test('rejects invalid URLs, non-HTTPS protocols, and unsupported domains', () =>
   }
 });
 
-test('explains that short Google Maps URLs need a complete link', () => {
-  assert.throws(
-    () => parseGoogleMapsUrl('https://maps.app.goo.gl/example'),
-    /Link pendek belum didukung/
-  );
+test('accepts HTTPS Google Maps links without coordinates', () => {
+  assert.equal(parseGoogleMapsUrl('https://maps.app.goo.gl/example'), null);
+  assert.equal(parseGoogleMapsUrl('https://www.google.com/maps/search/?api=1&query=coffee'), null);
 });
 
-test('rejects missing and out-of-range coordinates', () => {
-  assert.throws(
-    () => parseGoogleMapsUrl('https://www.google.com/maps/search/?api=1&query=coffee'),
-    /Koordinat tidak ditemukan/
-  );
-  assert.throws(
-    () => parseGoogleMapsUrl('https://www.google.com/maps?q=91,110'),
-    /di luar rentang/
-  );
-  assert.throws(
-    () => parseGoogleMapsUrl('https://www.google.com/maps?q=-7,181'),
-    /di luar rentang/
-  );
+test('ignores absent or out-of-range coordinates while accepting a valid Maps link', () => {
+  assert.equal(parseGoogleMapsUrl('https://www.google.com/maps?q=91,110'), null);
+  assert.equal(parseGoogleMapsUrl('https://www.google.com/maps?q=-7,181'), null);
 });

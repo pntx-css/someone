@@ -17,11 +17,12 @@ interface CustomPlace extends CustomPlaceDraft {
   id: string;
 }
 
-interface MapPlace extends Coordinates {
+interface MapPlace {
   id: string;
   name: string;
   description: string;
   mapsUrl: string;
+  coordinates: Coordinates | null;
 }
 
 interface PlannedVisit {
@@ -256,7 +257,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
       }
       const coordinates = parseGoogleMapsUrl(mapsUrl);
       const saveError = onSave({
-        ...coordinates,
+        coordinates,
         mapsUrl: mapsUrl.trim(),
         name: trimmedName || 'Tempat pilihan',
         description: trimmedDescription,
@@ -304,7 +305,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
             required
           />
           <p id="custom-place-hint" className="special-field-hint">
-            Link pendek belum didukung. Di Google Maps, buka tempat → Bagikan → salin link lengkap yang memuat koordinat.
+            Link HTTPS Google Maps, termasuk link pendek, bisa digunakan. Marker dan rute tersedia jika link memuat koordinat.
           </p>
           <label htmlFor="custom-place-name">Nama tempat <span>(opsional)</span></label>
           <input
@@ -365,8 +366,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
         id: place.id,
         name: place.title,
         description: place.description,
-        latitude: place.latitude,
-        longitude: place.longitude,
+        coordinates: { latitude: place.latitude, longitude: place.longitude },
         mapsUrl: `https://www.google.com/maps?q=${place.latitude},${place.longitude}`,
       })),
       ...places.map((place) => ({
@@ -386,8 +386,14 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
       .filter((place): place is MapPlace => place !== undefined),
     [allPlaces, orderedVisits]
   );
-  const activeRoute = route?.placeIds.length === selectedPlaces.length &&
-    route.placeIds.every((placeId, index) => placeId === selectedPlaces[index]?.id)
+  const mappedPlaces = useMemo(
+    () => selectedPlaces.filter(
+      (place): place is MapPlace & { coordinates: Coordinates } => place.coordinates !== null
+    ),
+    [selectedPlaces]
+  );
+  const activeRoute = route?.placeIds.length === mappedPlaces.length &&
+    route.placeIds.every((placeId, index) => placeId === mappedPlaces[index]?.id)
     ? route
     : null;
   const planPayload = useMemo<PlanSubmissionVisit[]>(
@@ -443,17 +449,19 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
   }, [wishlistSent]);
 
   useEffect(() => {
-    if (selectedPlaces.length < 2) {
+    if (mappedPlaces.length < 2) {
       return;
     }
 
-    const fallbackDistance = selectedPlaces.slice(1).reduce(
-      (total, place, index) => total + haversineDistance(selectedPlaces[index], place),
+    const fallbackDistance = mappedPlaces.slice(1).reduce(
+      (total, place, index) => total + haversineDistance(mappedPlaces[index].coordinates, place.coordinates),
       0
     );
     const controller = new AbortController();
-    const coordinates = selectedPlaces.map(({ longitude, latitude }) => `${longitude},${latitude}`).join(';');
-    const placeIds = selectedPlaces.map(({ id }) => id);
+    const coordinates = mappedPlaces
+      .map(({ coordinates: placeCoordinates }) => `${placeCoordinates.longitude},${placeCoordinates.latitude}`)
+      .join(';');
+    const placeIds = mappedPlaces.map(({ id }) => id);
 
     void fetch(
       `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=false`,
@@ -503,20 +511,20 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
         }
       });
     return () => controller.abort();
-  }, [selectedPlaces]);
+  }, [mappedPlaces]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
     markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = selectedPlaces.map((place) => {
+    markersRef.current = mappedPlaces.map((place) => {
       const markerElement = document.createElement('button');
       markerElement.type = 'button';
       markerElement.className = 'special-map-marker';
       markerElement.setAttribute('aria-label', `Lihat ${place.name} di peta`);
       markerElement.dataset.placeId = place.id;
       return new Marker({ element: markerElement, anchor: 'bottom' })
-        .setLngLat([place.longitude, place.latitude])
+        .setLngLat([place.coordinates.longitude, place.coordinates.latitude])
         .setPopup(
           new Popup({ offset: 24 }).setDOMContent(
             createPopup(place, plannedVisits.find((visit) => visit.placeId === place.id)?.time)
@@ -525,12 +533,18 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
         .addTo(map);
     });
 
-    if (selectedPlaces.length === 1) {
-      const [place] = selectedPlaces;
-      map.flyTo({ center: [place.longitude, place.latitude], zoom: 13, essential: false });
-    } else if (selectedPlaces.length > 1) {
+    if (mappedPlaces.length === 1) {
+      const [place] = mappedPlaces;
+      map.flyTo({
+        center: [place.coordinates.longitude, place.coordinates.latitude],
+        zoom: 13,
+        essential: false,
+      });
+    } else if (mappedPlaces.length > 1) {
       const bounds = new LngLatBounds();
-      selectedPlaces.forEach(({ longitude, latitude }) => bounds.extend([longitude, latitude]));
+      mappedPlaces.forEach(({ coordinates: placeCoordinates }) =>
+        bounds.extend([placeCoordinates.longitude, placeCoordinates.latitude])
+      );
       map.fitBounds(bounds, { padding: 64, maxZoom: 13, duration: 500 });
     }
 
@@ -547,7 +561,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
         paint: { 'line-color': '#c24578', 'line-width': 4, 'line-opacity': 0.82 },
       });
     }
-  }, [activeRoute, mapReady, plannedVisits, selectedPlaces]);
+  }, [activeRoute, mapReady, mappedPlaces, plannedVisits]);
 
   const closeForm = useCallback(() => {
     setIsAddingPlace(false);
@@ -558,8 +572,11 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
     const duplicate = places.some(
       (place) =>
         place.id !== editingPlaceId &&
-        place.latitude === draft.latitude &&
-        place.longitude === draft.longitude
+        (place.mapsUrl === draft.mapsUrl ||
+          (place.coordinates !== null &&
+            draft.coordinates !== null &&
+            place.coordinates.latitude === draft.coordinates.latitude &&
+            place.coordinates.longitude === draft.coordinates.longitude))
     );
     if (duplicate) return 'Tempat dengan koordinat tersebut sudah ada.';
 
@@ -650,10 +667,10 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
     if (!nextVisit) return;
     const from = allPlaces.find((place) => place.id === visit.placeId);
     const to = allPlaces.find((place) => place.id === nextVisit.placeId);
-    if (!from || !to) return;
+    if (!from?.coordinates || !to?.coordinates) return;
     const gapMinutes = (Number(nextVisit.time.slice(0, 2)) * 60 + Number(nextVisit.time.slice(3))) -
       (Number(visit.time.slice(0, 2)) * 60 + Number(visit.time.slice(3)));
-    const estimatedMinutes = Math.ceil(haversineDistance(from, to) / (30_000 / 60));
+    const estimatedMinutes = Math.ceil(haversineDistance(from.coordinates, to.coordinates) / (30_000 / 60));
     if (gapMinutes >= 0 && gapMinutes < estimatedMinutes) {
       visitWarnings.push(
         `Perjalanan dari ${from.name} ke ${to.name} mungkin tidak cukup: estimasi garis lurus minimal ${estimatedMinutes} menit.`
@@ -786,12 +803,16 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
           <div ref={mapContainerRef} className="special-map" aria-label="Peta tempat custom pilihan" />
           <p className="special-route-status" aria-live="polite">
             {selectedPlaces.length === 0 && 'Pilih kartu tempat untuk melihatnya di peta.'}
-            {selectedPlaces.length === 1 && 'Pilih tempat lain untuk melihat rute antar-tempat.'}
-            {selectedPlaces.length > 1 && !activeRoute && 'Mencari rute jalan...'}
-            {selectedPlaces.length > 1 && activeRoute?.status === 'routed' &&
+            {mappedPlaces.length === 0 && selectedPlaces.length > 0 &&
+              'Link tempat yang dipilih tidak memuat koordinat, jadi tidak bisa ditampilkan di peta.'}
+            {mappedPlaces.length === 1 && 'Pilih tempat lain dengan koordinat untuk melihat rute antar-tempat.'}
+            {mappedPlaces.length > 1 && !activeRoute && 'Mencari rute jalan...'}
+            {mappedPlaces.length > 1 && activeRoute?.status === 'routed' &&
               `Rute OSRM: ${formatDistance(activeRoute.distanceMeters)} · sekitar ${formatDuration(activeRoute.durationSeconds ?? 0)}.`}
-            {selectedPlaces.length > 1 && activeRoute?.status === 'fallback' &&
+            {mappedPlaces.length > 1 && activeRoute?.status === 'fallback' &&
               `Rute jalan tidak tersedia. Perkiraan jarak garis lurus: ${formatDistance(activeRoute.distanceMeters)}.`}
+            {mappedPlaces.length < selectedPlaces.length && mappedPlaces.length > 0 &&
+              ' Beberapa tempat tidak ditampilkan karena link-nya tidak memuat koordinat.'}
           </p>
         </div>
 

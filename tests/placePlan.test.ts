@@ -26,17 +26,16 @@ test('accepts multiple visits but rejects empty and oversized plans', () => {
   assert.equal(validatePlacePlanVisits(Array.from({ length: 7 }, (_, index) => ({ ...validVisit, name: `Tempat ${index}` }))), null);
 });
 
-test('rejects invalid times, missing names, untrusted links, and short links', () => {
+test('validates planned visits and accepts Google Maps links without coordinates', () => {
   assert.equal(validatePlacePlanVisits([{ ...validVisit, time: '25:00' }]), null);
   assert.equal(validatePlacePlanVisits([{ ...validVisit, name: ' ' }]), null);
   assert.equal(validatePlacePlanVisits([{ ...validVisit, mapsUrl: 'javascript:alert(1)' }]), null);
-  assert.equal(validatePlacePlanVisits([{ ...validVisit, mapsUrl: 'https://maps.app.goo.gl/example' }]), null);
-  assert.equal(
-    validatePlacePlanVisits([{ ...validVisit, mapsUrl: 'https://www.google.com/maps?q=91,110' }]),
-    null
+  assert.deepEqual(
+    validatePlacePlanVisits([{ ...validVisit, mapsUrl: 'https://maps.app.goo.gl/example' }]),
+    [{ ...validVisit, mapsUrl: 'https://maps.app.goo.gl/example' }]
   );
-  assert.equal(
-    validatePlacePlanVisits([{ ...validVisit, mapsUrl: 'https://www.google.com/maps?q=91,110&query=-7,110' }]),
+  assert.notEqual(
+    validatePlacePlanVisits([{ ...validVisit, mapsUrl: 'https://www.google.com/maps/search/?api=1&query=coffee' }]),
     null
   );
 });

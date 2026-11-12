@@ -33,7 +33,7 @@ export const PersonalMessage: React.FC<PersonalMessageProps> = ({ onNext }) => {
   return (
     <div className="letter-container" style={{ position: 'relative' }}>
       <div className="letter-paper">
-        <div className="letter-content">
+        <div className="letter-content" lang="id">
           {renderPersonalMessage()}
         </div>
         <div style={{ textAlign: 'center', marginTop: '3rem' }}>

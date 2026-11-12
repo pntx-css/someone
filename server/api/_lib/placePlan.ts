@@ -5,20 +5,6 @@ export interface PlannedPlaceInput {
 }
 
 const GOOGLE_MAPS_HOST = /^(?:(?:www|maps)\.)?google\.(?:com|[a-z]{2,3}(?:\.[a-z]{2})?)$/i;
-const COORDINATE_PAIR = /(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/;
-
-const validCoordinatePair = (value: string): boolean => {
-  const match = value.match(COORDINATE_PAIR);
-  if (!match) return false;
-  const latitude = Number(match[1]);
-  const longitude = Number(match[2]);
-  return Number.isFinite(latitude) &&
-    Number.isFinite(longitude) &&
-    latitude >= -90 &&
-    latitude <= 90 &&
-    longitude >= -180 &&
-    longitude <= 180;
-};
 
 const validMapsUrl = (value: string): boolean => {
   let url: URL;
@@ -29,37 +15,22 @@ const validMapsUrl = (value: string): boolean => {
   }
 
   const hostname = url.hostname.toLowerCase();
+  const isShortMapsLink = hostname === 'maps.app.goo.gl' ||
+    (hostname === 'goo.gl' && url.pathname.startsWith('/maps'));
   if (
     url.protocol !== 'https:' ||
     url.username ||
     url.password ||
     (url.port && url.port !== '443') ||
-    hostname === 'goo.gl' ||
-    hostname === 'maps.app.goo.gl' ||
-    !GOOGLE_MAPS_HOST.test(hostname) ||
-    (!hostname.startsWith('maps.') && !url.pathname.startsWith('/maps'))
+    (!isShortMapsLink && (
+      !GOOGLE_MAPS_HOST.test(hostname) ||
+      (!hostname.startsWith('maps.') && !url.pathname.startsWith('/maps'))
+    ))
   ) {
     return false;
   }
 
-  const coordinateValues = [
-    url.searchParams.get('q'),
-    url.searchParams.get('query'),
-    url.searchParams.get('ll'),
-    url.searchParams.get('center'),
-    url.searchParams.get('daddr'),
-  ].filter((candidate): candidate is string => candidate !== null);
-  for (const candidate of coordinateValues) {
-    if (COORDINATE_PAIR.test(candidate)) return validCoordinatePair(candidate);
-  }
-
-  const embeddedCoordinates = url.href.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);
-  if (embeddedCoordinates && validCoordinatePair(`${embeddedCoordinates[1]},${embeddedCoordinates[2]}`)) {
-    return true;
-  }
-
-  const atCoordinates = url.pathname.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
-  return Boolean(atCoordinates && validCoordinatePair(`${atCoordinates[1]},${atCoordinates[2]}`));
+  return true;
 };
 
 export const validatePlacePlanVisits = (value: unknown): PlannedPlaceInput[] | null => {

@@ -38,6 +38,10 @@
   font-size: 1.15rem;
   line-height: 2;
   color: var(--color-pink-900);
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;
+  hyphens: auto;
   white-space: pre-wrap; /* Preserve line breaks from text */
 }
 
