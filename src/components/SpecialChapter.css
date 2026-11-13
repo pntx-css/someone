@@ -48,11 +48,12 @@
 
 .special-section-heading {
   display: flex;
-  align-items: end;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 1rem;
-  margin-bottom: 1.25rem;
-  text-align: left;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .special-section-heading h3 {
@@ -372,24 +373,41 @@
   height: 2.65rem;
   place-items: center;
   border: 3px solid #fffaf7;
-  border-radius: 50% 50% 50% 0;
+  border-radius: 50%;
   background: #c24578;
   box-shadow: 0 4px 10px rgba(89, 65, 62, 0.22);
   color: #fff;
   font: 600 0.8rem var(--font-body);
   cursor: pointer;
-  transform: rotate(-45deg);
+  transform: none;
 }
 
 .special-map-marker span {
   display: inline-block;
-  transform: rotate(45deg);
 }
 
 .special-map-marker:hover,
 .special-map-marker:focus-visible {
   background: #a85d70;
-  transform: rotate(-45deg) scale(1.1);
+  transform: scale(1.1);
+}
+
+.special-map-home-marker {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 3px solid #fffaf7;
+  border-radius: 50%;
+  background: #527a54;
+  box-shadow: 0 4px 10px rgba(89, 65, 62, 0.22);
+  color: #fff;
+}
+
+.special-map-home-marker svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: currentColor;
 }
 
 .special-route-status,
@@ -462,6 +480,11 @@
   font: 0.52rem 'DM Mono', monospace;
   transform: translate(-50%, -50%);
   cursor: pointer;
+  transition: transform 160ms var(--ease-soft), background-color 160ms var(--ease-soft), box-shadow 160ms var(--ease-soft);
+}
+
+.special-clock-dot:active {
+  transform: translate(-50%, -50%) scale(0.82);
 }
 
 .special-clock-label {
@@ -614,6 +637,9 @@
   padding: 1rem;
   background: rgba(89, 65, 62, 0.48);
   backdrop-filter: blur(6px);
+  overflow: hidden;
+  overscroll-behavior: contain;
+  touch-action: none;
   animation: special-fade-in 180ms ease both;
 }
 
@@ -621,7 +647,9 @@
   position: relative;
   width: min(100%, 520px);
   max-height: min(92vh, 760px);
-  overflow: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   padding: 2rem;
   border: 1px solid rgba(131, 24, 67, 0.16);
   border-radius: var(--radius-dialog);
@@ -630,6 +658,7 @@
     var(--color-paper);
   box-shadow: 0 24px 70px rgba(89, 65, 62, 0.28);
   animation: special-dialog-in 220ms cubic-bezier(0.2, 0.7, 0.25, 1) both;
+  text-align: center;
 }
 
 .special-place-dialog::before {
@@ -665,7 +694,7 @@
 
 .special-dialog-intro {
   max-width: 26rem;
-  margin-bottom: 1.1rem;
+  margin: 0 auto 1.1rem;
   color: rgba(59, 23, 39, 0.7);
   font-size: 0.83rem;
   line-height: 1.6;
@@ -673,6 +702,7 @@
 
 .special-place-form {
   display: grid;
+  text-align: left;
 }
 
 .special-place-form label {
@@ -713,6 +743,7 @@
   color: rgba(59, 23, 39, 0.65);
   font-size: 0.73rem;
   line-height: 1.5;
+  text-align: left;
 }
 
 .special-form-error {
@@ -799,6 +830,11 @@
   .special-map {
     height: 340px;
   }
+
+  .special-section-heading {
+    align-items: center;
+    text-align: center;
+  }
 }
 
 @media (max-width: 520px) {
@@ -833,7 +869,7 @@
   }
 
   .special-section-heading {
-    align-items: start;
+    align-items: center;
   }
 
   .special-placeholder-count {

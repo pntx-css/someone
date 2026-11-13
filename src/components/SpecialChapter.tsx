@@ -35,6 +35,11 @@ interface PlanSubmissionVisit {
   mapsUrl: string;
 }
 
+const HOME_COORDINATES: Coordinates = {
+  latitude: -7.604534579811721,
+  longitude: 110.80566972274204,
+};
+
 interface SpecialChapterProps {
   wishlistSent: boolean;
   onBack: () => void;
@@ -146,7 +151,7 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
           <label htmlFor="planned-visit-time">Waktu</label>
           <input ref={timeInputRef} id="planned-visit-time" type="time" value={time} onChange={(event) => setTime(event.target.value)} required />
           <a className="special-maps-link" href={place.mapsUrl} target="_blank" rel="noopener noreferrer">
-            Buka Google Maps ↗
+            Buka Google Maps 
           </a>
           <div className="special-dialog-actions">
             {onRemove && (
@@ -244,7 +249,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
         <p className="special-eyebrow">a little place of your own</p>
         <h3 id="special-place-dialog-title">{initialPlace ? 'Edit tempat' : 'Tambah tempat'}</h3>
         <p className="special-dialog-intro">
-          Tempat tersimpan sementara di halaman ini dan akan hilang saat halaman dimuat ulang.
+         tulis tempat yang pengen kamu datengin, yang belum ada di rekomendasiku
         </p>
         <form className="special-place-form" onSubmit={handleSubmit} noValidate>
           <label htmlFor="custom-place-url">Link Google Maps <span aria-hidden="true">*</span></label>
@@ -266,7 +271,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
           <p id="custom-place-hint" className="special-field-hint">
             Tempel link Google Maps untuk menyimpan tempat ini.
           </p>
-          <label htmlFor="custom-place-name">Nama tempat <span>(opsional)</span></label>
+          <label htmlFor="custom-place-name">Nama tempat</label>
           <input
             id="custom-place-name"
             type="text"
@@ -276,7 +281,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
               setError('');
             }}
             maxLength={MAX_NAME_LENGTH}
-            placeholder="Contoh: tempat favorit kita"
+            placeholder="Contoh: lenopdon"
           />
           <label htmlFor="custom-place-description">Deskripsi <span>(opsional)</span></label>
           <textarea
@@ -288,7 +293,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
             }}
             maxLength={MAX_DESCRIPTION_LENGTH}
             rows={3}
-            placeholder="Kenapa tempat ini spesial?"
+            placeholder="mw nyoba krna lewat epyepe"
           />
           <p id="custom-place-error" className="special-form-error" role="alert">
             {error}
@@ -400,7 +405,16 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
     const map = mapRef.current;
     if (!map || !mapReady) return;
     markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = mappedPlaces.map((place, index) => {
+    const homeMarkerElement = document.createElement('div');
+    homeMarkerElement.className = 'special-map-home-marker';
+    homeMarkerElement.setAttribute('role', 'img');
+    homeMarkerElement.setAttribute('aria-label', 'Rumah');
+    homeMarkerElement.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/></svg>';
+    const homeMarker = new Marker({ element: homeMarkerElement, anchor: 'bottom' })
+      .setLngLat([HOME_COORDINATES.longitude, HOME_COORDINATES.latitude])
+      .addTo(map);
+
+    const placeMarkers = mappedPlaces.map((place, index) => {
       const markerElement = document.createElement('button');
       markerElement.type = 'button';
       markerElement.className = 'special-map-marker';
@@ -411,12 +425,17 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
         .setLngLat([place.coordinates.longitude, place.coordinates.latitude])
         .addTo(map);
     });
-    if (mappedPlaces.length === 1) {
-      const [place] = mappedPlaces;
-      map.flyTo({ center: [place.coordinates.longitude, place.coordinates.latitude], zoom: 13, essential: false });
-    } else if (mappedPlaces.length > 1) {
+    markersRef.current = [homeMarker, ...placeMarkers];
+    const mapLocations = [HOME_COORDINATES, ...mappedPlaces.map((place) => place.coordinates)];
+    if (mapLocations.length === 1) {
+      map.flyTo({
+        center: [HOME_COORDINATES.longitude, HOME_COORDINATES.latitude],
+        zoom: 13,
+        essential: false,
+      });
+    } else {
       const bounds = new LngLatBounds();
-      mappedPlaces.forEach((place) => bounds.extend([place.coordinates.longitude, place.coordinates.latitude]));
+      mapLocations.forEach((coordinates) => bounds.extend([coordinates.longitude, coordinates.latitude]));
       map.fitBounds(bounds, { padding: 56, maxZoom: 13, duration: 500 });
     }
   }, [mapReady, mappedPlaces]);
@@ -503,7 +522,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
         throw new Error('Server belum mengonfirmasi penyimpanan rencana. Coba lagi ya.');
       }
       setSavedPlanSignature(planSignature);
-      setPlanSubmissionNotice('Rencana berhasil dikirim ke dashboard admin.');
+      setPlanSubmissionNotice('Rencana kita udah kusimpan, sampe besokkk');
     } catch (submissionError) {
       setPlanSubmissionError(
         submissionError instanceof Error ? submissionError.message : 'Rencana belum berhasil dikirim. Coba lagi ya.'
@@ -539,13 +558,13 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
     <section className="special-chapter" aria-labelledby="special-chapter-title">
       <header className="special-chapter-heading">
         <h2 id="special-chapter-title">Special Chapter</h2>
-        <p>our little plan, just for us.</p>
+        <p>pilih dan tentukan jam nya yaa, mwehehehe gabisa "ngikut"</p>
       </header>
 
       <section className="special-defaults" aria-labelledby="special-defaults-title">
         <div className="special-section-heading">
           <div>
-            <h3 id="special-defaults-title">Tempat pilihan</h3>
+            <h3 id="special-defaults-title">Rekomendasiku</h3>
           </div>
           <span className="special-placeholder-count">8 saran</span>
         </div>
@@ -569,7 +588,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
                   </span>
                   <h4>{place.title}</h4>
                   <p>{place.description}</p>
-                  <span className="special-custom-badge">{visit ? `Direncanakan · ${visit.time}` : 'Tempat pilihan'}</span>
+                  <span className="special-custom-badge">{visit ? `Direncanakan · ${visit.time}` : 'Rekomendasi'}</span>
                 </button>
                 <a
                   className="special-maps-link"
@@ -577,7 +596,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Buka Google Maps ↗
+                  Buka Google Maps 
                 </a>
               </article>
             );
@@ -589,7 +608,9 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
       <section className="special-custom-section" aria-labelledby="special-custom-title">
         <div className="special-section-heading">
           <div>
-            <h3 id="special-custom-title">Tempat custom</h3>
+            <h3 id="special-custom-title">Custom place</h3>
+          <div></div>
+            <h4 id="special-custom-title">klo kmu punya plan tempat yang pengen kmu datengin tulis aja disini</h4>
           </div>
           <span className="special-placeholder-count">{places.length}/{MAX_CUSTOM_PLACES} tempat</span>
         </div>
@@ -618,7 +639,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
                   </span>
                 </button>
                 <a className="special-maps-link" href={place.mapsUrl} target="_blank" rel="noopener noreferrer">
-                  Buka Google Maps ↗
+                  Buka Google Maps
                 </a>
                 <div className="special-card-actions">
                   <button type="button" onClick={() => setEditingPlaceId(place.id)}>Edit</button>

@@ -10,7 +10,7 @@ export interface CustomPlaceDraft {
   description: string;
 }
 
-export const MAX_CUSTOM_PLACES = 3;
+export const MAX_CUSTOM_PLACES = 4;
 
 export const getProgressiveEmptyCardCount = (registeredPlaces: number): number =>
   registeredPlaces < MAX_CUSTOM_PLACES ? 1 : 0;

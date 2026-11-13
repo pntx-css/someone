@@ -25,7 +25,7 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
         if (allOut) {
           setTimeout(() => {
             setIsCompleted(true);
-            setTimeout(() => onComplete(), 1000);
+            setTimeout(() => onComplete(), 4000);
           }, 600);
         }
 
@@ -95,8 +95,13 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
   return (
     <div className={`cake-container ${isCompleted ? 'completed-anim' : ''}`}>
       <h2 className="cake-instruction">
-        {candles.every(c => c === 'extinguished') ? 'happy birthday!' : 'make a wish...'}
+        {candles.every(c => c === 'extinguished') ? 'Selamat HBD' : 'Make a wish...'}
       </h2>
+         <p className="cake-sub-instruction">
+              {candles.every(c => c === 'extinguished')
+                  ? 'btw kucingnya bisa kmu klik loh'
+                  : 'tiup lilinnya (klik sih maksudku) *anggep aja lagi niup'}
+        </p>
 
       <svg
         className="cake-svg"

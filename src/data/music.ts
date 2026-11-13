@@ -14,7 +14,7 @@ export const songs: Song[] = [
   },
   {
     id: 'perfection',
-    title: 'Perfection (Sempurna English Ver.)',
+    title: 'Sempurna English Ver.',
     artist: 'BBIBEEB',
     file: '/audio/bbibeeb-perfection.mp3',
   },

@@ -307,3 +307,16 @@
   .wheel-col:nth-child(2), .wheel-label:nth-child(2) { width: 100px !important; }
   .wheel-col:nth-child(3), .wheel-label:nth-child(3) { width: 70px !important; }
 }
+.cake-instruction {
+  margin-bottom: 1rem !important;
+  line-height: 1.1;
+}
+
+.cake-sub-instruction {
+  font-family: var(--font-hand);
+  font-size: 1.35rem;
+  margin-top: -0.6rem !important;
+  padding-top: 0;
+  line-height: 1.2;
+  margin-bottom: 1.5rem !important;
+}

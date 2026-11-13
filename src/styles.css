@@ -45,6 +45,7 @@
 html {
   background: var(--color-canvas);
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 body, html {
@@ -53,6 +54,13 @@ body, html {
   background-color: var(--color-light);
   color: var(--color-dark);
   overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100dvh;
+  overflow-x: clip;
 }
 
 @keyframes fadeIn {

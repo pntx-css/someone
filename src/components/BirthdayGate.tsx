@@ -65,7 +65,7 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
   return (
     <div className={`gate-container ${isUnlocking ? 'unlock-anim' : ''}`}>
       <div className="gate-content">
-        <h1 className="gate-title">BEFORE THE NEXT CHAPTER</h1>
+        <h1 className="gate-title">Before The Next Chapter</h1>
         <p className="gate-subtitle">masukin tanggal lahir kamu yaa</p>
         
         <div className="labels-row">

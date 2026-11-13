@@ -65,15 +65,15 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
     <section className="wishlist-section" aria-labelledby="wishlist-title">
       <div className="wishlist-heading">
         <p className="wishlist-eyebrow">a little note for later</p>
-        <h2 id="wishlist-title">Your Wishlist</h2>
-        <p className="wishlist-intro">Tulis harapan kecil atau pesan yang ingin kamu simpan.</p>
+        <h2 id="wishlist-title">Your Hope</h2>
+        <p className="wishlist-intro">Tulis harapan dan pesan kamu buat aku disini yaa</p>
       </div>
 
       <div className={`wishlist-envelope-stage wishlist-envelope-stage--${stageStatus}`}>
         <div className="wishlist-envelope-back" aria-hidden="true" />
         <form className="wishlist-paper" onSubmit={handleSubmit} noValidate>
           <label className="wishlist-label" htmlFor="wishlist-message">
-            Dear, you...
+            Dear, papan...
           </label>
           <textarea
             id="wishlist-message"
@@ -87,7 +87,7 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
                 setSubmissionError('');
               }
             }}
-            placeholder="Tulis wishlist atau pesanmu di sini..."
+            placeholder="Tulis harapan dan pesanmu di sini..."
             maxLength={1200}
             disabled={isSubmitting || isSent}
             aria-invalid={Boolean(validationMessage)}
@@ -120,7 +120,7 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
       </div>
 
       <p className={`wishlist-confirmation ${isSent ? 'is-visible' : ''}`} aria-live="polite">
-        {isSent && 'Pesanmu berhasil dikirim dan dilipat rapi. Terima kasih sudah berbagi ♡'}
+        {isSent && 'Pesanmu udah kuterima, makasih yaa ♡'}
       </p>
       <Suspense fallback={null}>
         <SpecialChapter wishlistSent={isSent} onBack={onBack} />

@@ -41,16 +41,16 @@ export const specialPlaces: DefaultPlace[] = [
     longitude: 110.770035,
   },
   {
-    id: 'rokaville',
-    title: 'Rokaville',
-    description: 'enak & ayamnya besar. tpi klo buat kmu kayaknya malah eneg',
-    latitude: -7.565221,
-    longitude: 110.820577,
+    id: 'balai-kota',
+    title: 'Balkot Surakarta',
+    description: 'enak kayaknya klo buat cerita cerita, bisa ke streetfood dideket sana juga',
+    latitude: -7.569102099686291, 
+    longitude: 110.82957039533673
   },
   {
     id: 'momoyok',
     title: 'Momoyo Coyudan',
-    description: 'klo dessert mah yang pastiasti aja yakan. biar ntar gak nyesel',
+    description: 'klo dessert mah yang pasti-pasti aja yakan. biar ntar gak nyesel',
     latitude: -7.574012,
     longitude: 110.821605,
   },
@@ -64,7 +64,7 @@ export const specialPlaces: DefaultPlace[] = [
   {
     id: 'lokananta',
     title: 'Lokananta',
-    description: 'kayaknya nyaman klo buat cerita cerita, kayak pas di alun',
+    description: 'kayaknya nyaman klo buat cerita cerita, kayak pas di alun-alun',
     latitude: -7.557610437263933,
     longitude: 110.79560345256228,
   },
