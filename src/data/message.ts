@@ -10,5 +10,5 @@ aku masih belajar buat lebih ngertiin kmu, jadi tolong yaa, kasih tau aku klo ak
 
 aku juga mw pesen sama kmu, kurangi mam pedes sama minum kopihh. aku tw sih itu enak, tapikan lambungmu UDAH CACAT. nanti klo ngeyel, lama-lama yang kena badan kmu sndiri. gak enak tw sakit tuh (￣з￣). ohya lupa, jangan keseringan begadang juga. itu bisa bikin pencernaanmu keganggu, ntar jadi lebih sering kit perutt (T＿T).
 
-terakhir, aku cuma mau bilang kalau aku bersyukur bisa dipertemukan sama kmu. lucu ya, dulu kita deket waktu kecil lalu asing, abistu bisa akrab lagi. itupun berawal dari emel (^ - ^). aku harap, banyak hal baik yang menantimu mulai dari sini. enjoy your day, enjoy your new age, and please be kind to yourself. once again,
-happy birthday! im really glad that it's you (⌒‐⌒).`;
+terakhir, aku cuma mau bilang kalau aku bersyukur bisa dipertemukan sama kmu. lucu ya, dulu kita deket waktu kecil lalu asing, abistu bisa akrab lagi. itupun berawal dari emel (^ - ^). aku harap, banyak hal baik yang menantimu mulai dari sini. enjoy your day, enjoy your new age, and please be kind to yourself. 
+once again,happy birthday! im really glad that it's you (⌒‐⌒).`;
