@@ -25,7 +25,7 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
         if (allOut) {
           setTimeout(() => {
             setIsCompleted(true);
-            setTimeout(() => onComplete(), 4000);
+            setTimeout(() => onComplete(), 5500);
           }, 600);
         }
 

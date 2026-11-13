@@ -10,7 +10,7 @@ interface HappyBirthdayProps {
 export const HappyBirthday: React.FC<HappyBirthdayProps> = ({ onSelectSong }) => {
   return (
     <div className="hb-container">
-      <h1 className="hb-title">HAPPY BIRTHDAY MAYLUVVV</h1>
+      <h1 className="hb-title">Happy Birthday Mayluvvv</h1>
       <p className="hb-subtitle">this one's for you ♡</p>
 
       <p className="music-prompt">pick a song for the journey</p>
