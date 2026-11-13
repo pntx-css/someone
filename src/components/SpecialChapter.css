@@ -170,7 +170,7 @@
   border-color: rgba(131, 24, 67, 0.13);
   background: var(--color-paper);
   box-shadow: 0 10px 26px rgba(89, 65, 62, 0.08), 0 2px 5px rgba(89, 65, 62, 0.04);
-  transition: border-color 240ms ease, background-color 240ms ease, box-shadow 240ms ease;
+  transition: transform 240ms var(--ease-soft), border-color 240ms var(--ease-soft), background-color 240ms var(--ease-soft), box-shadow 240ms var(--ease-soft);
 }
 
 .special-custom-card:hover {
@@ -522,7 +522,7 @@
   width: 6.5rem;
   padding: 0.4rem;
   border: 1px solid rgba(131, 24, 67, 0.22);
-  border-radius: 3px;
+  border-radius: 0.8rem;
   color: #3b1727;
   background: #fff;
   font: 0.76rem 'DM Mono', monospace;
@@ -563,7 +563,7 @@
   min-height: 2.8rem;
   margin-top: 1rem;
   border: 1px solid #831843;
-  border-radius: 3px;
+  border-radius: var(--radius-control);
   color: #fff8fa;
   background: #831843;
   font: 500 0.72rem 'DM Mono', monospace;
@@ -586,6 +586,25 @@
   cursor: not-allowed;
 }
 
+.special-return-button {
+  width: 100%;
+  min-height: 2.8rem;
+  margin-top: 0.7rem;
+  border: 1px solid rgba(131, 24, 67, 0.42);
+  border-radius: var(--radius-control);
+  color: #831843;
+  background: rgba(255, 252, 247, 0.76);
+  font: 500 0.72rem 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+}
+
+.special-return-button:hover:not(:disabled) {
+  border-color: #831843;
+  background: #fff;
+  box-shadow: 0 5px 12px rgba(101, 18, 56, 0.12);
+  transform: translateY(-1px);
+}
+
 .special-modal-backdrop {
   position: fixed;
   z-index: 1000;
@@ -605,7 +624,7 @@
   overflow: auto;
   padding: 2rem;
   border: 1px solid rgba(131, 24, 67, 0.16);
-  border-radius: 1.25rem;
+  border-radius: var(--radius-dialog);
   background:
     radial-gradient(ellipse at top right, rgba(232, 213, 181, 0.62), transparent 45%),
     var(--color-paper);
@@ -676,7 +695,7 @@
 .special-place-form textarea {
   width: 100%;
   border: 1px solid rgba(131, 24, 67, 0.24);
-  border-radius: 4px;
+  border-radius: 0.85rem;
   padding: 0.75rem;
   color: #3b1727;
   background: rgba(255, 255, 255, 0.9);
@@ -714,7 +733,7 @@
   min-height: 2.7rem;
   padding: 0.65rem 1rem;
   border: 1px solid #831843;
-  border-radius: 3px;
+  border-radius: var(--radius-control);
   font: 500 0.72rem 'DM Mono', monospace;
   cursor: pointer;
   transition: background-color 160ms ease, transform 160ms ease;

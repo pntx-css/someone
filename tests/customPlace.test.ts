@@ -30,7 +30,9 @@ test('default place cards use the provided names and coordinates', () => {
       { title: 'Dikichi Solo', latitude: -7.543494, longitude: 110.770035 },
       { title: 'Rokaville', latitude: -7.565221, longitude: 110.820577 },
       { title: 'Momoyo Coyudan', latitude: -7.574012, longitude: 110.821605 },
-      { title: 'Seblak Preanger', latitude: -7.553735, longitude: 110.763795 },
+      { title: 'Seblak Massbond', latitude: -7.55045472562746, longitude: 110.81394444276832 },
+      { title: 'Lokananta', latitude: -7.557610437263933, longitude: 110.79560345256228 },
+      { title: 'U&Co Steak', latitude: -7.574575152920673, longitude: 110.82564019489072 }
     ]
   );
   assert.equal(specialPlaces.length, 7);

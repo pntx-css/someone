@@ -37,6 +37,7 @@ interface PlanSubmissionVisit {
 
 interface SpecialChapterProps {
   wishlistSent: boolean;
+  onBack: () => void;
 }
 
 interface PlaceFormProps {
@@ -302,7 +303,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
   );
 };
 
-export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) => {
+export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, onBack }) => {
   const [places, setPlaces] = useState<CustomPlace[]>([]);
   const [plannedVisits, setPlannedVisits] = useState<PlannedVisit[]>([]);
   const [planningPlaceId, setPlanningPlaceId] = useState<string | null>(null);
@@ -740,6 +741,11 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent }) 
                 ? 'RENCANA TERKIRIM'
                 : 'SIMPAN RENCANA'}
           </button>
+          {isCurrentPlanSaved && (
+            <button type="button" className="special-return-button" onClick={onBack}>
+              KEMBALI KE AWAL
+            </button>
+          )}
         </div>
       </section>
 

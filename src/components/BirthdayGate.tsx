@@ -13,7 +13,6 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
   const [error, setError] = useState('');
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-
   const handleUnlock = async () => {
     if (isUnlocking || isVerifying) return;
     setIsVerifying(true);
@@ -86,7 +85,6 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
             <ScrollWheel options={YEARS} value={year} onChange={setYear} label="Tahun" />
           </div>
         </div>
-
         <button className="gate-btn" onClick={handleUnlock} disabled={isVerifying || isUnlocking}>
           {isVerifying ? 'checking...' : 'next'}
         </button>

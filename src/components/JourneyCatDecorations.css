@@ -7,7 +7,11 @@
   position: absolute;
   z-index: 800;
   inset: 0;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 1fr) minmax(18rem, 8fr) minmax(5.5rem, 1fr);
+  grid-template-rows: repeat(3, minmax(9rem, 1fr));
+  align-items: center;
+  overflow: clip;
   pointer-events: none;
 }
 
@@ -16,9 +20,11 @@
   padding: 0;
   border: 0;
   background: transparent;
-  position: absolute;
+  position: relative;
+  justify-self: center;
+  align-self: center;
   display: block;
-  width: clamp(110px, 19.53vw, 150px);
+  width: clamp(5.5rem, 10vw, 8.5rem);
   aspect-ratio: 1;
   line-height: 0;
   opacity: 0.16;
@@ -26,6 +32,7 @@
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
   transition: transform 180ms ease;
+  overflow: visible;
 }
 
 .journey-cat-decoration:hover {
@@ -41,14 +48,18 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center;
   pointer-events: none;
-  transition: opacity 220ms ease;
+  transform: scale(var(--cat-normal-scale, 1));
+  transform-origin: center;
+  transition: opacity 220ms ease, transform 220ms ease;
 }
 
 .journey-cat-decoration .journey-cat-decoration-smile {
   position: absolute;
   inset: 0;
   opacity: 0;
+  transform: scale(var(--cat-smile-scale, 1));
 }
 
 .journey-cat-decoration.is-smiling img:first-child {
@@ -65,8 +76,13 @@
 }
 
 @media (max-width: 600px) {
+  .journey-cat-decorations {
+    grid-template-columns: minmax(3.75rem, 1fr) minmax(12rem, 5fr) minmax(3.75rem, 1fr);
+    grid-template-rows: repeat(3, minmax(8rem, 1fr));
+  }
+
   .journey-cat-decoration {
-    width: 110px;
+    width: clamp(3.75rem, 17vw, 5.5rem);
     opacity: 0.12;
   }
 }

@@ -29,7 +29,7 @@ export const specialPlaces: DefaultPlace[] = [
   {
     id: 'solo-square',
     title: 'Solo Square XXI',
-    description: 'enaktuh buat nonton. klo emng mw si',
+    description: 'enaktuh buat nonton. klo emng mw si. btw klo emng mw ke bioskop mending mam dulu, biar nggak plenger',
     latitude: -7.560842310271578,
     longitude: 110.78852662557664,
   },
@@ -55,11 +55,25 @@ export const specialPlaces: DefaultPlace[] = [
     longitude: 110.821605,
   },
   {
-    id: 'seblak-preanger',
-    title: 'Seblak Preanger',
+    id: 'seblak-massbond',
+    title: 'Seblak Massbond',
     description: 'gtw si masukin aja. gw gtw tempat seblak seblak gni, maybe enak. MAYBE LOHYA',
-    latitude: -7.553735,
-    longitude: 110.763795,
+    latitude: -7.55045472562746,
+    longitude: 110.81394444276832,
+  },
+  {
+    id: 'lokananta',
+    title: 'Lokananta',
+    description: 'kayaknya nyaman klo buat cerita cerita, kayak pas di alun',
+    latitude: -7.557610437263933,
+    longitude: 110.79560345256228,
+  },
+  {
+    id: 'u-co-steak',
+    title: 'U&Co Steak',
+    description: 'klo mw steak disini enak, KATANYA juga sih',
+    latitude: -7.574575152920673,
+    longitude: 110.82564019489072
   },
 ];
 

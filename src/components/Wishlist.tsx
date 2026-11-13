@@ -122,16 +122,8 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
       <p className={`wishlist-confirmation ${isSent ? 'is-visible' : ''}`} aria-live="polite">
         {isSent && 'Pesanmu berhasil dikirim dan dilipat rapi. Terima kasih sudah berbagi ♡'}
       </p>
-      <button
-        className="wishlist-back"
-        type="button"
-        onClick={onBack}
-        disabled={isSubmitting}
-      >
-        KEMBALI
-      </button>
       <Suspense fallback={null}>
-        <SpecialChapter wishlistSent={isSent} />
+        <SpecialChapter wishlistSent={isSent} onBack={onBack} />
       </Suspense>
     </section>
   );

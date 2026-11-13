@@ -129,12 +129,12 @@
   background: var(--color-light);
   padding: 0.9rem;
   border: 1px solid rgba(131, 24, 67, 0.08);
-  border-radius: 2px;
+  border-radius: var(--radius-paper);
   box-shadow:
     0 15px 35px rgba(131, 24, 67, 0.1),
     0 3px 10px rgba(131, 24, 67, 0.05);
   position: relative;
-  transition: transform 250ms ease;
+  transition: transform 250ms var(--ease-soft), box-shadow 250ms var(--ease-soft);
 }
 
 .memory-frame:hover {
@@ -162,7 +162,7 @@
 .memory-img {
   width: 100%;
   height: auto;
-  border-radius: 1px;
+  border-radius: calc(var(--radius-paper) - 0.35rem);
   display: block;
   background-color: var(--color-pink-100);
 }

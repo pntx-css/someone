@@ -6,6 +6,12 @@
     radial-gradient(ellipse at 10% 12%, rgba(255, 255, 255, 0.62), transparent 34%),
     radial-gradient(ellipse at 92% 84%, rgba(249, 213, 229, 0.58), transparent 38%),
     var(--color-pink-50);
+  animation: admin-page-enter 420ms var(--ease-soft) both;
+}
+
+@keyframes admin-page-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .admin-loading-skeleton {
@@ -17,6 +23,7 @@
   border: 1px solid rgba(131, 24, 67, 0.12);
   background: #fffdfb;
   box-shadow: 0 18px 48px rgba(131, 24, 67, 0.08);
+  border-radius: var(--radius-dialog);
 }
 
 .admin-skeleton {
@@ -72,6 +79,7 @@
   border: 1px solid rgba(131, 24, 67, 0.12);
   background: #fffdfb;
   box-shadow: 0 8px 24px rgba(131, 24, 67, 0.055);
+  border-radius: var(--radius-paper);
 }
 
 .admin-skeleton--meta {
@@ -103,6 +111,7 @@
     repeating-linear-gradient(0deg, rgba(131, 24, 67, 0.018) 0 1px, transparent 1px 6px),
     #fffdfb;
   box-shadow: 0 18px 48px rgba(131, 24, 67, 0.1);
+  border-radius: var(--radius-dialog);
 }
 
 .admin-eyebrow {
@@ -151,7 +160,7 @@
   min-height: 46px;
   padding: 0.65rem 0.75rem;
   border: 1px solid rgba(131, 24, 67, 0.22);
-  border-radius: 2px;
+  border-radius: 0.85rem;
   color: var(--color-dark);
   background: #fff;
   font: inherit;
@@ -170,7 +179,7 @@
   min-height: 42px;
   padding: 0.65rem 1rem;
   border: 1px solid var(--color-pink-900);
-  border-radius: 2px;
+  border-radius: var(--radius-control);
   font: 500 0.74rem 'DM Mono', monospace;
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -323,6 +332,8 @@
   border: 1px solid rgba(131, 24, 67, 0.12);
   background: #fffdfb;
   box-shadow: 0 8px 24px rgba(131, 24, 67, 0.055);
+  border-radius: var(--radius-paper);
+  transition: transform var(--motion-fast) var(--ease-soft), box-shadow var(--motion-fast) var(--ease-soft), border-color var(--motion-fast) var(--ease-soft);
 }
 
 .admin-plan-visits {
@@ -361,7 +372,8 @@
 .admin-message {
   padding: clamp(1rem, 4vw, 1.5rem);
   border: 1px solid rgba(131, 24, 67, 0.12);
-  border-radius: 2px;
+  border-radius: var(--radius-paper);
+  transition: transform var(--motion-fast) var(--ease-soft), box-shadow var(--motion-fast) var(--ease-soft), border-color var(--motion-fast) var(--ease-soft);
   background: #fffdfb;
   box-shadow: 0 8px 24px rgba(131, 24, 67, 0.055);
 }
@@ -473,6 +485,8 @@
   place-items: center;
   padding: 1rem;
   background: rgba(59, 23, 39, 0.42);
+  backdrop-filter: blur(5px);
+  animation: admin-backdrop-in var(--motion-fast) ease both;
 }
 
 .admin-alert-backdrop {
@@ -483,6 +497,13 @@
   place-items: center;
   padding: 1rem;
   background: rgba(59, 23, 39, 0.42);
+  backdrop-filter: blur(5px);
+  animation: admin-backdrop-in var(--motion-fast) ease both;
+}
+
+@keyframes admin-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .admin-alert-dialog {
@@ -491,6 +512,8 @@
   border: 1px solid rgba(131, 24, 67, 0.15);
   background: #fffdfb;
   box-shadow: 0 20px 60px rgba(59, 23, 39, 0.22);
+  border-radius: var(--radius-dialog);
+  animation: admin-dialog-in var(--motion-standard) var(--ease-soft) both;
 }
 
 .admin-alert-dialog h2 {
@@ -508,6 +531,13 @@
   border: 1px solid rgba(131, 24, 67, 0.15);
   background: #fffdfb;
   box-shadow: 0 20px 60px rgba(59, 23, 39, 0.22);
+  border-radius: var(--radius-dialog);
+  animation: admin-dialog-in var(--motion-standard) var(--ease-soft) both;
+}
+
+@keyframes admin-dialog-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .admin-confirm-dialog h2 {

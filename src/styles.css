@@ -20,7 +20,9 @@
   --space-3: 1.5rem;
   --space-4: 2rem;
   --space-6: 3rem;
-  --radius-paper: 0.35rem;
+  --radius-paper: 1.1rem;
+  --radius-control: 999px;
+  --radius-dialog: 1.5rem;
   --shadow-paper: 0 16px 42px rgba(89, 65, 62, 0.11), 0 2px 6px rgba(89, 65, 62, 0.06);
   --ease-soft: cubic-bezier(0.2, 0.7, 0.25, 1);
   --motion-fast: 180ms;
@@ -71,11 +73,42 @@ code, pre, .mono {
 button, input, textarea, select { font: inherit; }
 button { touch-action: manipulation; }
 
-.birthday-journey > :not(.music-player) { animation: journey-enter var(--motion-standard) var(--ease-soft) both; }
+.journey-chapter { animation: journey-enter 460ms var(--ease-soft) both; }
 
 @keyframes journey-enter {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(18px) scale(0.992); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Shared tactile language: controls stay easy to tap and surfaces never feel boxy. */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  border-radius: var(--radius-control);
+  transition: transform var(--motion-fast) var(--ease-soft), box-shadow var(--motion-fast) var(--ease-soft), background-color var(--motion-fast) var(--ease-soft), border-color var(--motion-fast) var(--ease-soft);
+}
+
+button.journey-cat-decoration,
+button.cat-illustration {
+  min-height: 0;
+}
+
+button:not(:disabled) { cursor: pointer; }
+button:not(:disabled):active { transform: scale(0.97); }
+
+@media (hover: hover) and (pointer: fine) {
+  .music-card:hover,
+  .memory-frame:hover,
+  .special-custom-card:hover,
+  .special-empty-card:hover,
+  .admin-message:hover,
+  .admin-plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px rgba(89, 65, 62, 0.14);
+  }
 }
 
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {

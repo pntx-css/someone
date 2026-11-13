@@ -4,6 +4,7 @@ import './MusicPlayer.css';
 
 interface MusicPlayerProps {
   song: Song;
+  onSongEnd: () => void;
 }
 
 const formatTime = (sec: number): string => {
@@ -12,7 +13,7 @@ const formatTime = (sec: number): string => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
-export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song }) => {
+export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song, onSongEnd }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -42,6 +43,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song }) => {
       setIsPlaying(false);
       setProgress(0);
       setCurrentTime(0);
+      onSongEnd();
     };
 
     const handleError = () => {
@@ -89,7 +91,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song }) => {
       audio.src = '';
       audio.remove();
     };
-  }, [song.file]);
+  }, [song.file, onSongEnd]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;

@@ -1,6 +1,7 @@
 .cat-illustration {
   display: inline-block;
-  width: calc(min(100vw - 4rem, 300px) / 3) !important;
+  width: min(var(--cat-size, 80px), 100%);
+  aspect-ratio: 1;
   appearance: none;
   padding: 0;
   border: 0;
@@ -38,7 +39,11 @@
 .cat-asset {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(var(--cat-normal-scale, 1));
+  transform-origin: center;
   transition:
     opacity 220ms ease,
     transform 220ms ease;
@@ -52,6 +57,7 @@
   height: 100%;
   object-fit: contain;
   opacity: 0;
+  transform: scale(var(--cat-smile-scale, 1));
 }
 
 .cat-asset--smile.is-visible {
@@ -74,7 +80,7 @@
 
 @media (max-width: 600px) {
   .cat-illustration {
-    width: calc(min(100vw - 4rem, 220px) / 3) !important;
+    width: min(var(--cat-size, 80px), 100%);
   }
 
   .cat-deco {

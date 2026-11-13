@@ -22,6 +22,17 @@ const CAT_ASSETS: Record<CatPose, CatPair> = {
   walking: ['/assets/cats/kucing1.svg', '/assets/cats/kucing2.svg'],
 };
 
+const CAT_VISUAL_SCALE: Record<string, number> = {
+  'kucing1.svg': 1.02,
+  'kucing2.svg': 1,
+  'kucing3.svg': 1.82,
+  'kucing4.svg': 1,
+  'kucing5.svg': 1,
+  'kucing6.svg': 1.07,
+  'kucing7.svg': 1.07,
+  'kucing8.svg': 1,
+};
+
 export const CatIllustration: React.FC<CatIllustrationProps> = ({
   pose,
   color,
@@ -55,7 +66,12 @@ export const CatIllustration: React.FC<CatIllustrationProps> = ({
       type="button"
       className={`cat-illustration cat-illustration--${color} ${flipX ? 'cat-flipped' : ''} ${smiling ? 'cat-smiling' : ''} ${className}`}
       onClick={handleClick}
-      style={{ width: size, ...style }}
+      style={{
+        '--cat-size': `${size}px`,
+        '--cat-normal-scale': CAT_VISUAL_SCALE[normalImage.split('/').pop() ?? ''] ?? 1,
+        '--cat-smile-scale': CAT_VISUAL_SCALE[smilingImage.split('/').pop() ?? ''] ?? 1,
+        ...style,
+      } as React.CSSProperties}
       aria-label={`Cute ${color} cat — click to pet!`}
       aria-pressed={smiling}
     >

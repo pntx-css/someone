@@ -185,6 +185,12 @@
   color: var(--color-pink-900);
 }
 
+.wheel-container:focus-visible {
+  outline: 3px solid rgba(168, 93, 112, 0.45);
+  outline-offset: 4px;
+  border-radius: 1rem;
+}
+
 .error-popup-overlay {
   position: fixed;
   top: 0;
