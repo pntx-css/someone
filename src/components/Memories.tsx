@@ -25,7 +25,7 @@ export const Memories: React.FC = () => {
 
     previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     closeButtonRef.current?.focus();
-    return () => previousFocusRef.current?.focus();
+    return () => previousFocusRef.current?.focus({ preventScroll: true });
   }, [selectedMemory]);
 
   useEffect(() => {

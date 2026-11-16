@@ -14,6 +14,7 @@ export const useBodyScrollLock = (isLocked: boolean) => {
       width: body.style.width,
       overflow: body.style.overflow,
       scrollbarGutter: documentElement.style.scrollbarGutter,
+      scrollBehavior: documentElement.style.scrollBehavior,
     };
 
     documentElement.style.scrollbarGutter = 'auto';
@@ -28,7 +29,9 @@ export const useBodyScrollLock = (isLocked: boolean) => {
       body.style.width = previous.width;
       body.style.overflow = previous.overflow;
       documentElement.style.scrollbarGutter = previous.scrollbarGutter;
+      documentElement.style.scrollBehavior = 'auto';
       window.scrollTo(0, scrollY);
+      documentElement.style.scrollBehavior = previous.scrollBehavior;
     };
   }, [isLocked]);
 };
