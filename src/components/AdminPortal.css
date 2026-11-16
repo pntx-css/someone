@@ -479,11 +479,9 @@
 
 .admin-dialog-backdrop {
   position: fixed;
-  z-index: 20;
+  z-index: 2000;
   inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
+  min-height: 100dvh;
   background: rgba(59, 23, 39, 0.42);
   backdrop-filter: blur(5px);
   animation: admin-backdrop-in var(--motion-fast) ease both;
@@ -491,11 +489,9 @@
 
 .admin-alert-backdrop {
   position: fixed;
-  z-index: 25;
+  z-index: 2000;
   inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
+  min-height: 100dvh;
   background: rgba(59, 23, 39, 0.42);
   backdrop-filter: blur(5px);
   animation: admin-backdrop-in var(--motion-fast) ease both;
@@ -507,7 +503,16 @@
 }
 
 .admin-alert-dialog {
-  width: min(100%, 380px);
+  position: fixed;
+  z-index: 2001;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: min(380px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1.5rem;
   border: 1px solid rgba(131, 24, 67, 0.15);
   background: #fffdfb;
@@ -526,13 +531,37 @@
 }
 
 .admin-confirm-dialog {
-  width: min(100%, 420px);
+  position: fixed;
+  z-index: 2001;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: min(420px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1.5rem;
   border: 1px solid rgba(131, 24, 67, 0.15);
   background: #fffdfb;
   box-shadow: 0 20px 60px rgba(59, 23, 39, 0.22);
   border-radius: var(--radius-dialog);
   animation: admin-dialog-in var(--motion-standard) var(--ease-soft) both;
+}
+
+.admin-dialog-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--color-pink-900);
+  background: rgba(252, 231, 243, 0.85);
+  font-size: 1.45rem;
+  line-height: 1;
 }
 
 @keyframes admin-dialog-in {

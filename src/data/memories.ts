@@ -11,6 +11,7 @@ import pict10 from '../assets/pict10.webp';
 import pict11 from '../assets/pict11.webp';
 import pict12 from '../assets/pict12.webp';
 import pict13 from '../assets/pict13.webp';
+import pict14 from '../assets/pict14.webp';
 
 export type MemorySide = 'left' | 'right';
 
@@ -39,4 +40,5 @@ export const memories: Memory[] = [
   { id: '11', image: pict11, width: 3000, height: 4000, caption: 'After Photobooth', detail: 'fomok orang orang yang abis photobooth.', side: 'left', rotation: 1.5 },
   { id: '12', image: pict12, width: 960, height: 1280, caption: 'Jogja After Rain', detail: 'abis ketemu ipan.', side: 'right', rotation: -2 },
   { id: '13', image: pict13, width: 1066, height: 600, caption: 'No Caption', detail: 'LUCU BNGET, CANDUU.', side: 'left', rotation: -1 },
+  { id: '14', image: pict14, width: 3000, height: 4000, caption: 'test filter', detail: 'wohoho dipergokin aziz lohyah', side: 'right', rotation: 1 },
 ];

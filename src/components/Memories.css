@@ -101,6 +101,12 @@
 
 .memory-card {
   width: 36%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: inherit;
   opacity: 0;
   transform: translateY(26px) rotate(var(--rot)) scale(0.97);
   transition:
@@ -118,6 +124,10 @@
 
 .memory-row--size-3 .memory-card {
   width: 35%;
+}
+
+.memory-row--memory-14 .memory-card {
+  width: 25%;
 }
 
 .memory-card.visible {
@@ -139,6 +149,11 @@
 
 .memory-frame:hover {
   transform: scale(1.02);
+}
+
+.memory-card:focus-visible {
+  outline: 3px solid var(--color-pink-500);
+  outline-offset: 5px;
 }
 
 .tape {
@@ -187,6 +202,90 @@
   color: var(--color-pink-500);
 }
 
+.memory-modal-backdrop {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  min-height: 100dvh;
+  background: rgba(89, 65, 62, 0.5);
+  backdrop-filter: blur(6px);
+  overscroll-behavior: contain;
+  touch-action: none;
+  animation: memory-modal-fade-in var(--motion-fast) ease both;
+}
+
+.memory-modal {
+  position: fixed;
+  z-index: 2001;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  display: grid;
+  justify-items: center;
+  width: min(580px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(0.7rem, 2vw, 0.9rem);
+  box-shadow: 0 24px 70px rgba(89, 65, 62, 0.28), var(--shadow-paper);
+  text-align: center;
+  animation: memory-modal-in var(--motion-standard) var(--ease-soft) both;
+}
+
+.memory-modal.memory-frame:hover {
+  transform: none;
+}
+
+.memory-modal-image {
+  width: 100%;
+  max-height: min(48dvh, 430px, calc(100dvh - 9rem));
+  object-fit: contain;
+}
+
+.memory-modal-copy {
+  margin-top: 0.75rem;
+}
+
+.memory-modal-copy h3 {
+  font-size: clamp(1.1rem, 3.2vw, 1.45rem);
+}
+
+.memory-modal-copy p {
+  margin-top: 0.35rem;
+  color: var(--color-pink-500);
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.memory-modal-close {
+  position: absolute;
+  z-index: 2;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--color-pink-900);
+  background: rgba(252, 231, 243, 0.92);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+@keyframes memory-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes memory-modal-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -217,6 +316,10 @@
 
   .memory-row--size-3 .memory-card {
     width: 36%;
+  }
+
+  .memory-row--memory-14 .memory-card {
+    width: 29%;
   }
 }
 
@@ -251,6 +354,10 @@
     width: 39%;
   }
 
+  .memory-row--memory-14 .memory-card {
+    width: 31%;
+  }
+
   .memory-frame {
     padding: 0.55rem;
   }
@@ -270,6 +377,10 @@
   .paper-plane-wrapper {
     width: 36px;
     height: 36px;
+  }
+
+  .memory-modal {
+    padding: 0.55rem;
   }
 
 }

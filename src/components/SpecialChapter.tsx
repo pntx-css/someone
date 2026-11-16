@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { LngLatBounds, Map as MapLibreMap, Marker, setWorkerUrl } from 'maplibre-gl';
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import {
@@ -9,6 +10,7 @@ import {
   type CustomPlaceDraft,
 } from '../data/customPlace';
 import { specialPlaces} from '../data/specialPlaces';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './SpecialChapter.css';
 
@@ -93,10 +95,6 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
     previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     timeInputRef.current?.focus();
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onCancel();
-      }
       if (event.key !== 'Tab' || !dialogRef.current) return;
       const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
         'input:not(:disabled), button:not(:disabled), a[href]'
@@ -125,13 +123,8 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
     onSave(time);
   };
 
-  return (
-    <div
-      className="special-modal-backdrop"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onCancel();
-      }}
-    >
+  return createPortal(
+    <div className="special-modal-backdrop">
       <div
         ref={dialogRef}
         className="special-place-dialog special-time-dialog"
@@ -164,7 +157,8 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -181,10 +175,6 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
     previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     mapsInputRef.current?.focus();
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onCancel();
-      }
       if (event.key !== 'Tab' || !dialogRef.current) return;
 
       const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
@@ -232,10 +222,8 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
     }
   };
 
-  return (
-    <div className="special-modal-backdrop" onMouseDown={(event) => {
-      if (event.target === event.currentTarget) onCancel();
-    }}>
+  return createPortal(
+    <div className="special-modal-backdrop">
       <div
         ref={dialogRef}
         className="special-place-dialog"
@@ -304,7 +292,8 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -322,6 +311,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
   const [mapReady, setMapReady] = useState(false);
+  useBodyScrollLock(Boolean(planningPlaceId || editingPlaceId || isAddingPlace));
 
   const allPlaces = useMemo<MapPlace[]>(
     () => [
@@ -565,6 +555,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
         <div className="special-section-heading">
           <div>
             <h3 id="special-defaults-title">Rekomendasiku</h3>
+            <h4 id="special-defaults-subtittle">btw ini banyak yang belum kucoba hhee, mayoritas cuman liat dari fyp</h4>
           </div>
           <span className="special-placeholder-count">8 saran</span>
         </div>
@@ -668,6 +659,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
           <div className="special-section-heading">
             <div>
               <h3>Our Map</h3>
+              <h4 id="special-defaults-subtittle">btw saranku liat jaraknnya juga yaa, biar gk kejauhan</h4>
             </div>
           </div>
           <div ref={mapContainerRef} className="special-map" aria-label="Peta OpenStreetMap tempat yang direncanakan" />

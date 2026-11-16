@@ -27,6 +27,16 @@
   animation: fadeIn 1s ease;
 }
 
+.cake-sub-instruction {
+  width: 100%;
+  margin: -0.6rem 0 1.5rem;
+  color: var(--color-dark);
+  font-family: var(--font-hand);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
 .cake-svg {
   width: 100%;
   max-width: 300px;

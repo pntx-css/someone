@@ -13,11 +13,11 @@ export interface DefaultPlacePlaceholder {
 
 export const specialPlaces: DefaultPlace[] = [
   {
-    id: 'mie-serasi-uns',
-    title: 'Mie Serasi UNS',
-    description: 'blum pernah kesana, katanya sih enak. tpi tempatnya di pasar',
-    latitude: -7.552372784489211,
-    longitude: 110.85986399489016,
+    id: 'we-cook-noodles-and-wings',
+    title: 'We Cook Noodles and Wings',
+    description: 'blum pernah kesana, tapi rating google nya tinggi njr',
+    latitude: -7.545591,
+    longitude: 110.770738,
   },
   {
     id: 'mie-ayam-worth-it',

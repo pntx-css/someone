@@ -13,6 +13,9 @@ const formatTime = (sec: number): string => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
+const isAbortError = (error: unknown): boolean =>
+  error instanceof DOMException && error.name === 'AbortError';
+
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song, onSongEnd }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -23,6 +26,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song, onSongEnd }) => 
 
   // Create audio element once and persist it
   useEffect(() => {
+    let isActive = true;
     const audio = new Audio(song.file);
     audio.preload = 'metadata';
     audioRef.current = audio;
@@ -58,6 +62,8 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song, onSongEnd }) => 
     };
 
     const handlePlayFailure = (error: unknown) => {
+      if (!isActive || isAbortError(error)) return;
+
       setIsPlaying(false);
       if (error instanceof DOMException && error.name === 'NotAllowedError') {
         setPlaybackMessage('Autoplay diblokir browser. Tekan tombol putar untuk memulai musik.');
@@ -78,11 +84,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song, onSongEnd }) => 
 
     // Autoplay after user selects
     audio.play().then(() => {
+      if (!isActive) return;
       setIsPlaying(true);
       setPlaybackMessage('');
     }).catch(handlePlayFailure);
 
     return () => {
+      isActive = false;
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
@@ -103,10 +111,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song, onSongEnd }) => 
     } else {
       audio.play()
         .then(() => {
+          if (audioRef.current !== audio || audio.paused) return;
           setIsPlaying(true);
           setPlaybackMessage('');
         })
         .catch((error: unknown) => {
+          if (isAbortError(error)) return;
+
           setIsPlaying(false);
           if (error instanceof DOMException && error.name === 'NotAllowedError') {
             setPlaybackMessage('Browser memblokir pemutaran. Coba tekan tombol putar lagi.');

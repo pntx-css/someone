@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ScrollWheel } from './ScrollWheel';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './BirthdayGate.css';
 
 const DAYS = Array.from({length: 31}, (_, i) => i + 1);
@@ -13,6 +15,7 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
   const [error, setError] = useState('');
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  useBodyScrollLock(Boolean(error));
   const handleUnlock = async () => {
     if (isUnlocking || isVerifying) return;
     setIsVerifying(true);
@@ -90,7 +93,7 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
         </button>
       </div>
 
-      {error && (
+      {error && createPortal(
         <div className="error-popup-overlay">
           <div
             className="error-popup"
@@ -98,12 +101,16 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
             aria-modal="true"
             aria-labelledby="birthday-error-message"
           >
+            <button className="error-popup-close" type="button" onClick={() => setError('')} aria-label="Tutup notifikasi">
+              ×
+            </button>
             <p id="birthday-error-message">{error}</p>
             <button className="error-popup-btn" onClick={() => setError('')} autoFocus>
               OK
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

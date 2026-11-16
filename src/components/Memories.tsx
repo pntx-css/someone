@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { memories } from '../data/memories';
+import { createPortal } from 'react-dom';
+import { memories, type Memory } from '../data/memories';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './Memories.css';
+
+interface SelectedMemory {
+  memory: Memory;
+}
 
 export const Memories: React.FC = () => {
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -8,6 +14,41 @@ export const Memories: React.FC = () => {
   const planeRef = useRef<HTMLDivElement>(null);
   const [svgSize, setSvgSize] = useState({ width: 0, height: 0 });
   const [pathD, setPathD] = useState('');
+  const [selectedMemory, setSelectedMemory] = useState<SelectedMemory | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  useBodyScrollLock(Boolean(selectedMemory));
+
+  useEffect(() => {
+    if (!selectedMemory) return;
+
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeButtonRef.current?.focus();
+    return () => previousFocusRef.current?.focus();
+  }, [selectedMemory]);
+
+  useEffect(() => {
+    if (!selectedMemory) return;
+
+    const keepFocusInModal = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !modalRef.current) return;
+      const controls = modalRef.current.querySelectorAll<HTMLElement>('button:not(:disabled)');
+      if (controls.length === 0) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', keepFocusInModal);
+    return () => document.removeEventListener('keydown', keepFocusInModal);
+  }, [selectedMemory]);
 
   useEffect(() => {
     const timeline = timelineRef.current;
@@ -155,6 +196,8 @@ export const Memories: React.FC = () => {
     };
   }, [pathD]);
 
+  const openMemory = (memory: Memory) => setSelectedMemory({ memory });
+
   return (
     <div className="memories-container" style={{ position: 'relative' }}>
       <img className="memory-footsteps" src="/assets/cats/jejak_kaki.svg" alt="" aria-hidden="true" />
@@ -182,10 +225,16 @@ export const Memories: React.FC = () => {
 
         {memories.map((memory, index) => (
           <div
-            className={`memory-row memory-row--${memory.side} memory-row--size-${index % 4}`}
+            className={`memory-row memory-row--${memory.side} memory-row--size-${index % 4} memory-row--memory-${memory.id}`}
             key={memory.id}
           >
-            <div className="memory-card" style={{ '--rot': `${memory.rotation}deg` } as React.CSSProperties}>
+            <button
+              className="memory-card"
+              type="button"
+              style={{ '--rot': `${memory.rotation}deg` } as React.CSSProperties}
+              onClick={() => openMemory(memory)}
+              aria-label={`Lihat detail kenangan: ${memory.caption}`}
+            >
               <div className="memory-frame">
                 <div className={`tape ${index % 2 !== 0 ? 'tape-alt' : ''}`} aria-hidden="true" />
                 <img
@@ -201,10 +250,46 @@ export const Memories: React.FC = () => {
                   <p className="memory-detail">{memory.detail}</p>
                 </div>
               </div>
-            </div>
+            </button>
           </div>
         ))}
       </div>
+
+      {selectedMemory && createPortal(
+        <div className="memory-modal-backdrop">
+          <section
+            ref={modalRef}
+            className="memory-modal memory-frame"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="memory-modal-title"
+            aria-describedby={selectedMemory.memory.detail ? 'memory-modal-detail' : undefined}
+          >
+            <button
+              ref={closeButtonRef}
+              className="memory-modal-close"
+              type="button"
+              onClick={() => setSelectedMemory(null)}
+              aria-label="Tutup detail kenangan"
+            >
+              ×
+            </button>
+            <div className="tape" aria-hidden="true" />
+            <img
+              src={selectedMemory.memory.image}
+              alt={selectedMemory.memory.caption}
+              className="memory-img memory-modal-image"
+              width={selectedMemory.memory.width}
+              height={selectedMemory.memory.height}
+            />
+            <div className="memory-text memory-modal-copy">
+              <h3 id="memory-modal-title">{selectedMemory.memory.caption}</h3>
+              {selectedMemory.memory.detail && <p id="memory-modal-detail">{selectedMemory.memory.detail}</p>}
+            </div>
+          </section>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

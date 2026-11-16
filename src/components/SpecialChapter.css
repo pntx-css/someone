@@ -630,11 +630,10 @@
 
 .special-modal-backdrop {
   position: fixed;
-  z-index: 1000;
+  z-index: 2000;
   inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
+  min-height: 100dvh;
+  height: 100dvh;
   background: rgba(89, 65, 62, 0.48);
   backdrop-filter: blur(6px);
   overflow: hidden;
@@ -644,10 +643,16 @@
 }
 
 .special-place-dialog {
-  position: relative;
-  width: min(100%, 520px);
-  max-height: min(92vh, 760px);
+  position: fixed;
+  z-index: 2001;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: min(520px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
   overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior: contain;
   touch-action: pan-y;
   padding: 2rem;
@@ -857,7 +862,7 @@
   }
 
   .special-place-dialog {
-    width: min(100%, 30rem);
+    width: min(30rem, calc(100vw - 2rem));
     max-height: calc(100dvh - 2rem);
   }
 }

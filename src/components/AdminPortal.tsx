@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './AdminPortal.css';
 
 type AdminStage = 'checking' | 'birthday' | 'login' | 'dashboard';
@@ -106,6 +108,7 @@ export const AdminPortal: React.FC = () => {
   const [error, setError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<WishlistMessage | null>(null);
   const [deletePlanTarget, setDeletePlanTarget] = useState<PlacePlanSubmission | null>(null);
+  useBodyScrollLock(Boolean((stage === 'birthday' && error) || deleteTarget || deletePlanTarget));
 
   const returnToAccess = async () => {
     setMessages([]);
@@ -434,7 +437,7 @@ export const AdminPortal: React.FC = () => {
           {error && stage === 'login' && <p className="admin-error" role="alert">{error}</p>}
           {notice && <p className="admin-notice" role="status">{notice}</p>}
         </section>
-        {error && stage === 'birthday' && (
+        {error && stage === 'birthday' && createPortal(
           <div className="admin-alert-backdrop" role="presentation">
             <section
               className="admin-alert-dialog"
@@ -443,6 +446,9 @@ export const AdminPortal: React.FC = () => {
               aria-labelledby="admin-birthday-error-title"
               aria-describedby="admin-birthday-error-message"
             >
+              <button className="admin-dialog-close" type="button" onClick={() => setError('')} aria-label="Tutup notifikasi">
+                ×
+              </button>
               <h2 id="admin-birthday-error-title">Belum bisa masuk</h2>
               <p id="admin-birthday-error-message">{error}</p>
               <button
@@ -454,7 +460,8 @@ export const AdminPortal: React.FC = () => {
                 MENGERTI
               </button>
             </section>
-          </div>
+          </div>,
+          document.body
         )}
       </main>
     );
@@ -638,7 +645,7 @@ export const AdminPortal: React.FC = () => {
         </nav>
       </section>
 
-      {deleteTarget && (
+      {deleteTarget && createPortal(
         <div className="admin-dialog-backdrop" role="presentation">
           <section
             className="admin-confirm-dialog"
@@ -647,6 +654,9 @@ export const AdminPortal: React.FC = () => {
             aria-labelledby="admin-delete-title"
             aria-describedby="admin-delete-description"
           >
+            <button className="admin-dialog-close" type="button" onClick={() => setDeleteTarget(null)} aria-label="Tutup konfirmasi">
+              ×
+            </button>
             <h2 id="admin-delete-title">Hapus wishlist ini?</h2>
             <p id="admin-delete-description">Pesan yang dihapus tidak dapat dikembalikan.</p>
             <div className="admin-dialog-actions">
@@ -668,9 +678,10 @@ export const AdminPortal: React.FC = () => {
               </button>
             </div>
           </section>
-        </div>
+        </div>,
+        document.body
       )}
-      {deletePlanTarget && (
+      {deletePlanTarget && createPortal(
         <div className="admin-dialog-backdrop" role="presentation">
           <section
             className="admin-confirm-dialog"
@@ -679,6 +690,9 @@ export const AdminPortal: React.FC = () => {
             aria-labelledby="admin-delete-plan-title"
             aria-describedby="admin-delete-plan-description"
           >
+            <button className="admin-dialog-close" type="button" onClick={() => setDeletePlanTarget(null)} aria-label="Tutup konfirmasi">
+              ×
+            </button>
             <h2 id="admin-delete-plan-title">Hapus rencana perjalanan ini?</h2>
             <p id="admin-delete-plan-description">Rencana yang dihapus tidak dapat dikembalikan.</p>
             <div className="admin-dialog-actions">
@@ -700,7 +714,8 @@ export const AdminPortal: React.FC = () => {
               </button>
             </div>
           </section>
-        </div>
+        </div>,
+        document.body
       )}
     </main>
   );
