@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { memories, type Memory } from '../data/memories';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { AnimatedText } from './AnimatedText';
 import './Memories.css';
 
 interface SelectedMemory {
@@ -115,7 +116,8 @@ export const Memories: React.FC = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
+          } else {
+            entry.target.classList.remove('visible');
           }
         });
       },
@@ -202,7 +204,9 @@ export const Memories: React.FC = () => {
     <div className="memories-container" style={{ position: 'relative' }}>
       <img className="memory-footsteps" src="/assets/cats/jejak_kaki.svg" alt="" aria-hidden="true" />
 
-      <h2 className="memories-title" style={{ position: 'relative', zIndex: 10 }}>Our Memories</h2>
+      <h2 className="memories-title" style={{ position: 'relative', zIndex: 10 }}>
+        <AnimatedText text="Our Memories" />
+      </h2>
 
       <div className="memories-timeline" ref={timelineRef}>
         <svg
@@ -231,7 +235,10 @@ export const Memories: React.FC = () => {
             <button
               className="memory-card"
               type="button"
-              style={{ '--rot': `${memory.rotation}deg` } as React.CSSProperties}
+              style={{
+                '--rot': `${memory.rotation}deg`,
+                '--memory-delay': `${Math.min(index * 65, 260)}ms`,
+              } as React.CSSProperties}
               onClick={() => openMemory(memory)}
               aria-label={`Lihat detail kenangan: ${memory.caption}`}
             >
@@ -244,6 +251,11 @@ export const Memories: React.FC = () => {
                   width={memory.width}
                   height={memory.height}
                   loading="lazy"
+                  onLoad={(event) => {
+                    event.currentTarget
+                      .closest('.memory-card')
+                      ?.classList.add('photo-loaded');
+                  }}
                 />
                 <div className="memory-text">
                   <h3 className="memory-caption">{memory.caption}</h3>

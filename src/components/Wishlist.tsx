@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useState } from 'react';
+import { AnimatedText } from './AnimatedText';
 import './Wishlist.css';
 
 const SpecialChapter = lazy(() =>
@@ -64,9 +65,15 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
   return (
     <section className="wishlist-section" aria-labelledby="wishlist-title">
       <div className="wishlist-heading">
-        <p className="wishlist-eyebrow">a little note for later</p>
-        <h2 id="wishlist-title">Your Hope</h2>
-        <p className="wishlist-intro">Tulis harapan dan pesan kamu buat aku disini yaa</p>
+        <p className="wishlist-eyebrow">
+          <AnimatedText text="a little note for later" />
+        </p>
+        <h2 id="wishlist-title">
+          <AnimatedText text="Your Hope" delay={180} />
+        </h2>
+        <p className="wishlist-intro">
+          <AnimatedText text="Tulis harapan dan pesan kamu buat aku disini yaa" delay={360} interval={16} />
+        </p>
       </div>
 
       <div className={`wishlist-envelope-stage wishlist-envelope-stage--${stageStatus}`}>

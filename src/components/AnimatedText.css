@@ -1,0 +1,81 @@
+.animated-text {
+  white-space: pre-wrap;
+}
+
+.animated-text__word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.animated-text__character {
+  display: inline-block;
+  opacity: 0;
+  animation: animated-letter-rise 460ms var(--ease-soft) both;
+}
+
+.animated-text__character--burst {
+  animation-name: animated-letter-burst;
+}
+
+.animated-text__character--explode {
+  animation-name: animated-letter-explode;
+}
+
+.animated-text__accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@keyframes animated-letter-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.55em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes animated-letter-burst {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--burst-x), var(--burst-y), 0) scale(0.35) rotate(var(--burst-rotation));
+  }
+  72% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.08) rotate(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(0);
+  }
+}
+
+@keyframes animated-letter-explode {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+  48% {
+    opacity: 1;
+    transform: translate3d(var(--explode-x), var(--explode-y), 0) scale(1.38) rotate(var(--explode-rotation));
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-text__character {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+}

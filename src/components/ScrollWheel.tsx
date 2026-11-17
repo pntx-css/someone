@@ -1,28 +1,55 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 
 interface ScrollWheelProps {
   options: (string | number)[];
   value: string | number;
   onChange: (val: string | number) => void;
   label: string;
+  initialScroll?: boolean;
+  initialScrollDelay?: number;
 }
 
-export const ScrollWheel: React.FC<ScrollWheelProps> = ({ options, value, onChange, label }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const itemHeight = 50;
+const ITEM_HEIGHT = 50;
 
-  useEffect(() => {
-    if (containerRef.current) {
-      const index = options.indexOf(value);
-      if (index !== -1) {
-        containerRef.current.scrollTop = index * itemHeight;
-      }
+export const ScrollWheel: React.FC<ScrollWheelProps> = ({
+  options,
+  value,
+  onChange,
+  label,
+  initialScroll = false,
+  initialScrollDelay = 0,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const initialIndexRef = useRef(options.indexOf(value));
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const index = initialIndexRef.current;
+    if (!container || index < 0) return;
+
+    const target = index * ITEM_HEIGHT;
+    if (!initialScroll || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      container.scrollTop = target;
+      return;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    container.scrollTop = Math.max(0, options.length - 1) * ITEM_HEIGHT;
+    let timeoutId = 0;
+    const frameId = window.requestAnimationFrame(() => {
+      timeoutId = window.setTimeout(() => {
+        container.scrollTo({ top: target, behavior: 'smooth' });
+      }, initialScrollDelay);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [initialScroll, initialScrollDelay, options]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop;
-    const index = Math.round(scrollTop / itemHeight);
+    const index = Math.round(scrollTop / ITEM_HEIGHT);
     if (index >= 0 && index < options.length) {
       if (options[index] !== value) {
         onChange(options[index]);
@@ -55,7 +82,7 @@ export const ScrollWheel: React.FC<ScrollWheelProps> = ({ options, value, onChan
 
     event.preventDefault();
     if (nextIndex === selectedIndex) return;
-    containerRef.current?.scrollTo({ top: nextIndex * itemHeight, behavior: 'auto' });
+    containerRef.current?.scrollTo({ top: nextIndex * ITEM_HEIGHT, behavior: 'auto' });
     onChange(options[nextIndex]);
   };
 
@@ -72,7 +99,7 @@ export const ScrollWheel: React.FC<ScrollWheelProps> = ({ options, value, onChan
           onScroll={handleScroll}
           onKeyDown={handleKeyDown}
         >
-          <div style={{ height: `${itemHeight}px`, flexShrink: 0 }} />
+          <div style={{ height: `${ITEM_HEIGHT}px`, flexShrink: 0 }} />
           {options.map((opt) => (
             <div 
               key={opt} 
@@ -83,7 +110,7 @@ export const ScrollWheel: React.FC<ScrollWheelProps> = ({ options, value, onChan
               onClick={() => {
                 if (containerRef.current) {
                   containerRef.current.scrollTo({
-                    top: options.indexOf(opt) * itemHeight,
+                    top: options.indexOf(opt) * ITEM_HEIGHT,
                     behavior: 'smooth'
                   });
                 }
@@ -92,7 +119,7 @@ export const ScrollWheel: React.FC<ScrollWheelProps> = ({ options, value, onChan
               {opt}
             </div>
           ))}
-          <div style={{ height: `${itemHeight}px`, flexShrink: 0 }} />
+          <div style={{ height: `${ITEM_HEIGHT}px`, flexShrink: 0 }} />
         </div>
       </div>
     </div>

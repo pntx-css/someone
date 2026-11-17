@@ -1,6 +1,7 @@
 import React from 'react';
 import { songs } from '../data/music';
 import type { Song } from '../data/music';
+import { AnimatedText } from './AnimatedText';
 import './HappyBirthday.css';
 
 interface HappyBirthdayProps {
@@ -10,24 +11,32 @@ interface HappyBirthdayProps {
 export const HappyBirthday: React.FC<HappyBirthdayProps> = ({ onSelectSong }) => {
   return (
     <div className="hb-container">
-      <h1 className="hb-title">Happy Birthday Mayluvvv</h1>
-      <p className="hb-subtitle">this one's for you ♡</p>
+      <h1 className="hb-title">
+        <AnimatedText text="Happy Birthday Mayluvvv" effect="burst" duration={560} interval={18} />
+      </h1>
+      <p className="hb-subtitle">
+        <AnimatedText text="this one's for you ♡" delay={300} />
+      </p>
 
-      <p className="music-prompt">pick a song for the journey</p>
+      <p className="music-prompt">
+        <AnimatedText text="pick a song for the journey" delay={620} />
+      </p>
 
       <div className="music-list">
-        {songs.map((song) => (
-          <button
+        {songs.map((song, index) => (
+          <div
+            className="music-card-reveal"
             key={song.id}
-            className="music-card"
-            onClick={() => onSelectSong(song)}
+            style={{ '--card-index': index } as React.CSSProperties}
           >
-            <div className="music-card-icon">♪</div>
-            <div className="music-card-info">
-              <div className="music-card-title">{song.title}</div>
-              <div className="music-card-artist">{song.artist}</div>
-            </div>
-          </button>
+            <button className="music-card" onClick={() => onSelectSong(song)}>
+              <div className="music-card-icon">♪</div>
+              <div className="music-card-info">
+                <div className="music-card-title">{song.title}</div>
+                <div className="music-card-artist">{song.artist}</div>
+              </div>
+            </button>
+          </div>
         ))}
       </div>
 

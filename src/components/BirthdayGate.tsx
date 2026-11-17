@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ScrollWheel } from './ScrollWheel';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { AnimatedText } from './AnimatedText';
 import './BirthdayGate.css';
 
 const DAYS = Array.from({length: 31}, (_, i) => i + 1);
@@ -68,8 +69,12 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
   return (
     <div className={`gate-container ${isUnlocking ? 'unlock-anim' : ''}`}>
       <div className="gate-content">
-        <h1 className="gate-title">Before The Next Chapter</h1>
-        <p className="gate-subtitle">masukin tanggal lahir kamu yaa</p>
+        <h1 className="gate-title">
+          <AnimatedText text="Before The Next Chapter" />
+        </h1>
+        <p className="gate-subtitle">
+          <AnimatedText text="masukin tanggal lahir kamu yaa" delay={300} />
+        </p>
         
         <div className="labels-row">
           <div className="wheel-label" style={{ width: '80px' }}>DATE</div>
@@ -79,13 +84,34 @@ export const BirthdayGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) =
 
         <div className="wheels-row">
           <div className="wheel-col" style={{ width: '80px' }}>
-            <ScrollWheel options={DAYS} value={day} onChange={setDay} label="Tanggal" />
+            <ScrollWheel
+              options={DAYS}
+              value={day}
+              onChange={setDay}
+              label="Tanggal"
+              initialScroll
+              initialScrollDelay={0}
+            />
           </div>
           <div className="wheel-col" style={{ width: '130px' }}>
-            <ScrollWheel options={MONTHS} value={month} onChange={setMonth} label="Bulan" />
+            <ScrollWheel
+              options={MONTHS}
+              value={month}
+              onChange={setMonth}
+              label="Bulan"
+              initialScroll
+              initialScrollDelay={120}
+            />
           </div>
           <div className="wheel-col" style={{ width: '90px' }}>
-            <ScrollWheel options={YEARS} value={year} onChange={setYear} label="Tahun" />
+            <ScrollWheel
+              options={YEARS}
+              value={year}
+              onChange={setYear}
+              label="Tahun"
+              initialScroll
+              initialScrollDelay={240}
+            />
           </div>
         </div>
         <button className="gate-btn" onClick={handleUnlock} disabled={isVerifying || isUnlocking}>

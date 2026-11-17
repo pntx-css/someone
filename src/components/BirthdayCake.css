@@ -24,7 +24,6 @@
   color: var(--color-pink-900);
   margin-bottom: 2.5rem;
   text-align: center;
-  animation: fadeIn 1s ease;
 }
 
 .cake-sub-instruction {
@@ -42,7 +41,13 @@
   max-width: 300px;
   overflow: visible;
   filter: drop-shadow(0 12px 24px rgba(131, 24, 67, 0.12));
-  animation: cakeFloat 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: cakeFloat 650ms var(--ease-soft) both;
+}
+
+.candle-light {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: candle-ignite 420ms ease-out var(--candle-delay, 0ms) both;
 }
 
 /* Candle interaction */
@@ -62,6 +67,7 @@
 .flame-glow {
   transform-origin: center bottom;
   animation: flicker 1.8s infinite alternate ease-in-out;
+  animation-delay: var(--candle-delay, 0ms);
 }
 
 /* Smoke animation */
@@ -73,7 +79,12 @@
 
 /* Keyframes */
 @keyframes cakeFloat {
-  from { opacity: 0; transform: translateY(25px) scale(0.95); }
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes candle-ignite {
+  from { opacity: 0; transform: translateY(3px) scale(0.82); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 

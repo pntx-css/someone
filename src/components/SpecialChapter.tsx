@@ -11,6 +11,7 @@ import {
 } from '../data/customPlace';
 import { specialPlaces} from '../data/specialPlaces';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { AnimatedText } from './AnimatedText';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './SpecialChapter.css';
 
@@ -87,9 +88,15 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
   onRemove,
 }) => {
   const [time, setTime] = useState(initialTime);
+  const [isEntering, setIsEntering] = useState(true);
+  const [isClosing, setIsClosing] = useState(false);
   const timeInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const closeActionRef = useRef<(() => void) | null>(null);
+  const closeCompletedRef = useRef(false);
+  const closeTimerRef = useRef<number | null>(null);
+  const pendingCloseRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -117,22 +124,69 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
     };
   }, [onCancel]);
 
+  useEffect(() => () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+    }
+  }, []);
+
+  const finishClose = () => {
+    if (closeCompletedRef.current) return;
+    closeCompletedRef.current = true;
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    closeActionRef.current?.();
+  };
+
+  const beginClose = (action: () => void) => {
+    closeCompletedRef.current = false;
+    closeActionRef.current = action;
+    setIsClosing(true);
+    closeTimerRef.current = window.setTimeout(finishClose, 300);
+  };
+
+  const requestClose = (action: () => void) => {
+    if (isClosing) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      action();
+    } else if (isEntering) {
+      pendingCloseRef.current ??= action;
+    } else {
+      beginClose(action);
+    }
+  };
+
+  const handleDialogAnimationEnd = (event: React.AnimationEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.animationName === 'special-time-dialog-flip-in') {
+      setIsEntering(false);
+      const pendingClose = pendingCloseRef.current;
+      pendingCloseRef.current = null;
+      if (pendingClose) beginClose(pendingClose);
+    } else if (event.animationName === 'special-time-dialog-flip-out') {
+      finishClose();
+    }
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)) return;
-    onSave(time);
+    if (isClosing || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)) return;
+    requestClose(() => onSave(time));
   };
 
   return createPortal(
-    <div className="special-modal-backdrop">
+    <div className={`special-modal-backdrop${isClosing ? ' is-closing' : ''}`}>
       <div
         ref={dialogRef}
-        className="special-place-dialog special-time-dialog"
+        className={`special-place-dialog special-time-dialog${isClosing ? ' is-closing' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="special-time-dialog-title"
+        onAnimationEnd={handleDialogAnimationEnd}
       >
-        <button className="special-dialog-close" type="button" onClick={onCancel} aria-label="Tutup pengaturan waktu">
+        <button className="special-dialog-close" type="button" onClick={() => requestClose(onCancel)} aria-label="Tutup pengaturan waktu">
           ×
         </button>
         <p className="special-eyebrow">a little time for us</p>
@@ -148,11 +202,11 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
           </a>
           <div className="special-dialog-actions">
             {onRemove && (
-              <button type="button" className="special-secondary-button" onClick={onRemove}>
+              <button type="button" className="special-secondary-button" onClick={() => requestClose(onRemove)}>
                 Hapus dari rencana
               </button>
             )}
-            <button type="button" className="special-secondary-button" onClick={onCancel}>Batal</button>
+            <button type="button" className="special-secondary-button" onClick={() => requestClose(onCancel)}>Batal</button>
             <button type="submit" className="special-primary-button">Simpan waktu</button>
           </div>
         </form>
@@ -308,10 +362,21 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
   const [planSubmissionError, setPlanSubmissionError] = useState('');
   const [planSubmissionNotice, setPlanSubmissionNotice] = useState('');
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const clockRef = useRef<HTMLDivElement>(null);
+  const planVisitRefs = useRef(new Map<string, HTMLLIElement>());
+  const flyingCardAnimations = useRef(new Map<HTMLElement, Animation>());
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
   const [mapReady, setMapReady] = useState(false);
   useBodyScrollLock(Boolean(planningPlaceId || editingPlaceId || isAddingPlace));
+
+  useEffect(() => () => {
+    flyingCardAnimations.current.forEach((animation, card) => {
+      animation.cancel();
+      card.remove();
+    });
+    flyingCardAnimations.current.clear();
+  }, []);
 
   const allPlaces = useMemo<MapPlace[]>(
     () => [
@@ -513,6 +578,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
       }
       setSavedPlanSignature(planSignature);
       setPlanSubmissionNotice('Rencana kita udah kusimpan, sampe besokkk');
+      throwPlanCardsIntoClock(orderedVisits);
     } catch (submissionError) {
       setPlanSubmissionError(
         submissionError instanceof Error ? submissionError.message : 'Rencana belum berhasil dikirim. Coba lagi ya.'
@@ -520,6 +586,74 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
     } finally {
       setIsSubmittingPlan(false);
     }
+  };
+
+  const throwPlanCardsIntoClock = (visits: PlannedVisit[]) => {
+    const clock = clockRef.current;
+    if (
+      !clock ||
+      typeof Element.prototype.animate !== 'function' ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+
+    const clockRect = clock.getBoundingClientRect();
+    const targetX = clockRect.left + clockRect.width / 2;
+    const targetY = clockRect.top + clockRect.height / 2;
+
+    visits.forEach((visit, index) => {
+      const source = planVisitRefs.current.get(visit.placeId);
+      const place = allPlaces.find((item) => item.id === visit.placeId);
+      if (!source || !place) return;
+
+      const sourceRect = source.getBoundingClientRect();
+      const card = document.createElement('div');
+      card.className = 'special-clock-flight';
+      card.setAttribute('aria-hidden', 'true');
+      card.inert = true;
+
+      const name = document.createElement('strong');
+      name.textContent = place.name;
+      const time = document.createElement('span');
+      time.textContent = visit.time;
+      card.append(name, time);
+      Object.assign(card.style, {
+        left: `${sourceRect.left}px`,
+        top: `${sourceRect.top}px`,
+        width: `${sourceRect.width}px`,
+        height: `${sourceRect.height}px`,
+      });
+      document.body.append(card);
+
+      const deltaX = targetX - (sourceRect.left + sourceRect.width / 2);
+      const deltaY = targetY - (sourceRect.top + sourceRect.height / 2);
+      const animation = card.animate(
+        [
+          { transform: 'translate(0, 0) rotate(0deg) scale(1)', opacity: 1 },
+          {
+            transform: `translate(${deltaX * 0.55}px, ${deltaY * 0.55 - 36}px) rotate(8deg) scale(0.82)`,
+            opacity: 0.95,
+            offset: 0.55,
+          },
+          { transform: `translate(${deltaX}px, ${deltaY}px) rotate(-8deg) scale(0.12)`, opacity: 0 },
+        ],
+        {
+          duration: 720,
+          delay: index * 120,
+          easing: 'cubic-bezier(0.2, 0.7, 0.25, 1)',
+          fill: 'forwards',
+        }
+      );
+
+      const removeCard = () => {
+        flyingCardAnimations.current.delete(card);
+        card.remove();
+      };
+      flyingCardAnimations.current.set(card, animation);
+      animation.addEventListener('finish', removeCard, { once: true });
+      animation.addEventListener('cancel', removeCard, { once: true });
+    });
   };
 
   const visitWarnings: string[] = [];
@@ -547,15 +681,23 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
   return (
     <section className="special-chapter" aria-labelledby="special-chapter-title">
       <header className="special-chapter-heading">
-        <h2 id="special-chapter-title">Special Chapter</h2>
-        <p>pilih dan tentukan jam nya yaa, mwehehehe gabisa "ngikut"</p>
+        <h2 id="special-chapter-title">
+          <AnimatedText text="Special Chapter" />
+        </h2>
+        <p>
+          <AnimatedText text={'pilih dan tentukan jam nya yaa, mwehehehe gabisa "ngikut"'} delay={260} interval={16} />
+        </p>
       </header>
 
       <section className="special-defaults" aria-labelledby="special-defaults-title">
         <div className="special-section-heading">
           <div>
-            <h3 id="special-defaults-title">Rekomendasiku</h3>
-            <h4 id="special-defaults-subtittle">btw ini banyak yang belum kucoba hhee, mayoritas cuman liat dari fyp</h4>
+            <h3 id="special-defaults-title">
+              <AnimatedText text="Rekomendasiku" />
+            </h3>
+            <h4 id="special-defaults-subtittle">
+              <AnimatedText text="btw ini banyak yang belum kucoba hhee, mayoritas cuman liat dari fyp" delay={180} interval={14} />
+            </h4>
           </div>
           <span className="special-placeholder-count">8 saran</span>
         </div>
@@ -563,7 +705,11 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
           {specialPlaces.map((place, index) => {
             const visit = plannedVisits.find((item) => item.placeId === place.id);
             return (
-              <article className={`special-custom-card ${visit ? 'is-selected' : ''}`} key={place.id}>
+              <article
+                className={`special-custom-card ${visit ? 'is-selected' : ''}`}
+                key={place.id}
+                style={{ '--card-delay': `${index * 100}ms` } as React.CSSProperties}
+              >
                 <button
                   type="button"
                   className="special-card-select"
@@ -587,7 +733,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Buka Google Maps 
+                  Buka Google Maps
                 </a>
               </article>
             );
@@ -599,18 +745,26 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
       <section className="special-custom-section" aria-labelledby="special-custom-title">
         <div className="special-section-heading">
           <div>
-            <h3 id="special-custom-title">Custom place</h3>
+            <h3 id="special-custom-title">
+              <AnimatedText text="Custom place" />
+            </h3>
           <div></div>
-            <h4 id="special-custom-title">klo kmu punya plan tempat yang pengen kmu datengin tulis aja disini</h4>
+            <h4 id="special-custom-title">
+              <AnimatedText text="klo kmu punya plan tempat yang pengen kmu datengin tulis aja disini" delay={180} interval={14} />
+            </h4>
           </div>
           <span className="special-placeholder-count">{places.length}/{MAX_CUSTOM_PLACES} tempat</span>
         </div>
         <div className="special-custom-grid">
-          {places.map((place) => {
+          {places.map((place, index) => {
             const visit = plannedVisits.find((item) => item.placeId === place.id);
             const isSelected = Boolean(visit);
             return (
-              <article className={`special-custom-card ${isSelected ? 'is-selected' : ''}`} key={place.id}>
+              <article
+                className={`special-custom-card ${isSelected ? 'is-selected' : ''}`}
+                key={place.id}
+                style={{ '--card-delay': `${index * 100}ms` } as React.CSSProperties}
+              >
                 <button
                   type="button"
                   className="special-card-select"
@@ -644,6 +798,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
             <button
               type="button"
               className="special-empty-card"
+              style={{ '--card-delay': `${places.length * 100}ms` } as React.CSSProperties}
               onClick={() => setIsAddingPlace(true)}
             >
               <span aria-hidden="true">＋</span>
@@ -658,8 +813,10 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
         <div className="special-map-panel">
           <div className="special-section-heading">
             <div>
-              <h3>Our Map</h3>
-              <h4 id="special-defaults-subtittle">btw saranku liat jaraknnya juga yaa, biar gk kejauhan</h4>
+            <h3><AnimatedText text="Our Map" /></h3>
+            <h4 id="special-defaults-subtittle">
+              <AnimatedText text="btw saranku liat jaraknnya juga yaa, biar gk kejauhan" delay={160} interval={14} />
+            </h4>
             </div>
           </div>
           <div ref={mapContainerRef} className="special-map" aria-label="Peta OpenStreetMap tempat yang direncanakan" />
@@ -668,10 +825,10 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
         <div className="special-plan-panel">
           <div className="special-section-heading">
             <div>
-              <h3>Our Plan</h3>
+              <h3><AnimatedText text="Our Plan" /></h3>
             </div>
           </div>
-          <div className="special-clock" role="group" aria-label="Jam analog tempat yang direncanakan">
+          <div ref={clockRef} className="special-clock" role="group" aria-label="Jam analog tempat yang direncanakan">
             <span className="special-clock-center" />
             {orderedVisits.map((visit) => {
               const minuteOfDay = Number(visit.time.slice(0, 2)) * 60 + Number(visit.time.slice(3));
@@ -705,7 +862,16 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
                 const place = allPlaces.find((item) => item.id === visit.placeId);
                 if (!place) return null;
                 return (
-                  <li key={visit.placeId}>
+                  <li
+                    key={visit.placeId}
+                    ref={(element) => {
+                      if (element) {
+                        planVisitRefs.current.set(visit.placeId, element);
+                      } else {
+                        planVisitRefs.current.delete(visit.placeId);
+                      }
+                    }}
+                  >
                     <button
                       type="button"
                       className="special-plan-place"

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AnimatedText } from './AnimatedText';
 import './BirthdayCake.css';
 
 type CandleState = 'flame' | 'smoke' | 'extinguished';
@@ -6,6 +7,11 @@ type CandleState = 'flame' | 'smoke' | 'extinguished';
 export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [candles, setCandles] = useState<CandleState[]>(['flame', 'flame', 'flame']);
   const [isCompleted, setIsCompleted] = useState(false);
+  const candlesAreOut = candles.every((candle) => candle === 'extinguished');
+  const instruction = candlesAreOut ? 'Selamat HBD!!!' : 'Make a wish...';
+  const subInstruction = candlesAreOut
+    ? 'btw kucingnya bisa kmu klik loh'
+    : 'tiup lilinnya (klik sih maksudku) *anggep aja lagi niup';
 
   const handleCandleClick = (index: number) => {
     if (candles[index] !== 'flame') return;
@@ -65,18 +71,28 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
 
     if (state === 'flame') {
       return (
-        <g key={index} className="flame-glow clickable" role="button" tabIndex={0} aria-label={`Matikan lilin ${index + 1}`}
-          onClick={() => handleCandleClick(index)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              handleCandleClick(index);
-            }
-          }}
+        <g
+          key={index}
+          className="candle-light"
+          style={{ '--candle-delay': `${680 + index * 300}ms` } as React.CSSProperties}
         >
-          <path d={p.flame} fill="#F33435" pointerEvents="visiblePainted" />
-          <path d={p.inner} fill="#FF9638" pointerEvents="none" />
-          <path d={p.core} fill="#FFF0B0" pointerEvents="none" />
+          <g
+            className="flame-glow clickable"
+            role="button"
+            tabIndex={0}
+            aria-label={`Matikan lilin ${index + 1}`}
+            onClick={() => handleCandleClick(index)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleCandleClick(index);
+              }
+            }}
+          >
+            <path d={p.flame} fill="#F33435" pointerEvents="visiblePainted" />
+            <path d={p.inner} fill="#FF9638" pointerEvents="none" />
+            <path d={p.core} fill="#FFF0B0" pointerEvents="none" />
+          </g>
         </g>
       );
     }
@@ -95,13 +111,15 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
   return (
     <div className={`cake-container ${isCompleted ? 'completed-anim' : ''}`}>
       <h2 className="cake-instruction">
-        {candles.every(c => c === 'extinguished') ? 'Selamat HBD' : 'Make a wish...'}
+        <AnimatedText
+          key={instruction}
+          text={instruction}
+          effect={candlesAreOut ? 'explode' : 'rise'}
+        />
       </h2>
-         <p className="cake-sub-instruction">
-              {candles.every(c => c === 'extinguished')
-                  ? 'btw kucingnya bisa kmu klik loh'
-                  : 'tiup lilinnya (klik sih maksudku) *anggep aja lagi niup'}
-        </p>
+      <p className="cake-sub-instruction">
+        <AnimatedText key={subInstruction} text={subInstruction} delay={180} interval={18} />
+      </p>
 
       <svg
         className="cake-svg"

@@ -52,11 +52,14 @@
 
 .gate-title {
   font-family: var(--font-display);
-  font-size: clamp(1.7rem, 4.5vw, 2.8rem);
-  line-height: 1.12;
+  max-width: 100%;
+  margin-inline: auto;
+  font-size: clamp(1.65rem, 3.8vw, 2.35rem);
+  line-height: 1.15;
   letter-spacing: 0.01em;
   margin-bottom: 0.5rem;
   color: var(--color-pink-900);
+  text-wrap: balance;
 }
 
 .gate-subtitle {
@@ -313,7 +316,7 @@
     gap: 0.25rem;
   }
   .gate-title {
-    font-size: 1.6rem;
+    font-size: 1.55rem;
   }
   .gate-content {
     padding: 2rem 1rem;

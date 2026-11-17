@@ -63,6 +63,37 @@
   overflow-wrap: anywhere;
 }
 
+.letter-content-visual {
+  white-space: inherit;
+}
+
+.letter-content-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.letter-typed-character {
+  display: inline-block;
+  opacity: 0;
+  animation: letter-typewriter 120ms linear both;
+}
+
+@keyframes letter-typewriter {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .letter-kaomoji {
   /* Keep unusual/kaomoji characters legible even when Caveat has no glyph. */
   font-family: var(--font-body);
@@ -100,5 +131,13 @@
 
   .letter-paper::after {
     inset: 0.45rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter-typed-character {
+    opacity: 1;
+    animation: none;
+    transform: none;
   }
 }
