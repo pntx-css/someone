@@ -55,9 +55,9 @@
   font-size: clamp(0.98rem, 1.15vw, 1.08rem);
   line-height: 1.85;
   color: var(--color-dark);
-  text-align: justify;
-  text-justify: inter-word;
-  text-align-last: left;
+  text-align: center;
+text-justify: auto;
+text-align-last: center;
   hyphens: auto;
   white-space: pre-wrap; /* Preserve line breaks from text */
   overflow-wrap: anywhere;
