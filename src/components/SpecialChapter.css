@@ -5,7 +5,15 @@
     radial-gradient(ellipse at 12% 18%, rgba(255, 255, 255, 0.72), transparent 34%),
     radial-gradient(ellipse at 88% 82%, rgba(249, 213, 229, 0.6), transparent 38%),
     #fce7f3;
-  animation: special-chapter-enter 520ms ease both;
+}
+
+.special-chapter--waiting {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.special-chapter--exiting {
+  pointer-events: none;
 }
 
 .special-chapter-heading,
@@ -174,11 +182,6 @@
   background: var(--color-paper);
   box-shadow: 0 10px 26px rgba(89, 65, 62, 0.08), 0 2px 5px rgba(89, 65, 62, 0.04);
   transition: transform 240ms var(--ease-soft), border-color 240ms var(--ease-soft), background-color 240ms var(--ease-soft), box-shadow 240ms var(--ease-soft);
-  animation: special-card-appear 450ms cubic-bezier(0.16, 1, 0.3, 1) var(--card-delay, 0ms) backwards;
-}
-
-.special-empty-card {
-  animation: special-card-appear 450ms cubic-bezier(0.16, 1, 0.3, 1) var(--card-delay, 0ms) backwards;
 }
 
 .special-custom-card:hover {
@@ -260,7 +263,10 @@ button.special-empty-card:active {
   transition: transform var(--motion-fast) var(--ease-soft), background-color var(--motion-fast) ease;
 }
 
-.special-card-check { fill: none; stroke-width: 2.2; }
+.special-card-check {
+  fill: none;
+  stroke-width: 2.2;
+}
 
 .special-card-select:hover .special-card-heart,
 .special-card-select[aria-pressed='true'] .special-card-heart {
@@ -887,51 +893,398 @@ button.special-empty-card:active {
   clip-path: inset(50%);
 }
 
-@keyframes special-chapter-enter {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+
+/* ================================
+   EXISTING DIALOG KEYFRAMES
+================================ */
 
 @keyframes special-dialog-in {
-  from { opacity: 0; transform: scale(0.85); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes special-backdrop-in {
-  from { opacity: 0; backdrop-filter: blur(0); }
-  to { opacity: 1; backdrop-filter: blur(6px); }
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
 }
 
 @keyframes special-backdrop-out {
-  from { opacity: 1; backdrop-filter: blur(6px); }
-  to { opacity: 0; backdrop-filter: blur(0); }
+  from {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
 }
 
 @keyframes special-dialog-content-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes special-dialog-out {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(0.92); }
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.92);
+  }
 }
 
 @keyframes special-time-dialog-flip-in {
-  0% { opacity: 0; transform: rotateY(-90deg) scale(0.85); }
-  70% { opacity: 1; transform: rotateY(5deg) scale(1.015); }
-  100% { opacity: 1; transform: rotateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: rotateY(-90deg) scale(0.85);
+  }
+
+  70% {
+    opacity: 1;
+    transform: rotateY(5deg) scale(1.015);
+  }
+
+  100% {
+    opacity: 1;
+    transform: rotateY(0) scale(1);
+  }
 }
 
 @keyframes special-time-dialog-flip-out {
-  from { opacity: 1; transform: rotateY(0) scale(1); }
-  to { opacity: 0; transform: rotateY(90deg) scale(0.92); }
+  from {
+    opacity: 1;
+    transform: rotateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: rotateY(90deg) scale(0.92);
+  }
+}
+
+
+/* ================================
+   SPECIAL CHAPTER ENTRANCE
+================================ */
+
+/* Judul utama */
+.special-chapter--entering .special-chapter-heading {
+  animation: special-header-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Judul rekomendasi */
+.special-chapter--entering .special-defaults > .special-section-heading {
+  animation: special-section-in 450ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+}
+
+/* Kartu rekomendasi satu per satu */
+.special-chapter--entering .special-default-grid > * {
+  animation: special-card-appear 450ms cubic-bezier(0.16, 1, 0.3, 1)
+    calc(1200ms + var(--card-delay, 0ms)) both;
+}
+
+/* Judul tempat custom */
+.special-chapter--entering .special-custom-section > .special-section-heading {
+  animation: special-section-in 450ms cubic-bezier(0.16, 1, 0.3, 1) 2400ms both;
+}
+
+/* Kartu custom satu per satu */
+.special-chapter--entering .special-custom-grid > * {
+  animation: special-card-appear 450ms cubic-bezier(0.16, 1, 0.3, 1)
+    calc(2900ms + var(--card-delay, 0ms)) both;
+}
+
+/* Map */
+.special-chapter--entering .special-map-panel {
+  animation: special-panel-in 550ms cubic-bezier(0.16, 1, 0.3, 1) 3700ms both;
+}
+
+/* Panel rencana */
+.special-chapter--entering .special-plan-panel {
+  animation: special-panel-in 550ms cubic-bezier(0.16, 1, 0.3, 1) 4350ms both;
+}
+
+/* Jam */
+.special-chapter--entering .special-clock {
+  animation: special-clock-in 500ms cubic-bezier(0.16, 1, 0.3, 1) 4950ms both;
+}
+
+/* Daftar rencana */
+.special-chapter--entering .special-plan-list li {
+  animation: special-card-appear 400ms cubic-bezier(0.16, 1, 0.3, 1) 5500ms both;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(1) {
+  animation-delay: 5500ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(2) {
+  animation-delay: 5600ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(3) {
+  animation-delay: 5700ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(4) {
+  animation-delay: 5800ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(5) {
+  animation-delay: 5900ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(6) {
+  animation-delay: 6000ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(7) {
+  animation-delay: 6100ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(8) {
+  animation-delay: 6200ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(9) {
+  animation-delay: 6300ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(10) {
+  animation-delay: 6400ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(11) {
+  animation-delay: 6500ms;
+}
+
+.special-chapter--entering .special-plan-list li:nth-child(12) {
+  animation-delay: 6600ms;
+}
+
+/* Tombol simpan */
+.special-chapter--entering .special-save-plan-button {
+  animation: special-section-in 450ms cubic-bezier(0.16, 1, 0.3, 1) 7100ms both;
+}
+
+
+/* ================================
+   SPECIAL CHAPTER EXIT
+================================ */
+
+.special-chapter--exiting .special-chapter-heading {
+  animation: special-header-out 260ms ease-in both;
+}
+
+/* Kartu keluar bertahap */
+.special-chapter--exiting .special-default-grid > *,
+.special-chapter--exiting .special-custom-grid > * {
+  animation: special-card-exit 360ms cubic-bezier(0.4, 0, 1, 1)
+    var(--exit-delay, 180ms) both;
+}
+
+/* Urutan kartu saat keluar */
+.special-chapter--exiting .special-default-grid > :nth-child(1),
+.special-chapter--exiting .special-custom-grid > :nth-last-child(1) {
+  --exit-delay: 520ms;
+}
+
+.special-chapter--exiting .special-default-grid > :nth-child(2),
+.special-chapter--exiting .special-custom-grid > :nth-last-child(2) {
+  --exit-delay: 465ms;
+}
+
+.special-chapter--exiting .special-default-grid > :nth-child(3),
+.special-chapter--exiting .special-custom-grid > :nth-last-child(3) {
+  --exit-delay: 410ms;
+}
+
+.special-chapter--exiting .special-default-grid > :nth-child(4),
+.special-chapter--exiting .special-custom-grid > :nth-last-child(4) {
+  --exit-delay: 355ms;
+}
+
+.special-chapter--exiting .special-default-grid > :nth-child(5),
+.special-chapter--exiting .special-custom-grid > :nth-last-child(5) {
+  --exit-delay: 300ms;
+}
+
+.special-chapter--exiting .special-default-grid > :nth-child(6),
+.special-chapter--exiting .special-custom-grid > :nth-last-child(6) {
+  --exit-delay: 245ms;
+}
+
+.special-chapter--exiting .special-default-grid > :nth-child(7),
+.special-chapter--exiting .special-custom-grid > :nth-last-child(7) {
+  --exit-delay: 190ms;
+}
+
+.special-chapter--exiting .special-default-grid > :nth-child(8),
+.special-chapter--exiting .special-custom-grid > :nth-last-child(8) {
+  --exit-delay: 135ms;
+}
+
+/* Map keluar */
+.special-chapter--exiting .special-map-panel {
+  animation: special-panel-out 380ms ease-in 650ms both;
+}
+
+/* Panel rencana keluar */
+.special-chapter--exiting .special-plan-panel {
+  animation: special-clock-out 380ms ease-in 820ms both;
+}
+
+/* Cegah klik tombol kembali berulang */
+.special-chapter--exiting .special-return-button {
+  pointer-events: none;
+}
+
+
+/* ================================
+   KEYFRAMES
+================================ */
+
+@keyframes special-header-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes special-section-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes special-card-appear {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
+
+@keyframes special-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.975);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes special-clock-in {
+  from {
+    opacity: 0;
+    transform: scale(0.75) rotate(-12deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes special-header-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-18px);
+    filter: blur(4px);
+  }
+}
+
+@keyframes special-card-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+  }
+}
+
+@keyframes special-panel-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+  }
+}
+
+@keyframes special-clock-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(30px) scale(0.92);
+  }
+}
+
+
+/* ================================
+   RESPONSIVE
+================================ */
 
 @media (max-width: 760px) {
   .special-chapter {
@@ -1025,6 +1378,11 @@ button.special-empty-card:active {
   }
 }
 
+
+/* ================================
+   REDUCED MOTION
+================================ */
+
 @media (prefers-reduced-motion: reduce) {
   .special-chapter,
   .special-modal-backdrop,
@@ -1033,7 +1391,13 @@ button.special-empty-card:active {
   .special-empty-card,
   .special-save-plan-button,
   .special-dialog-actions button {
-    animation-duration: 0.01ms;
-    transition-duration: 0.01ms;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .special-chapter--entering *,
+  .special-chapter--exiting * {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
   }
 }

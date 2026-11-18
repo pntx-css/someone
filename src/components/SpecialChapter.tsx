@@ -368,7 +368,63 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
   const [mapReady, setMapReady] = useState(false);
+  const [chapterPhase, setChapterPhase] = useState<
+    'waiting' | 'entering' | 'entered' | 'exiting'
+  >('waiting');
+
+  const enterTimerRef = useRef<number | null>(null);
+  const exitTimerRef = useRef<number | null>(null);
+
   useBodyScrollLock(Boolean(planningPlaceId || editingPlaceId || isAddingPlace));
+
+  useEffect(() => {
+    if (!wishlistSent) return;
+
+    enterTimerRef.current = window.setTimeout(() => {
+      enterTimerRef.current = null;
+      setChapterPhase('entering');
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        setChapterPhase('entered');
+        return;
+      }
+
+      enterTimerRef.current = window.setTimeout(() => {
+        setChapterPhase('entered');
+        enterTimerRef.current = null;
+      }, 7600);
+    }, 1500);
+
+    return () => {
+      if (enterTimerRef.current !== null) {
+        window.clearTimeout(enterTimerRef.current);
+        enterTimerRef.current = null;
+      }
+    };
+  }, [wishlistSent]);
+
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current !== null) {
+        window.clearTimeout(exitTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleChapterBack = () => {
+    if (chapterPhase === 'exiting') return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onBack();
+      return;
+    }
+
+    setChapterPhase('exiting');
+
+    exitTimerRef.current = window.setTimeout(() => {
+      onBack();
+    }, 1250);
+  };
 
   useEffect(() => () => {
     flyingCardAnimations.current.forEach((animation, card) => {
@@ -679,7 +735,11 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
   if (!wishlistSent) return null;
 
   return (
-    <section className="special-chapter" aria-labelledby="special-chapter-title">
+    <section
+        className={`special-chapter special-chapter--${chapterPhase}`}
+        aria-labelledby="special-chapter-title"
+        >
+
       <header className="special-chapter-heading">
         <h2 id="special-chapter-title">
           <AnimatedText text="Special Chapter" />
@@ -921,7 +981,12 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
                 : 'SIMPAN RENCANA'}
           </button>
           {isCurrentPlanSaved && (
-            <button type="button" className="special-return-button" onClick={onBack}>
+            <button
+              type="button"
+              className="special-return-button"
+              onClick={handleChapterBack}
+              disabled={chapterPhase === 'exiting'}
+            >
               KEMBALI KE AWAL
             </button>
           )}
