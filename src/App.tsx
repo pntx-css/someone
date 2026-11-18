@@ -13,6 +13,7 @@ import { songs, type Song } from './data/music';
 const BirthdayJourney: React.FC = () => {
   const [phase, setPhase] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [planeArrived, setPlaneArrived] = useState(false);
 
   const handleSelectSong = (song: Song) => {
     setCurrentSong(song);
@@ -27,6 +28,11 @@ const BirthdayJourney: React.FC = () => {
     });
   }, []);
 
+  const handleWishlistBack = () => {
+    setPlaneArrived(false);
+    setPhase(1);
+  };
+
   return (
     <main className="birthday-journey">
       <div className="journey-chapter" key={phase} aria-live="polite">
@@ -36,8 +42,8 @@ const BirthdayJourney: React.FC = () => {
         {phase === 4 && <PersonalMessage onNext={() => setPhase(5)} />}
         {phase === 5 && (
           <>
-          <Memories />
-          <Wishlist onBack={() => setPhase(1)} />
+            <Memories onPlaneArrived={setPlaneArrived} />
+            <Wishlist onBack={handleWishlistBack} planeArrived={planeArrived} />
           </>
         )}
       </div>

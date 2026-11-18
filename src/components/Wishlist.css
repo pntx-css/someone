@@ -267,6 +267,7 @@
 
 .wishlist-envelope-stage--success .wishlist-paper {
   opacity: 0;
+  animation: none;
 }
 
 .wishlist-envelope-stage--success .wishlist-envelope-back {
@@ -383,5 +384,137 @@
   .wishlist-back {
     transition-duration: 0.01ms;
     transition-delay: 0ms;
+  }
+}
+
+.wishlist-heading--waiting {
+  visibility: hidden;
+}
+
+.wishlist-heading--waiting .animated-text__character {
+  opacity: 0;
+  animation: none;
+}
+
+.puzzle-paper--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.puzzle-paper--revealed {
+  visibility: visible;
+  animation: puzzlePaperReveal 900ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes puzzlePaperReveal {
+  0% {
+    opacity: 0;
+    clip-path: polygon(
+      0 0, 20% 0, 20% 20%,
+      40% 20%, 40% 0,
+      70% 0, 70% 25%,
+      100% 25%, 100% 100%,
+      75% 100%, 75% 80%,
+      45% 80%, 45% 100%,
+      0 100%
+    );
+    transform: scale(0.85) rotate(-3deg) translateY(30px);
+  }
+
+  45% {
+    opacity: 1;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: scale(1.03) rotate(1deg) translateY(-5px);
+  }
+
+  75% {
+    transform: scale(0.98) rotate(-0.5deg);
+  }
+
+  100% {
+    opacity: 1;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: scale(1) rotate(0);
+  }
+}
+
+.puzzle-item {
+  opacity: 0;
+  visibility: hidden;
+  clip-path: inset(0 100% 0 0);
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
+.puzzle-item.is-revealed {
+  visibility: visible;
+  pointer-events: auto;
+  animation: puzzleTextReveal 600ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.puzzle-label.is-revealed {
+  animation-delay: 900ms;
+  transition: visibility 0s 900ms;
+}
+
+.puzzle-textarea.is-revealed {
+  animation-delay: 1550ms;
+  transition: visibility 0s 1550ms;
+}
+
+.puzzle-count.is-revealed {
+  animation-delay: 2200ms;
+  transition: visibility 0s 2200ms;
+}
+
+.puzzle-button.is-revealed {
+  animation: puzzleButtonReveal 500ms cubic-bezier(.2, 1.5, .5, 1) 2850ms both;
+  transition: visibility 0s 2850ms;
+}
+
+@keyframes puzzleTextReveal {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes puzzleButtonReveal {
+  0% {
+    opacity: 0;
+    transform: scale(.5);
+  }
+
+  75% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .puzzle-paper--revealed,
+  .puzzle-item.is-revealed {
+    animation: none !important;
+    opacity: 1;
+    visibility: visible;
+    clip-path: none;
+    transform: none;
+  }
+
+  .puzzle-item.is-revealed {
+    transition: none;
   }
 }

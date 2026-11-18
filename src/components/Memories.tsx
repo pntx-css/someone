@@ -9,8 +9,13 @@ interface SelectedMemory {
   memory: Memory;
 }
 
-export const Memories: React.FC = () => {
+interface MemoriesProps {
+  onPlaneArrived: (arrived: boolean) => void;
+}
+export const Memories: React.FC<MemoriesProps> = ({ onPlaneArrived }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
+  const planeArrivedRef = useRef(false);
+  const onPlaneArrivedRef = useRef(onPlaneArrived);
   const pathRef = useRef<SVGPathElement>(null);
   const planeRef = useRef<HTMLDivElement>(null);
   const [svgSize, setSvgSize] = useState({ width: 0, height: 0 });
@@ -20,6 +25,10 @@ export const Memories: React.FC = () => {
   const modalRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   useBodyScrollLock(Boolean(selectedMemory));
+
+  useEffect(() => {
+    onPlaneArrivedRef.current = onPlaneArrived;
+  }, [onPlaneArrived]);
 
   useEffect(() => {
     if (!selectedMemory) return;
@@ -151,8 +160,19 @@ export const Memories: React.FC = () => {
       let distance = 0;
 
       if (targetY >= pathEndY) {
-        distance = pathLength;
-      } else if (targetY > pathStartY) {
+  distance = pathLength;
+
+  if (!planeArrivedRef.current) {
+    planeArrivedRef.current = true;
+    onPlaneArrivedRef.current(true);
+  }
+} else {
+  if (planeArrivedRef.current) {
+    planeArrivedRef.current = false;
+    onPlaneArrivedRef.current(false);
+  }
+
+  if (targetY > pathStartY) {
         let start = 0;
         let end = pathLength;
 
@@ -166,7 +186,8 @@ export const Memories: React.FC = () => {
         }
 
         distance = (start + end) / 2;
-      }
+  }
+}
 
       const point = path.getPointAtLength(distance);
       const sampleDistance = Math.min(3, pathLength / 100);

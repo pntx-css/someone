@@ -10,9 +10,10 @@ type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 interface WishlistProps {
   onBack: () => void;
+  planeArrived: boolean;
 }
 
-export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
+export const Wishlist: React.FC<WishlistProps> = ({ onBack, planeArrived }) => {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [validationMessage, setValidationMessage] = useState('');
@@ -38,17 +39,22 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: trimmedMessage }),
       });
+
       const result: unknown = await response.json().catch(() => null);
+
       if (!response.ok) {
         const errorMessage =
           result && typeof result === 'object' && typeof (result as { error?: unknown }).error === 'string'
             ? (result as { error: string }).error
             : 'Pesan belum berhasil dikirim. Coba lagi ya.';
+
         throw new Error(errorMessage);
       }
+
       if (!result || typeof result !== 'object' || (result as { sent?: unknown }).sent !== true) {
         throw new Error('Server belum mengonfirmasi penyimpanan pesan. Coba lagi ya.');
       }
+
       setStatus('success');
     } catch (error) {
       setSubmissionError(
@@ -64,31 +70,48 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
 
   return (
     <section className="wishlist-section" aria-labelledby="wishlist-title">
-      <div className="wishlist-heading">
+      <div className={`wishlist-heading ${planeArrived ? '' : 'wishlist-heading--waiting'}`}>
         <p className="wishlist-eyebrow">
           <AnimatedText text="a little note for later" />
         </p>
+
         <h2 id="wishlist-title">
           <AnimatedText text="Your Hope" delay={180} />
         </h2>
+
         <p className="wishlist-intro">
-          <AnimatedText text="Tulis harapan dan pesan kamu buat aku disini yaa" delay={360} interval={16} />
+          <AnimatedText
+            text="Tulis harapan dan pesan kamu buat aku disini yaa"
+            delay={360}
+            interval={16}
+          />
         </p>
       </div>
 
       <div className={`wishlist-envelope-stage wishlist-envelope-stage--${stageStatus}`}>
         <div className="wishlist-envelope-back" aria-hidden="true" />
-        <form className="wishlist-paper" onSubmit={handleSubmit} noValidate>
-          <label className="wishlist-label" htmlFor="wishlist-message">
+
+        <form
+          className={`wishlist-paper ${planeArrived ? 'puzzle-paper--revealed' : 'puzzle-paper--hidden'}`}
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <label
+            className={`wishlist-label puzzle-item puzzle-label ${planeArrived ? 'is-revealed' : ''}`}
+            htmlFor="wishlist-message"
+          >
             Dear, papan...
           </label>
+
           <textarea
+            className={`wishlist-textarea puzzle-item puzzle-textarea ${planeArrived ? 'is-revealed' : ''}`}
             id="wishlist-message"
-            className="wishlist-textarea"
             value={message}
             onChange={(event) => {
               setMessage(event.target.value);
+
               if (validationMessage) setValidationMessage('');
+
               if (status === 'error') {
                 setStatus('idle');
                 setSubmissionError('');
@@ -100,14 +123,24 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
             aria-invalid={Boolean(validationMessage)}
             aria-describedby="wishlist-feedback wishlist-count"
           />
+
           <div className="wishlist-paper-footer">
-            <span id="wishlist-count" className="wishlist-count">
+            <span
+              id="wishlist-count"
+              className={`wishlist-count puzzle-item puzzle-count ${planeArrived ? 'is-revealed' : ''}`}
+            >
               {message.length}/1200
             </span>
-            <button className="wishlist-submit" type="submit" disabled={isSubmitting || isSent}>
+
+            <button
+              className={`wishlist-submit puzzle-button ${planeArrived ? 'is-revealed' : ''}`}
+              type="submit"
+              disabled={isSubmitting || isSent}
+            >
               {isSubmitting ? 'MENGIRIM...' : isSent ? 'TERKIRIM' : 'KIRIM'}
             </button>
           </div>
+
           <p
             id="wishlist-feedback"
             className={`wishlist-feedback ${validationMessage || submissionError || isSubmitting ? 'is-visible' : ''}`}
@@ -129,6 +162,7 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack }) => {
       <p className={`wishlist-confirmation ${isSent ? 'is-visible' : ''}`} aria-live="polite">
         {isSent && 'Pesanmu udah kuterima, makasih yaa ♡'}
       </p>
+
       <Suspense fallback={null}>
         <SpecialChapter wishlistSent={isSent} onBack={onBack} />
       </Suspense>
