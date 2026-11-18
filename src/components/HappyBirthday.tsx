@@ -12,7 +12,7 @@ export const HappyBirthday: React.FC<HappyBirthdayProps> = ({ onSelectSong }) =>
   return (
     <div className="hb-container">
       <h1 className="hb-title">
-        <AnimatedText text="Happy Birthday Mayluvvv" effect="burst" duration={560} interval={18} />
+        <AnimatedText text="Happy Birthday" effect="burst" duration={560} interval={18} />
       </h1>
       <p className="hb-subtitle">
         <AnimatedText text="this one's for you ♡" delay={300} />
