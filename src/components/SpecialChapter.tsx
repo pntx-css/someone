@@ -12,6 +12,7 @@ import {
 import { specialPlaces} from '../data/specialPlaces';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import { AnimatedText } from './AnimatedText';
+import { ScrollWheel } from './ScrollWheel';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './SpecialChapter.css';
 
@@ -64,6 +65,8 @@ interface PlanTimeDialogProps {
 
 const MAX_NAME_LENGTH = 80;
 const MAX_DESCRIPTION_LENGTH = 240;
+const HOURS = Array.from({ length: 24 }, (_, hour) => String(hour).padStart(2, '0'));
+const MINUTES = Array.from({ length: 60 }, (_, minute) => String(minute).padStart(2, '0'));
 
 setWorkerUrl(mapWorkerUrl);
 
@@ -87,10 +90,10 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
   onSave,
   onRemove,
 }) => {
-  const [time, setTime] = useState(initialTime);
+  const [hour, setHour] = useState(initialTime.slice(0, 2));
+  const [minute, setMinute] = useState(initialTime.slice(3, 5));
   const [isEntering, setIsEntering] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
-  const timeInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const closeActionRef = useRef<(() => void) | null>(null);
@@ -100,11 +103,11 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    timeInputRef.current?.focus();
+    dialogRef.current?.querySelector<HTMLElement>('.special-time-wheels [role="listbox"]')?.focus();
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Tab' || !dialogRef.current) return;
       const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'input:not(:disabled), button:not(:disabled), a[href]'
+        '[tabindex]:not([tabindex="-1"]), input:not(:disabled), button:not(:disabled), a[href]'
       );
       if (focusable.length === 0) return;
       const first = focusable[0];
@@ -160,18 +163,19 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
 
   const handleDialogAnimationEnd = (event: React.AnimationEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
-    if (event.animationName === 'special-time-dialog-flip-in') {
+    if (event.animationName === 'special-time-dialog-scroll-in') {
       setIsEntering(false);
       const pendingClose = pendingCloseRef.current;
       pendingCloseRef.current = null;
       if (pendingClose) beginClose(pendingClose);
-    } else if (event.animationName === 'special-time-dialog-flip-out') {
+    } else if (event.animationName === 'special-time-dialog-scroll-out') {
       finishClose();
     }
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const time = `${hour}:${minute}`;
     if (isClosing || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)) return;
     requestClose(() => onSave(time));
   };
@@ -186,17 +190,38 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
         aria-labelledby="special-time-dialog-title"
         onAnimationEnd={handleDialogAnimationEnd}
       >
-        <button className="special-dialog-close" type="button" onClick={() => requestClose(onCancel)} aria-label="Tutup pengaturan waktu">
-          ×
-        </button>
         <p className="special-eyebrow">a little time for us</p>
         <h3 id="special-time-dialog-title">Atur waktu kunjungan</h3>
         <p className="special-dialog-intro">
           {place.name}{place.description && place.description !== place.name ? ` · ${place.description}` : ''}
         </p>
         <form className="special-place-form" onSubmit={handleSubmit}>
-          <label htmlFor="planned-visit-time">Waktu</label>
-          <input ref={timeInputRef} id="planned-visit-time" type="time" value={time} onChange={(event) => setTime(event.target.value)} required />
+          <p className="special-time-field-label">Waktu</p>
+          <div className="special-time-wheels" role="group" aria-label="Pilih waktu kunjungan">
+            <div className="special-time-wheel-column">
+              <span className="special-time-wheel-label">Jam</span>
+              <ScrollWheel
+                options={HOURS}
+                value={hour}
+                onChange={(value) => setHour(String(value))}
+                label="Jam"
+                initialScroll
+                initialScrollDelay={0}
+              />
+            </div>
+            <span className="special-time-separator" aria-hidden="true">:</span>
+            <div className="special-time-wheel-column">
+              <span className="special-time-wheel-label">Menit</span>
+              <ScrollWheel
+                options={MINUTES}
+                value={minute}
+                onChange={(value) => setMinute(String(value))}
+                label="Menit"
+                initialScroll
+                initialScrollDelay={140}
+              />
+            </div>
+          </div>
           <a className="special-maps-link" href={place.mapsUrl} target="_blank" rel="noopener noreferrer">
             Buka Google Maps 
           </a>
@@ -363,7 +388,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
   const [planSubmissionNotice, setPlanSubmissionNotice] = useState('');
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const clockRef = useRef<HTMLDivElement>(null);
-  const planVisitRefs = useRef(new Map<string, HTMLLIElement>());
+  const planVisitRefs = useRef(new Map<string, HTMLTableRowElement>());
   const flyingCardAnimations = useRef(new Map<HTMLElement, Animation>());
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
@@ -917,47 +942,64 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
           {orderedVisits.length === 0 ? (
             <p className="special-empty-plan">Pilih tempat untuk mulai.</p>
           ) : (
-            <ol className="special-plan-list">
-              {orderedVisits.map((visit) => {
-                const place = allPlaces.find((item) => item.id === visit.placeId);
-                if (!place) return null;
-                return (
-                  <li
-                    key={visit.placeId}
-                    ref={(element) => {
-                      if (element) {
-                        planVisitRefs.current.set(visit.placeId, element);
-                      } else {
-                        planVisitRefs.current.delete(visit.placeId);
-                      }
-                    }}
-                  >
-                    <button
-                      type="button"
-                      className="special-plan-place"
-                      onClick={() => setPlanningPlaceId(place.id)}
-                    >
-                      {place.name}
-                    </button>
-                    <label className="special-time-label">
-                      <span className="sr-only">Waktu untuk {place.name}</span>
-                      <input
-                        type="time"
-                        value={visit.time}
-                        onChange={(event) => updateVisitTime(visit.placeId, event.target.value)}
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="special-remove-plan"
-                      onClick={() => removeVisit(visit.placeId)}
-                    >
-                      Hapus
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
+            <div className="special-plan-table-wrap">
+              <table className="special-plan-table" aria-label="Rencana kunjungan">
+                <thead>
+                  <tr>
+                    <th scope="col">Tempat</th>
+                    <th scope="col">Waktu</th>
+                    <th scope="col">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderedVisits.map((visit) => {
+                    const place = allPlaces.find((item) => item.id === visit.placeId);
+                    if (!place) return null;
+                    return (
+                      <tr
+                        key={visit.placeId}
+                        ref={(element) => {
+                          if (element) {
+                            planVisitRefs.current.set(visit.placeId, element);
+                          } else {
+                            planVisitRefs.current.delete(visit.placeId);
+                          }
+                        }}
+                      >
+                        <td>
+                          <button
+                            type="button"
+                            className="special-plan-place"
+                            onClick={() => setPlanningPlaceId(place.id)}
+                          >
+                            {place.name}
+                          </button>
+                        </td>
+                        <td>
+                          <label className="special-time-label">
+                            <span className="sr-only">Waktu untuk {place.name}</span>
+                            <input
+                              type="time"
+                              value={visit.time}
+                              onChange={(event) => updateVisitTime(visit.placeId, event.target.value)}
+                            />
+                          </label>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="special-remove-plan"
+                            onClick={() => removeVisit(visit.placeId)}
+                          >
+                            Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
           {visitWarnings.length > 0 && (
             <ul className="special-plan-warnings" aria-label="Peringatan waktu">
@@ -1005,7 +1047,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
         <PlanTimeDialog
           key={planningPlace.id}
           place={planningPlace}
-          initialTime={existingPlanningVisit?.time ?? '09:00'}
+          initialTime={existingPlanningVisit?.time ?? '00:00'}
           onCancel={closePlanningDialog}
           onSave={(time) => saveVisitTime(planningPlace.id, time)}
           onRemove={existingPlanningVisit ? () => removeVisit(planningPlace.id) : undefined}

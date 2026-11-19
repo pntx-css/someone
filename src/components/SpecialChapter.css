@@ -7,6 +7,20 @@
     #fce7f3;
 }
 
+@keyframes special-card-text-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    transform: translateY(9px);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: translateY(0);
+  }
+}
+
 .special-chapter--waiting {
   visibility: hidden;
   pointer-events: none;
@@ -176,6 +190,8 @@
 
 .special-custom-card {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
   padding: 0.4rem 1rem 1rem;
   overflow: hidden;
   border-color: rgba(131, 24, 67, 0.13);
@@ -213,6 +229,7 @@ button.special-empty-card:active {
   position: relative;
   display: block;
   width: 100%;
+  flex: 1 0 auto;
   min-height: 145px;
   padding: 1.1rem 1.3rem 0.8rem 0;
   border: 0;
@@ -247,6 +264,23 @@ button.special-empty-card:active {
   font-weight: 400;
   line-height: 1.55;
   overflow-wrap: anywhere;
+}
+
+.special-card-select h4 {
+  max-width: calc(100% - 3.25rem);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.special-card-select .special-custom-badge {
+  max-width: calc(100% - 0.5rem);
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.special-default-grid .special-custom-badge {
+  font: 500 0.72rem var(--font-display);
+  letter-spacing: 0.01em;
 }
 
 .special-card-heart {
@@ -288,9 +322,11 @@ button.special-empty-card:active {
 
 .special-maps-link {
   display: inline-block;
-  margin: 0.15rem 0 0.9rem;
+  align-self: flex-start;
+  margin: 0.25rem 0 0.75rem;
   color: #a32150;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
@@ -304,7 +340,7 @@ button.special-empty-card:active {
 }
 
 .special-card-actions button,
-.special-plan-list button {
+.special-plan-table button {
   border: 0;
   background: transparent;
   color: #831843;
@@ -384,6 +420,12 @@ button.special-empty-card:active {
   margin-bottom: 1rem;
 }
 
+.special-plan-panel .special-section-heading h3 {
+  color: var(--color-berry);
+  font: 600 clamp(1.7rem, 3vw, 2rem)/1.15 var(--font-display);
+  letter-spacing: -0.02em;
+}
+
 .special-map {
   width: 100%;
   height: 340px;
@@ -450,13 +492,16 @@ button.special-empty-card:active {
 
 .special-clock {
   position: relative;
-  width: 180px;
+  width: min(220px, 100%);
   aspect-ratio: 1;
-  margin: 0 auto 1.3rem;
-  border: 2px solid rgba(131, 24, 67, 0.42);
+  margin: 0 auto 1.5rem;
+  border: 1px solid rgba(168, 93, 112, 0.35);
   border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 7px rgba(248, 221, 227, 0.62),
+    0 8px 20px rgba(89, 65, 62, 0.07);
   background:
-    radial-gradient(circle, transparent 0 64%, rgba(194, 69, 120, 0.07) 65% 100%),
+    radial-gradient(circle, #fffdfb 0 62%, rgba(248, 221, 227, 0.5) 63% 100%),
     #fff9fb;
 }
 
@@ -531,18 +576,24 @@ button.special-empty-card:active {
   position: absolute;
   z-index: 2;
   display: grid;
-  min-width: 40px;
-  height: 19px;
-  padding: 0 0.25rem;
-  border: 2px solid #fff;
+  min-width: 3.1rem;
+  min-height: 1.65rem;
+  padding: 0.15rem 0.42rem;
+  border: 2px solid var(--color-paper);
   border-radius: 999px;
-  background: #c24578;
-  box-shadow: 0 0 0 1px #c24578;
+  background: var(--color-berry);
+  box-shadow: 0 3px 9px rgba(89, 65, 62, 0.2);
   color: #fff;
-  font: 0.52rem 'DM Mono', monospace;
+  font: 600 0.7rem var(--font-display);
   transform: translate(-50%, -50%);
   cursor: pointer;
   transition: transform 160ms var(--ease-soft), background-color 160ms var(--ease-soft), box-shadow 160ms var(--ease-soft);
+}
+
+.special-clock-dot:hover,
+.special-clock-dot:focus-visible {
+  background: #831843;
+  box-shadow: 0 0 0 3px rgba(194, 69, 120, 0.2), 0 5px 12px rgba(89, 65, 62, 0.2);
 }
 
 .special-clock-dot:active {
@@ -551,8 +602,8 @@ button.special-empty-card:active {
 
 .special-clock-label {
   position: absolute;
-  color: rgba(131, 24, 67, 0.7);
-  font: 0.62rem 'DM Mono', monospace;
+  color: rgba(131, 24, 67, 0.76);
+  font: 600 0.78rem var(--font-display);
 }
 
 .special-clock-label--12 { top: 7%; left: 50%; transform: translateX(-50%); }
@@ -561,37 +612,82 @@ button.special-empty-card:active {
 .special-clock-label--9 { top: 50%; left: 7%; transform: translateY(-50%); }
 
 .special-empty-plan {
-  padding: 1rem;
-  border-radius: 4px;
-  color: rgba(59, 23, 39, 0.7);
-  background: #fff4f8;
-  font-size: 0.82rem;
-  line-height: 1.55;
+  padding: 1rem 1.1rem;
+  border: 1px dashed rgba(168, 93, 112, 0.35);
+  border-radius: 0.9rem;
+  color: rgba(59, 23, 39, 0.72);
+  background: rgba(252, 231, 243, 0.55);
+  font: 400 0.9rem/1.6 var(--font-body);
   text-align: center;
 }
 
-.special-plan-list {
-  display: grid;
-  gap: 0.6rem;
-  list-style: none;
+.special-plan-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
 }
 
-.special-plan-list li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid rgba(131, 24, 67, 0.12);
+.special-plan-table {
+  width: 100%;
+  min-width: 14rem;
+  border-collapse: separate;
+  border-spacing: 0 0.4rem;
+  table-layout: fixed;
 }
 
-.special-plan-place {
+.special-plan-table th {
+  padding: 0 0.4rem 0.15rem;
+  color: rgba(131, 24, 67, 0.64);
+  font: 500 0.6rem 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.special-plan-table th:nth-child(2),
+.special-plan-table th:nth-child(3),
+.special-plan-table td:nth-child(2),
+.special-plan-table td:nth-child(3) {
+  text-align: center;
+}
+
+.special-plan-table th:first-child { width: 48%; }
+.special-plan-table th:nth-child(2) { width: 30%; }
+.special-plan-table th:last-child { width: 22%; }
+
+.special-plan-table td {
+  padding: 0.45rem 0.4rem;
+  border-top: 1px solid rgba(131, 24, 67, 0.1);
+  border-bottom: 1px solid rgba(131, 24, 67, 0.1);
+  background: rgba(252, 231, 243, 0.38);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.special-plan-table td:first-child {
+  border-left: 1px solid rgba(131, 24, 67, 0.1);
+  border-radius: 0.75rem 0 0 0.75rem;
+}
+
+.special-plan-table td:last-child {
+  border-right: 1px solid rgba(131, 24, 67, 0.1);
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.special-plan-table tr:hover td {
+  border-color: rgba(168, 93, 112, 0.28);
+  background: rgba(252, 231, 243, 0.68);
+}
+
+.special-plan-table .special-plan-place {
+  display: block;
+  width: 100%;
+  min-width: 0;
   padding: 0;
   border: 0;
   background: transparent;
   overflow: hidden;
-  color: #831843;
-  font: 500 0.68rem var(--font-body);
+  color: var(--color-berry);
+  font: 600 0.88rem/1.25 var(--font-display);
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
@@ -604,17 +700,52 @@ button.special-empty-card:active {
 }
 
 .special-time-label input {
-  width: 6.5rem;
-  padding: 0.4rem;
-  border: 1px solid rgba(131, 24, 67, 0.22);
-  border-radius: 0.8rem;
-  color: #3b1727;
-  background: #fff;
-  font: 0.76rem 'DM Mono', monospace;
+  width: 4rem;
+  min-height: 2.15rem;
+  padding: 0.35rem 0.25rem;
+  border: 1px solid rgba(131, 24, 67, 0.17);
+  border-radius: 999px;
+  color: var(--color-berry);
+  background: var(--color-paper);
+  font: 600 0.82rem var(--font-display);
+  text-align: center;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-.special-plan-list .special-remove-plan {
+.special-time-label input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.special-time-label input:focus-visible {
+  border-color: #c24578;
+  outline: 3px solid rgba(236, 72, 153, 0.2);
+  outline-offset: 1px;
+}
+
+.special-plan-table .special-remove-plan {
+  display: inline-flex;
+  min-height: 2rem;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid rgba(163, 33, 80, 0.3);
+  border-radius: 999px;
   color: #a32150;
+  background: rgba(255, 252, 247, 0.85);
+  font: 500 0.7rem var(--font-body);
+  white-space: nowrap;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.special-plan-table .special-remove-plan:hover {
+  border-color: #a32150;
+  color: #fff;
+  background: #a32150;
+}
+
+.special-plan-table .special-remove-plan:focus-visible {
+  outline: 3px solid rgba(236, 72, 153, 0.35);
+  outline-offset: 2px;
 }
 
 .special-plan-warnings {
@@ -623,8 +754,7 @@ button.special-empty-card:active {
   margin-top: 0.8rem;
   padding-left: 1.1rem;
   color: #8d2549;
-  font-size: 0.76rem;
-  line-height: 1.5;
+  font: 400 0.82rem/1.55 var(--font-body);
 }
 
 .special-plan-submit-feedback {
@@ -746,11 +876,11 @@ button.special-empty-card:active {
 .special-place-dialog.special-time-dialog {
   transform-style: preserve-3d;
   backface-visibility: hidden;
-  animation: special-time-dialog-flip-in 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: special-time-dialog-scroll-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .special-place-dialog.special-time-dialog.is-closing {
-  animation: special-time-dialog-flip-out 250ms ease-in both;
+  animation: special-time-dialog-scroll-out 250ms ease-in both;
 }
 
 .special-place-dialog::before {
@@ -827,6 +957,95 @@ button.special-empty-card:active {
   font: 400 0.88rem var(--font-body);
 }
 
+.special-time-field-label {
+  margin: 0.85rem 0 0.4rem;
+  color: #831843;
+  font: 500 0.82rem var(--font-body);
+}
+
+.special-time-wheels {
+  position: relative;
+  display: flex;
+  min-height: 11rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0.25rem 0 0.35rem;
+}
+
+.special-time-wheels::before,
+.special-time-wheels::after {
+  position: absolute;
+  z-index: 1;
+  top: calc(50% + 0.45rem);
+  right: 0;
+  left: 0;
+  pointer-events: none;
+  content: '';
+}
+
+.special-time-wheels::before {
+  height: 50px;
+  border-radius: 0.75rem;
+  background: rgba(249, 213, 229, 0.48);
+  transform: translateY(-50%);
+}
+
+.special-time-wheels::after {
+  height: 50px;
+  border-top: 1px solid rgba(194, 69, 120, 0.35);
+  border-bottom: 1px solid rgba(194, 69, 120, 0.35);
+  transform: translateY(-50%);
+}
+
+.special-time-wheel-column {
+  position: relative;
+  z-index: 2;
+  width: 5.25rem;
+  text-align: center;
+}
+
+.special-time-wheel-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: rgba(131, 24, 67, 0.62);
+  font: 0.62rem 'DM Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.special-time-wheels .wheel-box,
+.special-time-wheels .wheel-container {
+  height: 150px;
+}
+
+.special-time-wheels .wheel-container {
+  touch-action: pan-y;
+}
+
+.special-time-wheels .wheel-item {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.special-time-wheels .wheel-item.selected {
+  color: var(--color-berry);
+  font-size: 1.55rem;
+}
+
+.special-time-separator {
+  z-index: 2;
+  margin-top: 1rem;
+  color: var(--color-berry);
+  font: 600 1.5rem var(--font-display);
+}
+
+.special-place-form .special-maps-link {
+  width: fit-content;
+  margin: 0.8rem 0 0.25rem;
+  font-weight: 500;
+}
+
 .special-place-form input:focus,
 .special-place-form textarea:focus {
   border-color: #c24578;
@@ -851,8 +1070,9 @@ button.special-empty-card:active {
 .special-dialog-actions {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.65rem;
-  margin-top: 0.7rem;
+  margin-top: 1rem;
 }
 
 .special-dialog-actions button {
@@ -958,32 +1178,27 @@ button.special-empty-card:active {
   }
 }
 
-@keyframes special-time-dialog-flip-in {
-  0% {
+@keyframes special-time-dialog-scroll-in {
+  from {
     opacity: 0;
-    transform: rotateY(-90deg) scale(0.85);
+    transform: translateY(36px) scale(0.97);
   }
 
-  70% {
+  to {
     opacity: 1;
-    transform: rotateY(5deg) scale(1.015);
-  }
-
-  100% {
-    opacity: 1;
-    transform: rotateY(0) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
-@keyframes special-time-dialog-flip-out {
+@keyframes special-time-dialog-scroll-out {
   from {
     opacity: 1;
-    transform: rotateY(0) scale(1);
+    transform: translateY(0) scale(1);
   }
 
   to {
     opacity: 0;
-    transform: rotateY(90deg) scale(0.92);
+    transform: translateY(24px) scale(0.97);
   }
 }
 
@@ -1008,6 +1223,31 @@ button.special-empty-card:active {
     calc(1200ms + var(--card-delay, 0ms)) both;
 }
 
+.special-chapter--entering .special-default-grid .special-placeholder-number {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(1450ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-default-grid .special-card-select h4 {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(1550ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-default-grid .special-card-select p {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(1650ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-default-grid .special-custom-badge {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(1750ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-default-grid .special-maps-link {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(1850ms + var(--card-delay, 0ms)) both;
+}
+
 /* Judul tempat custom */
 .special-chapter--entering .special-custom-section > .special-section-heading {
   animation: special-section-in 450ms cubic-bezier(0.16, 1, 0.3, 1) 2400ms both;
@@ -1017,6 +1257,31 @@ button.special-empty-card:active {
 .special-chapter--entering .special-custom-grid > * {
   animation: special-card-appear 450ms cubic-bezier(0.16, 1, 0.3, 1)
     calc(2900ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-custom-grid .special-card-select h4 {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(3150ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-custom-grid .special-card-select p {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(3250ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-custom-grid .special-custom-badge {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(3350ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-custom-grid .special-maps-link {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(3450ms + var(--card-delay, 0ms)) both;
+}
+
+.special-chapter--entering .special-custom-grid .special-card-actions {
+  animation: special-card-text-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(3550ms + var(--card-delay, 0ms)) both;
 }
 
 /* Map */
@@ -1035,55 +1300,55 @@ button.special-empty-card:active {
 }
 
 /* Daftar rencana */
-.special-chapter--entering .special-plan-list li {
+.special-chapter--entering .special-plan-table tbody tr {
   animation: special-card-appear 400ms cubic-bezier(0.16, 1, 0.3, 1) 5500ms both;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(1) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(1) {
   animation-delay: 5500ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(2) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(2) {
   animation-delay: 5600ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(3) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(3) {
   animation-delay: 5700ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(4) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(4) {
   animation-delay: 5800ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(5) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(5) {
   animation-delay: 5900ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(6) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(6) {
   animation-delay: 6000ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(7) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(7) {
   animation-delay: 6100ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(8) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(8) {
   animation-delay: 6200ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(9) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(9) {
   animation-delay: 6300ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(10) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(10) {
   animation-delay: 6400ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(11) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(11) {
   animation-delay: 6500ms;
 }
 
-.special-chapter--entering .special-plan-list li:nth-child(12) {
+.special-chapter--entering .special-plan-table tbody tr:nth-child(12) {
   animation-delay: 6600ms;
 }
 
@@ -1332,6 +1597,19 @@ button.special-empty-card:active {
   .special-place-dialog {
     width: min(30rem, calc(100vw - 2rem));
     max-height: calc(100dvh - 2rem);
+  }
+
+  .special-dialog-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .special-dialog-actions button {
+    width: 100%;
+  }
+
+  .special-dialog-actions .special-primary-button {
+    grid-column: 1 / -1;
   }
 }
 
