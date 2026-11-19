@@ -4,6 +4,7 @@ export interface DefaultPlace extends Coordinates {
   id: string;
   title: string;
   description: string;
+  mapsUrl: string;
 }
 
 export interface DefaultPlacePlaceholder {
@@ -18,6 +19,7 @@ export const specialPlaces: DefaultPlace[] = [
     description: 'blum pernah kesana, tapi rating google nya tinggi njr',
     latitude: -7.545591,
     longitude: 110.770738,
+    mapsUrl: 'https://maps.app.goo.gl/4MK11FE46GgF3Jnm9',
   },
   {
     id: 'mie-ayam-worth-it',
@@ -25,6 +27,7 @@ export const specialPlaces: DefaultPlace[] = [
     description: 'keknya beneran worth it si, waktu itu juga rame kan. moga klo milih ini gk ketemu silvi lagi',
     latitude: -7.550031747694307, 
     longitude: 110.86095705256122,
+    mapsUrl: 'https://maps.app.goo.gl/DQHp9h2UBwmJYne98',
   },
   {
     id: 'solo-square',
@@ -32,6 +35,7 @@ export const specialPlaces: DefaultPlace[] = [
     description: 'enaktuh buat nonton. klo emng mw si. btw klo emng mw ke bioskop mending mam dulu, biar nggak plenger',
     latitude: -7.56078107468666, 
     longitude: 110.78863233721871,
+    mapsUrl: 'https://maps.app.goo.gl/D1uVMHX4CPThAuH57',
   },
   {
     id: 'dikichi-solo',
@@ -39,6 +43,7 @@ export const specialPlaces: DefaultPlace[] = [
     description: 'katanya sih ayam no 1 se indo, gtw bener enggak. belum coba soalnya hhe',
     latitude: -7.543398144764399, 
     longitude: 110.77002249489023,
+    mapsUrl: 'https://maps.app.goo.gl/ygkYgtii7cpQJt1y7',
   },
   {
     id: 'balai-kota',
@@ -46,6 +51,7 @@ export const specialPlaces: DefaultPlace[] = [
     description: 'enak kayaknya klo buat cerita cerita, bisa ke streetfood dideket sana juga',
     latitude: -7.569139167349101,  
     longitude: 110.82961545256178,
+    mapsUrl: 'https://maps.app.goo.gl/mgNSJ5oXzKWQBd5YA',
   },
   {
     id: 'momoyok',
@@ -53,6 +59,7 @@ export const specialPlaces: DefaultPlace[] = [
     description: 'klo dessert mah yang pasti-pasti aja yakan. biar ntar gak nyesel',
     latitude: -7.573912487806288, 
     longitude: 110.82204078139726,
+    mapsUrl: 'https://maps.app.goo.gl/1vLwgBV39oEGb9CD9',
   },
   {
     id: 'seblak-massbond',
@@ -60,6 +67,7 @@ export const specialPlaces: DefaultPlace[] = [
     description: 'gtw si masukin aja. gw gtw tempat seblak seblak gni, maybe enak. MAYBE LOHYA',
     latitude: -7.550518540493909, 
     longitude: 110.81375132372544,
+    mapsUrl: 'https://maps.app.goo.gl/N4T5R2QftYa21zzG6',
   },
   {
     id: 'lokananta',
@@ -67,13 +75,15 @@ export const specialPlaces: DefaultPlace[] = [
     description: 'kayaknya nyaman klo buat cerita cerita, kayak pas di alun-alun',
     latitude: -7.557716793607948, 
     longitude: 110.7955605372194,
+    mapsUrl: 'https://maps.app.goo.gl/UftiVk7haythk8N5A',
   },
   {
     id: 'u-co-steak',
     title: 'U&Co Steak',
     description: 'klo mw steak disini enak, KATANYA juga sih',
     latitude: -7.574596423355014, 
-    longitude: 110.82568311023358
+    longitude: 110.82568311023358,
+    mapsUrl: 'https://maps.app.goo.gl/N51c4Uib6QkvCY4D7',
   },
 ];
 

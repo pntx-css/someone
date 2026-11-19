@@ -466,7 +466,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
         name: place.title,
         description: place.description,
         coordinates: { latitude: place.latitude, longitude: place.longitude },
-        mapsUrl: `https://www.google.com/maps?q=${place.latitude},${place.longitude}`,
+        mapsUrl: place.mapsUrl,
       })),
       ...places.map((place) => ({
         ...place,
@@ -808,11 +808,11 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
                 </button>
                 <a
                   className="special-maps-link"
-                  href={`https://www.google.com/maps?q=${place.latitude},${place.longitude}`}
+                  href={place.mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Buka Google Maps
+                  Buka link Google
                 </a>
               </article>
             );
