@@ -682,46 +682,20 @@ button.special-empty-card:active {
   display: block;
   width: 100%;
   min-width: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  padding: 0 0 0 0.7rem;
   overflow: hidden;
   color: var(--color-berry);
   font: 600 0.88rem/1.25 var(--font-display);
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: left;
-  cursor: pointer;
+  text-align: center;
 }
 
-.special-plan-place:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.special-time-label input {
-  width: 4rem;
-  min-height: 2.15rem;
-  padding: 0.35rem 0.25rem;
-  border: 1px solid rgba(131, 24, 67, 0.17);
-  border-radius: 999px;
+.special-plan-time {
+  display: inline-block;
   color: var(--color-berry);
-  background: var(--color-paper);
   font: 600 0.82rem var(--font-display);
   text-align: center;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-.special-time-label input::-webkit-calendar-picker-indicator {
-  display: none;
-}
-
-.special-time-label input:focus-visible {
-  border-color: #c24578;
-  outline: 3px solid rgba(236, 72, 153, 0.2);
-  outline-offset: 1px;
 }
 
 .special-plan-table .special-remove-plan {
@@ -1076,6 +1050,8 @@ button.special-empty-card:active {
 }
 
 .special-dialog-actions button {
+  flex: 1 1 0;
+  min-width: 0;
   min-height: 2.7rem;
   padding: 0.65rem 1rem;
   border: 1px solid #831843;
@@ -1600,38 +1576,86 @@ button.special-empty-card:active {
   }
 
   .special-dialog-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.45rem;
   }
 
   .special-dialog-actions button {
     width: 100%;
-  }
-
-  .special-dialog-actions .special-primary-button {
-    grid-column: 1 / -1;
+    min-height: 2.45rem;
+    padding: 0.55rem 0.35rem;
+    font-size: 0.68rem;
   }
 }
 
 @media (max-width: 480px) {
   .special-chapter {
-    padding-right: 1rem;
-    padding-left: 1rem;
+    padding: 3.25rem 0.75rem 5rem;
+  }
+
+  .special-chapter-heading {
+    margin-bottom: 2.25rem;
+  }
+
+  .special-chapter-heading > p:last-child,
+  .special-section-heading h4,
+  .special-section-note {
+    width: 100%;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .special-defaults,
+  .special-custom-section {
+    margin-bottom: 2.75rem;
   }
 
   .special-section-heading {
     align-items: center;
+    gap: 0.75rem;
+  }
+
+  .special-section-heading h3 {
+    font-size: 1.55rem;
+  }
+
+  .special-section-heading h4 {
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    line-height: 1.55;
   }
 
   .special-placeholder-count {
-    max-width: 11rem;
+    max-width: 100%;
     white-space: normal;
-    text-align: right;
+    text-align: center;
   }
 
   .special-default-grid,
   .special-custom-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .special-custom-card {
+    padding: 0.35rem 0.85rem 0.85rem;
+  }
+
+  .special-card-select {
+    min-height: 138px;
+    padding: 0.85rem 2.6rem 0.7rem 0;
+  }
+
+  .special-card-select h4,
+  .special-card-select p {
+    max-width: 100%;
+  }
+
+  .special-card-heart {
+    top: 0.85rem;
+    width: 2.25rem;
+    height: 2.25rem;
   }
 
   .special-placeholder-card {
@@ -1644,15 +1668,121 @@ button.special-empty-card:active {
 
   .special-map-panel,
   .special-plan-panel {
-    padding: 1rem;
+    min-width: 0;
+    padding: 0.85rem;
   }
 
   .special-map {
     height: 290px;
   }
 
+  .special-clock {
+    width: min(190px, 100%);
+  }
+
+  .special-plan-table-wrap {
+    margin-inline: -0.15rem;
+  }
+
+  .special-plan-table {
+    min-width: 220px;
+  }
+
+  .special-plan-table th,
+  .special-plan-table td {
+    padding-inline: 0.25rem;
+  }
+
+  .special-plan-table th:first-child {
+    width: 43%;
+  }
+
+  .special-plan-table th:nth-child(2) {
+    width: 29%;
+  }
+
+  .special-plan-table th:last-child {
+    width: 28%;
+  }
+
+  .special-plan-table .special-plan-place {
+    padding-left: 0.45rem;
+  }
+
+  .special-plan-time {
+    font-size: 0.78rem;
+  }
+
+  .special-plan-table .special-remove-plan {
+    padding-inline: 0.38rem;
+  }
+
   .special-place-dialog {
-    padding: 1.5rem 1.2rem;
+    width: calc(100vw - 1.25rem);
+    max-width: calc(100vw - 1.25rem);
+    max-height: calc(100dvh - 1.25rem);
+    padding: 1.35rem 0.9rem;
+  }
+
+  .special-place-dialog h3 {
+    font-size: 1.45rem;
+  }
+
+  .special-time-wheels {
+    min-height: 10rem;
+  }
+
+  .special-time-wheel-column {
+    width: 4.35rem;
+  }
+
+  .special-dialog-actions {
+    gap: 0.45rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .special-chapter {
+    padding-inline: 0.55rem;
+  }
+
+  .special-map-panel,
+  .special-plan-panel {
+    padding-inline: 0.65rem;
+  }
+
+  .special-clock {
+    width: 176px;
+  }
+
+  .special-place-dialog {
+    width: calc(100vw - 0.75rem);
+    max-width: calc(100vw - 0.75rem);
+  }
+
+  .special-time-wheel-column {
+    width: 4rem;
+  }
+
+  .special-time-separator {
+    margin-inline: -0.1rem;
+  }
+
+  .special-plan-table {
+    min-width: 204px;
+  }
+
+  .special-plan-table .special-plan-place {
+    padding-left: 0.3rem;
+  }
+
+  .special-plan-time {
+    font-size: 0.76rem;
+  }
+
+  .special-plan-table .special-remove-plan {
+    padding-inline: 0.28rem;
+    font-size: 0.64rem;
   }
 }
 

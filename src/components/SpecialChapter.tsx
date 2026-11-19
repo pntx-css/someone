@@ -228,7 +228,7 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
           <div className="special-dialog-actions">
             {onRemove && (
               <button type="button" className="special-secondary-button" onClick={() => requestClose(onRemove)}>
-                Hapus dari rencana
+                Hapus 
               </button>
             )}
             <button type="button" className="special-secondary-button" onClick={() => requestClose(onCancel)}>Batal</button>
@@ -628,12 +628,6 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
     closePlanningDialog();
   };
 
-  const updateVisitTime = (placeId: string, time: string) => {
-    setPlannedVisits((current) =>
-      current.map((visit) => (visit.placeId === placeId ? { ...visit, time } : visit))
-    );
-  };
-
   const submitPlan = async () => {
     if (isSubmittingPlan || planPayload.length === 0 || isCurrentPlanSaved) return;
     setIsSubmittingPlan(true);
@@ -967,23 +961,12 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
                         }}
                       >
                         <td>
-                          <button
-                            type="button"
-                            className="special-plan-place"
-                            onClick={() => setPlanningPlaceId(place.id)}
-                          >
+                          <span className="special-plan-place">
                             {place.name}
-                          </button>
+                          </span>
                         </td>
                         <td>
-                          <label className="special-time-label">
-                            <span className="sr-only">Waktu untuk {place.name}</span>
-                            <input
-                              type="time"
-                              value={visit.time}
-                              onChange={(event) => updateVisitTime(visit.placeId, event.target.value)}
-                            />
-                          </label>
+                          <span className="special-plan-time">{visit.time}</span>
                         </td>
                         <td>
                           <button
