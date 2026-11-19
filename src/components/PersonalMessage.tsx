@@ -6,54 +6,57 @@ interface PersonalMessageProps {
   onNext: () => void;
 }
 
-const typewriterInterval = 1800 / Math.max(1, Array.from(personalMessage).length);
+const WORD_INTERVAL = 40;
+const WORD_DURATION = 520;
+const SENTENCES_PER_BURST = 3;
+const SENTENCE_PATTERN = /[\s\S]*?[.!?]+(?:[)\]"'”’*_]*)?(?=\s|$)|[\s\S]+$/gu;
+
+const splitIntoBurstGroups = (text: string): string[] => {
+  const sentences = Array.from(text.matchAll(SENTENCE_PATTERN), (match) => match[0]);
+  const groups: string[] = [];
+
+  for (let index = 0; index < sentences.length; index += SENTENCES_PER_BURST) {
+    groups.push(sentences.slice(index, index + SENTENCES_PER_BURST).join(''));
+  }
+
+  return groups;
+};
+
+const personalMessageBursts = splitIntoBurstGroups(personalMessage);
 
 const renderPersonalMessage = (): React.ReactNode[] => {
-  const kaomojiPattern = /\([^()\n]*[^\p{ASCII}][^()\n]*\)/gu;
-  const content: React.ReactNode[] = [];
-  let lastIndex = 0;
-  let characterIndex = 0;
+  let delay = 0;
 
-  const renderCharacters = (text: string, key: string): React.ReactNode => (
-    <span className="letter-typed-run" key={key}>
-      {Array.from(text).map((character) => {
-        const delay = characterIndex * typewriterInterval;
-        const keyIndex = characterIndex;
-        characterIndex += 1;
+  return personalMessageBursts.map((text, index) => {
+    const words = text.match(/\s+|\S+/gu) ?? [];
+    const wordCount = words.filter((word) => !/^\s+$/u.test(word)).length;
+    const currentDelay = delay;
+    delay += Math.max(0, wordCount - 1) * WORD_INTERVAL + WORD_DURATION + 180;
+    let revealIndex = 0;
 
-        return /\s/u.test(character) ? (
-          <React.Fragment key={keyIndex}>{character}</React.Fragment>
-        ) : (
-          <span
-            className="letter-typed-character"
-            key={keyIndex}
-            style={{ animationDelay: `${delay}ms` }}
-          >
-            {character}
-          </span>
-        );
-      })}
-    </span>
-  );
+    return (
+      <span className="letter-message-burst" key={`message-burst-${index}`}>
+        {words.map((word, wordIndex) => {
+          if (/^\s+$/u.test(word)) {
+            return <React.Fragment key={`space-${wordIndex}`}>{word}</React.Fragment>;
+          }
 
-  for (const match of personalMessage.matchAll(kaomojiPattern)) {
-    const index = match.index;
-    if (index > lastIndex) {
-      content.push(renderCharacters(personalMessage.slice(lastIndex, index), `message-${index}`));
-    }
-    content.push(
-      <span className="letter-kaomoji" key={index}>
-        {renderCharacters(match[0], `kaomoji-${index}`)}
+          const wordDelay = currentDelay + revealIndex * WORD_INTERVAL;
+          revealIndex += 1;
+
+          return (
+            <span
+              className="letter-word-pop"
+              key={`word-${wordIndex}`}
+              style={{ animationDelay: `${wordDelay}ms` }}
+            >
+              {word}
+            </span>
+          );
+        })}
       </span>
     );
-    lastIndex = index + match[0].length;
-  }
-
-  if (lastIndex < personalMessage.length) {
-    content.push(renderCharacters(personalMessage.slice(lastIndex), 'message-end'));
-  }
-
-  return content;
+  });
 };
 
 export const PersonalMessage: React.FC<PersonalMessageProps> = ({ onNext }) => {
@@ -67,8 +70,8 @@ export const PersonalMessage: React.FC<PersonalMessageProps> = ({ onNext }) => {
           <span className="letter-content-accessible">{personalMessage}</span>
         </div>
         <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-          <button 
-            className="gate-btn" 
+          <button
+            className="gate-btn"
             onClick={onNext}
             style={{ position: 'relative', zIndex: 10 }}
           >
