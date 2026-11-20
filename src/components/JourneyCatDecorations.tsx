@@ -90,14 +90,66 @@ const CatDecoration: React.FC<CatDecorationProps> = ({ asset, row, side }) => {
   );
 };
 
-export const JourneyCatDecorations: React.FC<{ phase: JourneyPhase }> = ({ phase }) => {
+const RandomFootprint: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const [isActivated, setIsActivated] = useState(false);
+  const [position] = useState(() => ({
+    side: Math.random() < 0.5 ? 'left' as const : 'right' as const,
+    row: Math.random() < 0.5 ? 2 : 4,
+  }));
+
+  const handleClick = () => {
+    if (isActivated) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onClick();
+      return;
+    }
+
+    setIsActivated(true);
+  };
+
+  return (
+    <button
+      className={`journey-footprint${isActivated ? ' is-activated' : ''}`}
+      type="button"
+      onClick={handleClick}
+      onAnimationEnd={(event) => {
+        if (event.target === event.currentTarget && event.animationName === 'journey-footprint-shrink') {
+          onClick();
+        }
+      }}
+      aria-label="Buka halaman rahasia"
+      title="Buka halaman rahasia"
+      style={{
+        gridColumn: position.side === 'left' ? 1 : 3,
+        gridRow: position.row,
+      }}
+    >
+      <img src="/assets/cats/jejak_kaki.svg" alt="" draggable="false" />
+    </button>
+  );
+};
+
+interface JourneyCatDecorationsProps {
+  phase: JourneyPhase;
+  onOpenRandomChapter: () => void;
+}
+
+export const JourneyCatDecorations: React.FC<JourneyCatDecorationsProps> = ({
+  phase,
+  onOpenRandomChapter,
+}) => {
   const cats = useMemo(() => positionLayouts[phase], [phase]);
 
   return (
     <div className="journey-cat-decorations">
       {cats.map((cat, index) => (
-        <CatDecoration key={`${phase}-${cat.side}-${cat.row}-${index}`} {...cat} />
+        <CatDecoration
+          key={`${phase}-${cat.side}-${cat.row}-${index}`}
+          {...cat}
+          row={cat.row * 2}
+        />
       ))}
+      {phase === 5 && <RandomFootprint onClick={onOpenRandomChapter} />}
     </div>
   );
 };

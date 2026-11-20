@@ -14,6 +14,9 @@ const BirthdayJourney: React.FC = () => {
   const [phase, setPhase] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [planeArrived, setPlaneArrived] = useState(false);
+  const [isCollapsing, setIsCollapsing] = useState(false);
+  const [showPlaceholder, setShowPlaceholder] = useState(false);
+  const [collapseOriginY, setCollapseOriginY] = useState(0);
 
   const handleSelectSong = (song: Song) => {
     setCurrentSong(song);
@@ -33,8 +36,41 @@ const BirthdayJourney: React.FC = () => {
     setPhase(1);
   };
 
+  const handleOpenRandomChapter = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      setShowPlaceholder(true);
+      return;
+    }
+
+    setCollapseOriginY(window.scrollY + window.innerHeight / 2);
+    setIsCollapsing(true);
+  };
+
+  if (showPlaceholder) {
+    return (
+      <main className="random-chapter-placeholder">
+        <p className="random-chapter-placeholder__eyebrow">a little surprise</p>
+        <h1>Something new is coming...</h1>
+        <p>Halaman ini masih disiapkan ♡</p>
+      </main>
+    );
+  }
+
   return (
-    <main className="birthday-journey">
+    <main
+      className={`birthday-journey${isCollapsing ? ' birthday-journey--collapsing' : ''}`}
+      style={{ '--journey-collapse-origin-y': `${collapseOriginY}px` } as React.CSSProperties}
+      onAnimationEnd={(event) => {
+        if (
+          event.target === event.currentTarget &&
+          event.animationName === 'journey-collapse'
+        ) {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+          setShowPlaceholder(true);
+        }
+      }}
+    >
       <div className="journey-chapter" key={phase} aria-live="polite">
         {phase === 1 && <BirthdayGate onUnlock={() => setPhase(2)} />}
         {phase === 2 && <BirthdayCake onComplete={() => setPhase(3)} />}
@@ -43,13 +79,21 @@ const BirthdayJourney: React.FC = () => {
         {phase === 5 && (
           <>
             <Memories onPlaneArrived={setPlaneArrived} />
-            <Wishlist onBack={handleWishlistBack} planeArrived={planeArrived} />
+            <Wishlist
+              onBack={handleWishlistBack}
+              planeArrived={planeArrived}
+            />
           </>
         )}
       </div>
 
       {currentSong && phase >= 4 && <MusicPlayer song={currentSong} onSongEnd={handleSongEnd} />}
-      {phase !== 1 && <JourneyCatDecorations phase={phase} />}
+      {phase !== 1 && (
+        <JourneyCatDecorations
+          phase={phase}
+          onOpenRandomChapter={handleOpenRandomChapter}
+        />
+      )}
     </main>
   );
 };

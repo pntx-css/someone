@@ -21,16 +21,6 @@
   margin-bottom: 4rem;
 }
 
-.memory-footsteps {
-  position: absolute;
-  top: 16rem;
-  right: 2%;
-  width: 34px;
-  opacity: 0.12;
-  pointer-events: none;
-  z-index: 0;
-}
-
 .memories-timeline {
   width: min(100%, 1060px);
   margin: 0 auto;

@@ -223,8 +223,6 @@ export const Memories: React.FC<MemoriesProps> = ({ onPlaneArrived }) => {
 
   return (
     <div className="memories-container" style={{ position: 'relative' }}>
-      <img className="memory-footsteps" src="/assets/cats/jejak_kaki.svg" alt="" aria-hidden="true" />
-
       <h2 className="memories-title" style={{ position: 'relative', zIndex: 10 }}>
         <AnimatedText text="Our Memories" />
       </h2>
