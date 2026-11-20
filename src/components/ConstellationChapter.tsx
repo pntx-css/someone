@@ -52,10 +52,19 @@ const LINE_INTERVAL_MS = 140;
 const STAR_POINTS = SKY_STARS;
 const LARGE_STAR_INDICES = new Set([0, 6, 8, 10, 18]);
 
-export const ConstellationChapter: React.FC = () => {
+interface ConstellationChapterProps {
+  immersiveError: string;
+  onRequestImmersiveMode: () => Promise<void>;
+}
+
+export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
+  immersiveError,
+  onRequestImmersiveMode,
+}) => {
   const [litStarCount, setLitStarCount] = useState(0);
   const [visibleLineCount, setVisibleLineCount] = useState(0);
   const [selectedStarIndex, setSelectedStarIndex] = useState<number | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const isComplete = visibleLineCount === CONSTELLATION_EDGES.length;
 
@@ -71,6 +80,12 @@ export const ConstellationChapter: React.FC = () => {
         rootStyle.removeProperty('scrollbar-gutter');
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const updateFullscreenState = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', updateFullscreenState);
+    return () => document.removeEventListener('fullscreenchange', updateFullscreenState);
   }, []);
 
   useEffect(() => {
@@ -141,6 +156,22 @@ export const ConstellationChapter: React.FC = () => {
           d="M0 300v-47l18-39 18 39h-11l24 33 19-48 21-45 21 45h-12l27 49 18-40 19-37 20 37h-12l23 32 19-54 24-45 24 45h-14l27 54 18-43 20-37 20 37h-12l25 43 20-48 21-43 21 43h-13l26 48 19-44 21-38 21 38h-13l25 44 21-54 22-46 22 46h-14l29 53 18-39 20-35 20 35h-12l26 40 18-47 21-42 21 42h-13l27 47 20-50 23-45 23 45h-14l29 50 19-45 20-37 20 37h-12l25 41 18-47 22-43 22 43h-14l28 47 20-51 22-43 22 43h-13l27 49 20-45 20-38 20 38h-12l26 41 20-48 21-42 21 42h-13l27 47 19-48 21-43 21 43h-13l27 48 18-43 20-37 20 37h-12l24 41 19-47 21-42 21 42h-13l26 47 20-47 20-39 20 39h-12l24 41 19-48 20-42 20 42h-12l25 48v47H0Z"
         />
       </svg>
+
+      <div className="constellation-controls">
+        <button
+          className="constellation-immersive-button"
+          type="button"
+          onClick={() => void onRequestImmersiveMode()}
+          disabled={isFullscreen && !immersiveError}
+        >
+          {isFullscreen && !immersiveError ? 'Layar penuh aktif' : 'Layar penuh & landscape'}
+        </button>
+        {immersiveError && (
+          <p className="constellation-immersive-message" role="status">
+            {immersiveError}
+          </p>
+        )}
+      </div>
 
       <svg
         className={`constellation-map${isComplete ? ' is-complete' : ''}`}

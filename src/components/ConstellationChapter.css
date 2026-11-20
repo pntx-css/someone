@@ -121,6 +121,50 @@
   fill: #03050d;
 }
 
+.constellation-controls {
+  position: absolute;
+  z-index: 5;
+  top: max(1rem, env(safe-area-inset-top));
+  right: max(1rem, env(safe-area-inset-right));
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+  max-width: min(20rem, calc(100vw - 2rem));
+}
+
+.constellation-immersive-button {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(226, 190, 255, 0.38);
+  border-radius: 999px;
+  background: rgba(18, 13, 39, 0.82);
+  color: #fffaff;
+  font: 500 0.78rem var(--font-body);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.constellation-immersive-button:hover:not(:disabled) {
+  background: rgba(75, 43, 112, 0.9);
+}
+
+.constellation-immersive-button:focus-visible {
+  outline: 2px solid #d6bdff;
+  outline-offset: 3px;
+}
+
+.constellation-immersive-button:disabled {
+  cursor: default;
+  opacity: 0.82;
+}
+
+.constellation-immersive-message {
+  color: #f0defe;
+  font: 0.75rem/1.4 var(--font-body);
+  text-align: right;
+  text-shadow: 0 1px 5px #09071e;
+}
+
 .constellation-map {
   z-index: 1;
   display: block;

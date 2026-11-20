@@ -1,5 +1,6 @@
 import React from 'react';
 import { personalMessage } from '../data/message';
+import { JourneyCatDecorations } from './JourneyCatDecorations';
 import './PersonalMessage.css';
 
 interface PersonalMessageProps {
@@ -63,6 +64,7 @@ export const PersonalMessage: React.FC<PersonalMessageProps> = ({ onNext }) => {
   return (
     <div className="letter-container" style={{ position: 'relative' }}>
       <div className="letter-paper">
+        <JourneyCatDecorations phase={4} />
         <div className="letter-content" lang="id">
           <div className="letter-content-visual" aria-hidden="true">
             {renderPersonalMessage()}

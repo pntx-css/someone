@@ -18,6 +18,7 @@ const BirthdayJourney: React.FC = () => {
   const [isCollapsing, setIsCollapsing] = useState(false);
   const [showConstellation, setShowConstellation] = useState(false);
   const [collapseOriginY, setCollapseOriginY] = useState(0);
+  const [immersiveError, setImmersiveError] = useState('');
 
   const handleSelectSong = (song: Song) => {
     setCurrentSong(song);
@@ -37,7 +38,53 @@ const BirthdayJourney: React.FC = () => {
     setPhase(1);
   };
 
+  const requestImmersiveMode = useCallback(async () => {
+    if (!document.fullscreenElement) {
+      if (!document.fullscreenEnabled || typeof document.documentElement.requestFullscreen !== 'function') {
+        setImmersiveError('Browser ini tidak mendukung layar penuh. Coba buka halaman ini di browser lain.');
+        return;
+      }
+
+      try {
+        await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+      } catch (error) {
+        console.warn('Fullscreen request failed', error);
+        setImmersiveError('Layar penuh belum diizinkan. Tekan tombol mode layar penuh untuk mencoba lagi.');
+        return;
+      }
+    }
+
+    const orientation = screen.orientation as (ScreenOrientation & {
+      lock?: (orientation: 'landscape') => Promise<void>;
+    }) | undefined;
+
+    if (!orientation) {
+      setImmersiveError('Layar penuh aktif, tetapi browser ini tidak mendukung kunci landscape.');
+      return;
+    }
+
+    if (orientation.type.startsWith('landscape')) {
+      setImmersiveError('');
+      return;
+    }
+
+    if (!orientation.lock) {
+      setImmersiveError('Layar penuh aktif, tetapi browser ini tidak mendukung kunci landscape.');
+      return;
+    }
+
+    try {
+      await orientation.lock('landscape');
+      setImmersiveError('');
+    } catch (error) {
+      console.warn('Landscape orientation lock failed', error);
+      setImmersiveError('Layar penuh aktif, tetapi orientasi landscape tidak dapat dikunci. Putar perangkat secara manual.');
+    }
+  }, []);
+
   const handleOpenRandomChapter = () => {
+    void requestImmersiveMode();
+
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       window.scrollTo({ top: 0, behavior: 'auto' });
       setShowConstellation(true);
@@ -48,46 +95,53 @@ const BirthdayJourney: React.FC = () => {
     setIsCollapsing(true);
   };
 
-  if (showConstellation) return <ConstellationChapter />;
-
   return (
-    <main
-      className={`birthday-journey${isCollapsing ? ' birthday-journey--collapsing' : ''}`}
-      style={{ '--journey-collapse-origin-y': `${collapseOriginY}px` } as React.CSSProperties}
-      onAnimationEnd={(event) => {
-        if (
-          event.target === event.currentTarget &&
-          event.animationName === 'journey-collapse'
-        ) {
-          window.scrollTo({ top: 0, behavior: 'auto' });
-          setShowConstellation(true);
-        }
-      }}
-    >
-      <div className="journey-chapter" key={phase} aria-live="polite">
-        {phase === 1 && <BirthdayGate onUnlock={() => setPhase(2)} />}
-        {phase === 2 && <BirthdayCake onComplete={() => setPhase(3)} />}
-        {phase === 3 && <HappyBirthday onSelectSong={handleSelectSong} />}
-        {phase === 4 && <PersonalMessage onNext={() => setPhase(5)} />}
-        {phase === 5 && (
-          <>
-            <Memories
-              onPlaneArrived={setPlaneArrived}
-              onOpenRandomChapter={handleOpenRandomChapter}
-            />
-            <Wishlist
-              onBack={handleWishlistBack}
-              planeArrived={planeArrived}
-            />
-          </>
-        )}
-      </div>
+    <>
+      {showConstellation ? (
+        <ConstellationChapter
+          immersiveError={immersiveError}
+          onRequestImmersiveMode={requestImmersiveMode}
+        />
+      ) : (
+        <main
+          className={`birthday-journey${isCollapsing ? ' birthday-journey--collapsing' : ''}`}
+          style={{ '--journey-collapse-origin-y': `${collapseOriginY}px` } as React.CSSProperties}
+          onAnimationEnd={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              event.animationName === 'journey-collapse'
+            ) {
+              window.scrollTo({ top: 0, behavior: 'auto' });
+              setShowConstellation(true);
+            }
+          }}
+        >
+          <div className="journey-chapter" key={phase} aria-live="polite">
+            {phase === 1 && <BirthdayGate onUnlock={() => setPhase(2)} />}
+            {phase === 2 && <BirthdayCake onComplete={() => setPhase(3)} />}
+            {phase === 3 && <HappyBirthday onSelectSong={handleSelectSong} />}
+            {phase === 4 && <PersonalMessage onNext={() => setPhase(5)} />}
+            {phase === 5 && (
+              <>
+                <Memories
+                  onPlaneArrived={setPlaneArrived}
+                  onOpenRandomChapter={handleOpenRandomChapter}
+                />
+                <Wishlist
+                  onBack={handleWishlistBack}
+                  planeArrived={planeArrived}
+                />
+              </>
+            )}
+          </div>
 
+          {phase === 2 || phase === 3 ? (
+            <JourneyCatDecorations phase={phase} />
+          ) : null}
+        </main>
+      )}
       {currentSong && phase >= 4 && <MusicPlayer song={currentSong} onSongEnd={handleSongEnd} />}
-      {phase === 2 || phase === 3 || phase === 4 ? (
-        <JourneyCatDecorations phase={phase} />
-      ) : null}
-    </main>
+    </>
   );
 };
 
