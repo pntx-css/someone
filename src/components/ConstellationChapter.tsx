@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './ConstellationChapter.css';
 
 interface StarCoordinate {
@@ -45,7 +45,8 @@ const CONSTELLATION_EDGES: ReadonlyArray<readonly [number, number]> = [
 ];
 
 const STAR_COUNT = SKY_STARS.length;
-const STAR_INTERVAL_MS = 1000;
+const STAR_START_DELAY_MS = 1200;
+const STAR_INTERVAL_MS = 650;
 const LINE_START_DELAY_MS = 650;
 const LINE_INTERVAL_MS = 140;
 const STAR_POINTS = SKY_STARS;
@@ -54,6 +55,23 @@ const LARGE_STAR_INDICES = new Set([0, 6, 8, 10, 18]);
 export const ConstellationChapter: React.FC = () => {
   const [litStarCount, setLitStarCount] = useState(0);
   const [visibleLineCount, setVisibleLineCount] = useState(0);
+  const [selectedStarIndex, setSelectedStarIndex] = useState<number | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const isComplete = visibleLineCount === CONSTELLATION_EDGES.length;
+
+  useEffect(() => {
+    const rootStyle = document.documentElement.style;
+    const previousGutter = rootStyle.getPropertyValue('scrollbar-gutter');
+    rootStyle.setProperty('scrollbar-gutter', 'auto');
+
+    return () => {
+      if (previousGutter) {
+        rootStyle.setProperty('scrollbar-gutter', previousGutter);
+      } else {
+        rootStyle.removeProperty('scrollbar-gutter');
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let startTimer = 0;
@@ -66,7 +84,7 @@ export const ConstellationChapter: React.FC = () => {
       nextStarTimer = window.setTimeout(() => lightStar(index + 1), STAR_INTERVAL_MS);
     };
 
-    startTimer = window.setTimeout(() => lightStar(0), 1200);
+    startTimer = window.setTimeout(() => lightStar(0), STAR_START_DELAY_MS);
     return () => {
       window.clearTimeout(startTimer);
       window.clearTimeout(nextStarTimer);
@@ -88,6 +106,17 @@ export const ConstellationChapter: React.FC = () => {
 
     return () => window.clearTimeout(lineTimer);
   }, [litStarCount]);
+
+  useEffect(() => {
+    if (selectedStarIndex === null) return;
+
+    closeButtonRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedStarIndex(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedStarIndex]);
 
   return (
     <main className="constellation-page">
@@ -114,7 +143,7 @@ export const ConstellationChapter: React.FC = () => {
       </svg>
 
       <svg
-        className={`constellation-map${visibleLineCount === CONSTELLATION_EDGES.length ? ' is-complete' : ''}`}
+        className={`constellation-map${isComplete ? ' is-complete' : ''}`}
         viewBox="0 0 1000 560"
         role="img"
         aria-labelledby="sagittarius-title sagittarius-description"
@@ -144,22 +173,73 @@ export const ConstellationChapter: React.FC = () => {
         </g>
 
         <g className="constellation-stars">
-          {STAR_POINTS.map((point, index) => (
-            <g key={`${point.x}-${point.y}`} transform={`translate(${point.x} ${point.y})`}>
-              <g
-                className={`constellation-star${index < litStarCount ? ' is-lit' : ''}${point.isPrimary ? ' is-primary' : ''}${[0, 2, 4, 6, 8, 10, 12, 14, 17, 18].includes(index) ? ' is-prominent' : ''}${LARGE_STAR_INDICES.has(index) ? ' is-large' : ''}`}
-                style={{ '--twinkle-delay': `${index * 180}ms` } as React.CSSProperties}
-              >
-                <path
-                  className="constellation-star-rays"
-                  d="M 0 -18 C 0.8 -5.5 1.6 -1.2 18 0 C 1.6 1.2 0.8 5.5 0 18 C -0.8 5.5 -1.6 1.2 -18 0 C -1.6 -1.2 -0.8 -5.5 0 -18 Z"
-                />
-                <circle r={2.2 + (4.52 - point.magnitude) * 0.42 + (LARGE_STAR_INDICES.has(index) ? 1 : 0)} />
+          {STAR_POINTS.map((point, index) => {
+            const canOpenMemory = isComplete;
+            return (
+              <g key={`${point.x}-${point.y}`} transform={`translate(${point.x} ${point.y})`}>
+                <g
+                  className={`constellation-star${index < litStarCount ? ' is-lit' : ''}${point.isPrimary ? ' is-primary' : ''}${[0, 2, 4, 6, 8, 10, 12, 14, 17, 18].includes(index) ? ' is-prominent' : ''}${LARGE_STAR_INDICES.has(index) ? ' is-large' : ''}${canOpenMemory ? ' is-clickable' : ''}`}
+                  style={{ '--twinkle-delay': `${index * 180}ms` } as React.CSSProperties}
+                  role={canOpenMemory ? 'button' : undefined}
+                  tabIndex={canOpenMemory ? 0 : undefined}
+                  aria-label={canOpenMemory ? `Buka kenangan bintang ${index + 1}` : undefined}
+                  onClick={canOpenMemory ? () => setSelectedStarIndex(index) : undefined}
+                  onKeyDown={canOpenMemory ? (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setSelectedStarIndex(index);
+                    }
+                  } : undefined}
+                >
+                  <path
+                    className="constellation-star-rays"
+                    d="M 0 -22 C 0.45 -7 0.85 -0.8 22 0 C 0.85 0.8 0.45 7 0 22 C -0.45 7 -0.85 0.8 -22 0 C -0.85 -0.8 -0.45 -7 0 -22 Z"
+                  />
+                  <circle r={1.3 + (4.52 - point.magnitude) * 0.3 + (LARGE_STAR_INDICES.has(index) ? 0.6 : 0)} />
+                </g>
               </g>
-            </g>
-          ))}
+            );
+          })}
         </g>
       </svg>
+
+      {selectedStarIndex !== null && (
+        <div
+          className="constellation-popup-backdrop"
+          onClick={() => setSelectedStarIndex(null)}
+        >
+          <section
+            className="constellation-popup"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="constellation-popup-title"
+            aria-describedby="constellation-popup-caption"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              ref={closeButtonRef}
+              className="constellation-popup-close"
+              type="button"
+              onClick={() => setSelectedStarIndex(null)}
+              aria-label="Tutup pop-up"
+            >
+              ×
+            </button>
+            <div className="constellation-popup-photo" role="img" aria-label="Placeholder foto">
+              <span>Foto sementara</span>
+            </div>
+            <div className="constellation-popup-copy">
+              <p className="constellation-popup-eyebrow">
+                BINTANG {String(selectedStarIndex + 1).padStart(2, '0')}
+              </p>
+              <h2 id="constellation-popup-title">Kenangan di bawah bintang</h2>
+              <p id="constellation-popup-caption">
+                Judul dan caption kenangan akan ditambahkan di sini.
+              </p>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 };

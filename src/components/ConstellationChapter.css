@@ -3,8 +3,6 @@
   z-index: 1000;
   inset: 0;
   display: grid;
-  width: 100vw;
-  height: 100dvh;
   place-items: center;
   overflow: hidden;
   isolation: isolate;
@@ -131,6 +129,104 @@
   overflow: visible;
 }
 
+.constellation-popup-backdrop {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(5, 4, 18, 0.68);
+  backdrop-filter: blur(8px);
+  animation: constellation-popup-backdrop-enter 420ms ease both;
+}
+
+.constellation-popup {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  width: min(760px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid rgba(226, 190, 255, 0.24);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(116, 72, 162, 0.22), transparent 50%),
+    rgba(18, 13, 39, 0.97);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
+  color: #f7efff;
+  animation: constellation-popup-reveal 620ms cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+.constellation-popup-close {
+  position: absolute;
+  z-index: 1;
+  top: 0.65rem;
+  right: 0.65rem;
+  display: grid;
+  width: 2.5rem;
+  min-height: 2.5rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fffaff;
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.constellation-popup-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.constellation-popup-photo {
+  display: grid;
+  min-height: 220px;
+  aspect-ratio: 4 / 3;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(231, 207, 255, 0.22);
+  border-radius: 0.85rem;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(211, 176, 255, 0.24), transparent 42%),
+    linear-gradient(145deg, #21183f, #0d1029);
+  color: rgba(243, 231, 255, 0.7);
+  font: 500 0.82rem var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.constellation-popup-copy {
+  padding: 1rem 0.5rem;
+}
+
+.constellation-popup-eyebrow {
+  margin-bottom: 0.65rem;
+  color: #c9a8ff;
+  font: 600 0.72rem var(--font-body);
+  letter-spacing: 0.18em;
+}
+
+.constellation-popup-copy h2 {
+  margin: 0 2.5rem 0.8rem 0;
+  color: #fffaff;
+  font: 500 clamp(1.45rem, 3vw, 2.1rem) var(--font-display);
+  line-height: 1.15;
+}
+
+.constellation-popup-copy > p:last-child {
+  margin: 0;
+  color: rgba(235, 224, 248, 0.8);
+  font: 400 clamp(1rem, 2.2vw, 1.25rem) var(--font-hand);
+  line-height: 1.35;
+}
+
 .constellation-lines line {
   fill: none;
   stroke: rgba(221, 180, 255, 0.92);
@@ -179,6 +275,15 @@
   filter: drop-shadow(0 0 8px rgba(239, 202, 255, 1));
 }
 
+.constellation-star.is-clickable {
+  cursor: pointer;
+}
+
+.constellation-star.is-clickable:focus-visible {
+  filter: drop-shadow(0 0 8px rgba(221, 193, 255, 0.95));
+  outline: none;
+}
+
 .constellation-map.is-complete .constellation-star.is-primary circle {
   animation: constellation-star-twinkle 4.8s ease-in-out var(--twinkle-delay, 0ms) infinite alternate;
 }
@@ -221,8 +326,36 @@
   }
 }
 
+@keyframes constellation-popup-backdrop-enter {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; backdrop-filter: blur(8px); }
+}
+
+@keyframes constellation-popup-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.76);
+    filter: blur(14px);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.025);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
 @media (max-width: 760px) and (orientation: portrait) {
   .constellation-page {
+    inset: auto;
+    top: 0;
+    left: 0;
     width: 100dvh;
     height: 100dvw;
     transform: rotate(90deg) translateY(-100%);
@@ -237,6 +370,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .constellation-starfield {
+    animation: none;
+  }
+
+  .constellation-popup-backdrop,
+  .constellation-popup {
     animation: none;
   }
 }

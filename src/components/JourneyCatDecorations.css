@@ -9,10 +9,21 @@
   inset: 0;
   display: grid;
   grid-template-columns: minmax(5.5rem, 1fr) minmax(18rem, 8fr) minmax(5.5rem, 1fr);
-  grid-template-rows: repeat(5, minmax(9rem, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
   align-items: center;
   overflow: clip;
   pointer-events: none;
+  padding-block: 0.5rem;
+}
+
+.journey-cat-decorations--phase-2,
+.journey-cat-decorations--phase-4 {
+  z-index: 1200;
+}
+
+.journey-cat-decorations--phase-2 .journey-cat-decoration,
+.journey-cat-decorations--phase-4 .journey-cat-decoration {
+  opacity: 0.24;
 }
 
 .journey-cat-decoration {
@@ -132,12 +143,22 @@
 @media (max-width: 600px) {
   .journey-cat-decorations {
     grid-template-columns: minmax(3.75rem, 1fr) minmax(12rem, 5fr) minmax(3.75rem, 1fr);
-    grid-template-rows: repeat(5, minmax(8rem, 1fr));
+    grid-template-rows: repeat(5, minmax(0, 1fr));
+  }
+
+  .journey-cat-decorations--phase-4 .journey-cat-decoration:nth-child(3),
+  .journey-cat-decorations--phase-4 .journey-cat-decoration:nth-child(6) {
+    grid-row: 3 !important;
   }
 
   .journey-cat-decoration {
     width: clamp(3.75rem, 17vw, 5.5rem);
     opacity: 0.12;
+  }
+
+  .journey-cat-decorations--phase-2 .journey-cat-decoration,
+  .journey-cat-decorations--phase-4 .journey-cat-decoration {
+    opacity: 0.2;
   }
 
   .journey-footprint {

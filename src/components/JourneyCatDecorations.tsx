@@ -1,13 +1,14 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './JourneyCatDecorations.css';
 
 interface CatDecorationProps {
   asset: number;
   row: number;
   side: 'left' | 'right';
+  className?: string;
 }
 
-type JourneyPhase = 2 | 3 | 4 | 5;
+type JourneyPhase = 2 | 3 | 4;
 
 /* Derived from the visible path bounds, not the SVG canvas/viewBox. */
 const CAT_VISUAL_SCALE: Record<number, number> = {
@@ -35,13 +36,9 @@ const positionLayouts: Record<JourneyPhase, CatDecorationProps[]> = {
     { asset: 7, row: 0, side: 'left' }, { asset: 1, row: 1, side: 'left' }, { asset: 3, row: 2, side: 'left' },
     { asset: 5, row: 0, side: 'right' }, { asset: 7, row: 1, side: 'right' }, { asset: 1, row: 2, side: 'right' },
   ],
-  5: [
-    { asset: 3, row: 0, side: 'left' }, { asset: 5, row: 1, side: 'left' }, { asset: 7, row: 2, side: 'left' },
-    { asset: 1, row: 0, side: 'right' }, { asset: 3, row: 1, side: 'right' }, { asset: 5, row: 2, side: 'right' },
-  ],
 };
 
-const CatDecoration: React.FC<CatDecorationProps> = ({ asset, row, side }) => {
+export const CatDecoration: React.FC<CatDecorationProps> = ({ asset, row, side, className = '' }) => {
   const [smiling, setSmiling] = useState(false);
   const firstAsset = Math.floor((asset - 1) / 2) * 2 + 1;
   const [smileAsset, setSmileAsset] = useState(firstAsset + 1);
@@ -67,7 +64,7 @@ const CatDecoration: React.FC<CatDecorationProps> = ({ asset, row, side }) => {
 
   return (
     <button
-      className={`journey-cat-decoration${smiling ? ' is-smiling' : ''}`}
+      className={`journey-cat-decoration${smiling ? ' is-smiling' : ''}${className ? ` ${className}` : ''}`}
       type="button"
       onClick={handleClick}
       aria-label="Klik untuk membelai kucing"
@@ -90,12 +87,8 @@ const CatDecoration: React.FC<CatDecorationProps> = ({ asset, row, side }) => {
   );
 };
 
-const RandomFootprint: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+export const RandomFootprint: React.FC<{ onClick: () => void }> = ({ onClick }) => {
   const [isActivated, setIsActivated] = useState(false);
-  const [position] = useState(() => ({
-    side: Math.random() < 0.5 ? 'left' as const : 'right' as const,
-    row: Math.random() < 0.5 ? 2 : 4,
-  }));
 
   const handleClick = () => {
     if (isActivated) return;
@@ -128,10 +121,6 @@ const RandomFootprint: React.FC<{ onClick: () => void }> = ({ onClick }) => {
       }}
       aria-label="Buka halaman rahasia"
       title="Buka halaman rahasia"
-      style={{
-        gridColumn: position.side === 'left' ? 1 : 3,
-        gridRow: position.row,
-      }}
     >
       <img src="/assets/cats/jejak_kaki.svg" alt="" draggable="false" />
     </button>
@@ -140,17 +129,12 @@ const RandomFootprint: React.FC<{ onClick: () => void }> = ({ onClick }) => {
 
 interface JourneyCatDecorationsProps {
   phase: JourneyPhase;
-  onOpenRandomChapter: () => void;
 }
 
-export const JourneyCatDecorations: React.FC<JourneyCatDecorationsProps> = ({
-  phase,
-  onOpenRandomChapter,
-}) => {
-  const cats = useMemo(() => positionLayouts[phase], [phase]);
-
+export const JourneyCatDecorations: React.FC<JourneyCatDecorationsProps> = ({ phase }) => {
+  const cats = positionLayouts[phase];
   return (
-    <div className="journey-cat-decorations">
+    <div className={`journey-cat-decorations journey-cat-decorations--phase-${phase}`}>
       {cats.map((cat, index) => (
         <CatDecoration
           key={`${phase}-${cat.side}-${cat.row}-${index}`}
@@ -158,7 +142,6 @@ export const JourneyCatDecorations: React.FC<JourneyCatDecorationsProps> = ({
           row={cat.row * 2}
         />
       ))}
-      {phase === 5 && <RandomFootprint onClick={onOpenRandomChapter} />}
     </div>
   );
 };

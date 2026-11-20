@@ -3,7 +3,15 @@ import { createPortal } from 'react-dom';
 import { memories, type Memory } from '../data/memories';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import { AnimatedText } from './AnimatedText';
+import { CatDecoration, RandomFootprint } from './JourneyCatDecorations';
 import './Memories.css';
+
+const MEMORY_CAT_ASSETS = new Map<number, number>([
+  [0, 3], [1, 5], [5, 7], [6, 1], [10, 3], [11, 5],
+]);
+const FOOTPRINT_MEMORY_ROWS = memories
+  .map((_, index) => index)
+  .filter((index) => !MEMORY_CAT_ASSETS.has(index));
 
 interface SelectedMemory {
   memory: Memory;
@@ -11,8 +19,9 @@ interface SelectedMemory {
 
 interface MemoriesProps {
   onPlaneArrived: (arrived: boolean) => void;
+  onOpenRandomChapter: () => void;
 }
-export const Memories: React.FC<MemoriesProps> = ({ onPlaneArrived }) => {
+export const Memories: React.FC<MemoriesProps> = ({ onPlaneArrived, onOpenRandomChapter }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const planeArrivedRef = useRef(false);
   const onPlaneArrivedRef = useRef(onPlaneArrived);
@@ -21,6 +30,9 @@ export const Memories: React.FC<MemoriesProps> = ({ onPlaneArrived }) => {
   const [svgSize, setSvgSize] = useState({ width: 0, height: 0 });
   const [pathD, setPathD] = useState('');
   const [selectedMemory, setSelectedMemory] = useState<SelectedMemory | null>(null);
+  const [footprintMemoryIndex] = useState(() =>
+    FOOTPRINT_MEMORY_ROWS[Math.floor(Math.random() * FOOTPRINT_MEMORY_ROWS.length)]
+  );
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -246,44 +258,63 @@ export const Memories: React.FC<MemoriesProps> = ({ onPlaneArrived }) => {
           <img src="/paper-plane.svg" alt="" />
         </div>
 
-        {memories.map((memory, index) => (
-          <div
-            className={`memory-row memory-row--${memory.side} memory-row--size-${index % 4} memory-row--memory-${memory.id}`}
-            key={memory.id}
-          >
-            <button
-              className="memory-card"
-              type="button"
-              style={{
-                '--rot': `${memory.rotation}deg`,
-                '--memory-delay': `${Math.min(index * 65, 260)}ms`,
-              } as React.CSSProperties}
-              onClick={() => openMemory(memory)}
-              aria-label={`Lihat detail kenangan: ${memory.caption}`}
+        {memories.map((memory, index) => {
+          const catAsset = MEMORY_CAT_ASSETS.get(index);
+          const decorationSide = memory.side === 'left' ? 'right' : 'left';
+          const decoration = catAsset !== undefined
+            ? (
+              <CatDecoration
+                asset={catAsset}
+                row={0}
+                side={decorationSide}
+                className="memory-cat-decoration"
+              />
+            )
+            : index === footprintMemoryIndex
+              ? <RandomFootprint onClick={onOpenRandomChapter} />
+              : null;
+
+          return (
+            <div
+              className={`memory-row memory-row--${memory.side} memory-row--size-${index % 4} memory-row--memory-${memory.id}`}
+              key={memory.id}
             >
-              <div className="memory-frame">
-                <div className={`tape ${index % 2 !== 0 ? 'tape-alt' : ''}`} aria-hidden="true" />
-                <img
-                  src={memory.image}
-                  alt={memory.caption}
-                  className="memory-img"
-                  width={memory.width}
-                  height={memory.height}
-                  loading="lazy"
-                  onLoad={(event) => {
-                    event.currentTarget
-                      .closest('.memory-card')
-                      ?.classList.add('photo-loaded');
-                  }}
-                />
-                <div className="memory-text">
-                  <h3 className="memory-caption">{memory.caption}</h3>
-                  <p className="memory-detail">{memory.detail}</p>
+              {memory.side === 'right' && decoration}
+              <button
+                className="memory-card"
+                type="button"
+                style={{
+                  '--rot': `${memory.rotation}deg`,
+                  '--memory-delay': `${Math.min(index * 65, 260)}ms`,
+                } as React.CSSProperties}
+                onClick={() => openMemory(memory)}
+                aria-label={`Lihat detail kenangan: ${memory.caption}`}
+              >
+                <div className="memory-frame">
+                  <div className={`tape ${index % 2 !== 0 ? 'tape-alt' : ''}`} aria-hidden="true" />
+                  <img
+                    src={memory.image}
+                    alt={memory.caption}
+                    className="memory-img"
+                    width={memory.width}
+                    height={memory.height}
+                    loading="lazy"
+                    onLoad={(event) => {
+                      event.currentTarget
+                        .closest('.memory-card')
+                        ?.classList.add('photo-loaded');
+                    }}
+                  />
+                  <div className="memory-text">
+                    <h3 className="memory-caption">{memory.caption}</h3>
+                    <p className="memory-detail">{memory.detail}</p>
+                  </div>
                 </div>
-              </div>
-            </button>
-          </div>
-        ))}
+              </button>
+              {memory.side === 'left' && decoration}
+            </div>
+          );
+        })}
       </div>
 
       {selectedMemory && createPortal(

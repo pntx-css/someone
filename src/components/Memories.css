@@ -77,6 +77,24 @@
   width: 100%;
   position: relative;
   z-index: 1;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.memory-row .memory-cat-decoration,
+.memory-row .journey-footprint {
+  flex: 0 0 auto;
+  z-index: 2;
+}
+
+.memory-row .memory-cat-decoration {
+  width: clamp(5rem, 8vw, 6rem);
+  opacity: 0.24;
+}
+
+.memory-row .journey-footprint {
+  width: clamp(4rem, 7vw, 5rem);
+  opacity: 0.2;
 }
 
 .memory-row--left {
@@ -402,6 +420,19 @@
   .memories-timeline {
     gap: 4.5rem;
     padding: 1rem 0 3rem;
+  }
+
+  .memory-row {
+    gap: 1.5rem;
+  }
+
+  .memory-row .memory-cat-decoration {
+    width: clamp(3.75rem, 14vw, 4.5rem);
+    opacity: 0.2;
+  }
+
+  .memory-row .journey-footprint {
+    width: clamp(3.5rem, 13vw, 4rem);
   }
 
   .memory-row--size-0 .memory-card {

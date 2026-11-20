@@ -30,26 +30,6 @@
   position: relative;
 }
 
-.gate-content::before {
-  content: "✧";
-  position: absolute;
-  top: 15px;
-  left: 20px;
-  color: var(--color-pink-500);
-  font-size: 1.5rem;
-  opacity: 0.5;
-}
-
-.gate-content::after {
-  content: "✧";
-  position: absolute;
-  bottom: 15px;
-  right: 20px;
-  color: var(--color-pink-500);
-  font-size: 1.5rem;
-  opacity: 0.5;
-}
-
 .gate-title {
   font-family: var(--font-display);
   max-width: 100%;

@@ -71,7 +71,10 @@ const BirthdayJourney: React.FC = () => {
         {phase === 4 && <PersonalMessage onNext={() => setPhase(5)} />}
         {phase === 5 && (
           <>
-            <Memories onPlaneArrived={setPlaneArrived} />
+            <Memories
+              onPlaneArrived={setPlaneArrived}
+              onOpenRandomChapter={handleOpenRandomChapter}
+            />
             <Wishlist
               onBack={handleWishlistBack}
               planeArrived={planeArrived}
@@ -81,12 +84,9 @@ const BirthdayJourney: React.FC = () => {
       </div>
 
       {currentSong && phase >= 4 && <MusicPlayer song={currentSong} onSongEnd={handleSongEnd} />}
-      {phase !== 1 && (
-        <JourneyCatDecorations
-          phase={phase}
-          onOpenRandomChapter={handleOpenRandomChapter}
-        />
-      )}
+      {phase === 2 || phase === 3 || phase === 4 ? (
+        <JourneyCatDecorations phase={phase} />
+      ) : null}
     </main>
   );
 };
