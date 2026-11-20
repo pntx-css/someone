@@ -28,6 +28,93 @@
   opacity: 0.62;
 }
 
+.music-player--side {
+  bottom: auto;
+  left: auto;
+  right: max(1rem, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  max-width: 52px;
+  height: 52px;
+  padding: 0;
+  border-radius: 50%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  transform-origin: right center;
+  transition:
+    width 520ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    max-width 520ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    padding 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-radius 420ms ease;
+  animation: playerSideSlideIn 0.42s var(--ease-soft) both;
+}
+
+.music-player--side .player-btn {
+  width: 50px;
+  height: 50px;
+  font-size: 1.35rem;
+}
+
+.music-player--side .player-info {
+  display: flex;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(12px);
+  transition:
+    opacity 220ms ease,
+    transform 360ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s linear 360ms;
+}
+
+.music-player--side .player-time {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(12px);
+  transition:
+    opacity 220ms ease,
+    transform 360ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s linear 360ms;
+}
+
+.music-player--side.music-player--expanded {
+  width: min(390px, calc(100vw - 2rem));
+  max-width: min(390px, calc(100vw - 2rem));
+  height: auto;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius-dialog);
+  justify-content: flex-start;
+  gap: 0.75rem;
+}
+
+.music-player--side.music-player--expanded .player-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 0.85rem;
+}
+
+.music-player--side.music-player--expanded .player-info {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  transition-delay: 90ms, 90ms, 0s;
+}
+
+.music-player--side.music-player--expanded .player-time {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  transition-delay: 140ms, 140ms, 0s;
+}
+
+.music-player--side.music-player--expanded .player-note-toggle {
+  width: 36px;
+  height: 36px;
+  font-size: 1.1rem;
+}
+
 .player-btn {
   width: 44px;
   height: 44px;
@@ -128,9 +215,20 @@
   to { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 
+@keyframes playerSideSlideIn {
+  from { opacity: 0; transform: translate(16px, -50%) scale(0.97); }
+  to { opacity: 1; transform: translate(0, -50%) scale(1); }
+}
+
 @media (max-width: 480px) {
   .music-player {
     padding: 0.9rem 1rem;
     width: calc(100vw - 2rem);
+  }
+
+  .music-player--side {
+    right: max(0.75rem, env(safe-area-inset-right));
+    width: 52px;
+    padding: 0;
   }
 }

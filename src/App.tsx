@@ -140,7 +140,13 @@ const BirthdayJourney: React.FC = () => {
           ) : null}
         </main>
       )}
-      {currentSong && phase >= 4 && <MusicPlayer song={currentSong} onSongEnd={handleSongEnd} />}
+      {currentSong && phase >= 4 && (
+        <MusicPlayer
+          song={currentSong}
+          onSongEnd={handleSongEnd}
+          variant={showConstellation ? 'side' : 'bottom'}
+        />
+      )}
     </>
   );
 };

@@ -163,8 +163,10 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
           type="button"
           onClick={() => void onRequestImmersiveMode()}
           disabled={isFullscreen && !immersiveError}
+          aria-label={isFullscreen && !immersiveError ? 'Keluar dari mode layar penuh' : 'Aktifkan layar penuh dan landscape'}
+          title={isFullscreen && !immersiveError ? 'Keluar dari mode layar penuh' : 'Aktifkan layar penuh dan landscape'}
         >
-          {isFullscreen && !immersiveError ? 'Layar penuh aktif' : 'Layar penuh & landscape'}
+          ⛶
         </button>
         {immersiveError && (
           <p className="constellation-immersive-message" role="status">

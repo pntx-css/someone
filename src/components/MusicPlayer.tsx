@@ -5,6 +5,7 @@ import './MusicPlayer.css';
 interface MusicPlayerProps {
   song: Song;
   onSongEnd: () => void;
+  variant?: 'bottom' | 'side';
 }
 
 const formatTime = (sec: number): string => {
@@ -16,13 +17,18 @@ const formatTime = (sec: number): string => {
 const isAbortError = (error: unknown): boolean =>
   error instanceof DOMException && error.name === 'AbortError';
 
-export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song, onSongEnd }) => {
+export const MusicPlayer: React.FC<MusicPlayerProps> = ({
+  song,
+  onSongEnd,
+  variant = 'bottom',
+}) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackMessage, setPlaybackMessage] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Create audio element once and persist it
   useEffect(() => {
@@ -142,40 +148,66 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ song, onSongEnd }) => 
   );
 
   return (
-    <div className="music-player">
-      <button
-        className="player-btn"
-        type="button"
-        onClick={togglePlay}
-        aria-label={isPlaying ? 'Jeda musik' : 'Putar musik'}
-      >
-        {isPlaying ? '❚❚' : '▶'}
-      </button>
+    <div className={`music-player music-player--${variant}${isExpanded ? ' music-player--expanded' : ''}`}>
+      {variant === 'side' && !isExpanded ? (
+        <button
+          className="player-btn player-note-toggle"
+          type="button"
+          onClick={() => setIsExpanded(true)}
+          aria-label="Tampilkan pemutar musik"
+          aria-expanded={false}
+        >
+          ♪
+        </button>
+      ) : (
+        <>
+          <button
+            className="player-btn"
+            type="button"
+            onClick={togglePlay}
+            aria-label={isPlaying ? 'Jeda musik' : 'Putar musik'}
+          >
+            {isPlaying ? '❚❚' : '▶'}
+          </button>
 
-      <div className="player-info">
-        <div className="player-song-name">
-          {song.title} — {song.artist}
-        </div>
-        <input
-          className="player-progress-bar"
-          type="range"
-          min="0"
-          max="100"
-          step="0.1"
-          value={progress}
-          onChange={handleProgressChange}
-          aria-label={`Posisi lagu ${song.title}`}
-        />
-        {playbackMessage && (
-          <p className="player-status" role="status">
-            {playbackMessage}
-          </p>
-        )}
-      </div>
+          <div className="player-info">
+            <div className="player-song-name">
+              {song.title} — {song.artist}
+            </div>
+            <input
+              className="player-progress-bar"
+              type="range"
+              min="0"
+              max="100"
+              step="0.1"
+              value={progress}
+              onChange={handleProgressChange}
+              aria-label={`Posisi lagu ${song.title}`}
+            />
+            {playbackMessage && (
+              <p className="player-status" role="status">
+                {playbackMessage}
+              </p>
+            )}
+          </div>
 
-      <div className="player-time" aria-live="off">
-        {formatTime(currentTime)}/{formatTime(duration)}
-      </div>
+          <div className="player-time" aria-live="off">
+            {formatTime(currentTime)}/{formatTime(duration)}
+          </div>
+
+          {variant === 'side' && (
+            <button
+              className="player-btn player-note-toggle"
+              type="button"
+              onClick={() => setIsExpanded(false)}
+              aria-label="Tutup pemutar musik"
+              aria-expanded={true}
+            >
+              ♪
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 };
