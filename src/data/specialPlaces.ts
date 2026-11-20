@@ -32,7 +32,7 @@ export const specialPlaces: DefaultPlace[] = [
   {
     id: 'solo-square',
     title: 'Solo Square XXI',
-    description: 'enaktuh buat nonton. klo emng mw si. btw klo emng mw ke bioskop mending mam dulu, biar nggak plenger',
+    description: 'enaktuh buat nonton. klo emng mw si. btw ni juga rekomend krna sekarang kan musimnya ujan',
     latitude: -7.56078107468666, 
     longitude: 110.78863233721871,
     mapsUrl: 'https://maps.app.goo.gl/D1uVMHX4CPThAuH57',
@@ -70,12 +70,12 @@ export const specialPlaces: DefaultPlace[] = [
     mapsUrl: 'https://maps.app.goo.gl/N4T5R2QftYa21zzG6',
   },
   {
-    id: 'lokananta',
-    title: 'Lokananta',
-    description: 'kayaknya nyaman klo buat cerita cerita, kayak pas di alun-alun',
-    latitude: -7.557716793607948, 
-    longitude: 110.7955605372194,
-    mapsUrl: 'https://maps.app.goo.gl/UftiVk7haythk8N5A',
+    id: 'gacoan',
+    title: 'Gacoan Yosodipuro',
+    description: 'enaksih, udang keju. naknaknak. tapi pasti rame bnget anjrr. atauu gacoan soba?',
+    latitude: -7.563289395524395,  
+    longitude: 110.81562289673994,
+    mapsUrl: 'https://maps.app.goo.gl/xvuNUAJonEjbiZgd7',
   },
   {
     id: 'u-co-steak',
