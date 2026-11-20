@@ -99,6 +99,15 @@ const RandomFootprint: React.FC<{ onClick: () => void }> = ({ onClick }) => {
 
   const handleClick = () => {
     if (isActivated) return;
+    if (window.matchMedia('(max-width: 760px) and (orientation: portrait)').matches) {
+      const orientation = screen.orientation as ScreenOrientation & {
+        lock?: (orientation: 'landscape') => Promise<void>;
+      };
+      void orientation.lock?.('landscape').catch(() => {
+        console.info('Landscape orientation lock unavailable; using the rotated page layout.');
+      });
+    }
+
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       onClick();
       return;

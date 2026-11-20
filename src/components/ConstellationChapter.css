@@ -1,0 +1,242 @@
+.constellation-page {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  width: 100vw;
+  height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 28% 58%, rgba(113, 35, 136, 0.48), transparent 43%),
+    radial-gradient(ellipse at 82% 66%, rgba(47, 34, 145, 0.42), transparent 42%),
+    linear-gradient(145deg, #080311 0%, #160b2b 44%, #151044 78%, #09071e 100%);
+}
+
+.constellation-nebula,
+.constellation-starfield,
+.constellation-horizon {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.constellation-nebula {
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at 52% 54%, rgba(208, 112, 221, 0.2), transparent 20%),
+    radial-gradient(ellipse at 23% 68%, rgba(115, 58, 158, 0.25), transparent 22%),
+    radial-gradient(ellipse at 83% 72%, rgba(77, 78, 195, 0.22), transparent 25%),
+    radial-gradient(ellipse at 48% 74%, rgba(70, 35, 120, 0.3), transparent 34%);
+  filter: blur(24px);
+}
+
+.constellation-starfield {
+  z-index: -1;
+  opacity: 0.76;
+  background-image:
+    radial-gradient(1px 1px at 7% 13%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 16% 42%, #b8e4fa 98%, transparent),
+    radial-gradient(1.5px 1.5px at 27% 22%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 38% 69%, #d2f0ff 98%, transparent),
+    radial-gradient(1px 1px at 49% 14%, #e5f7ff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 61% 38%, #eafaff 98%, transparent),
+    radial-gradient(1px 1px at 73% 18%, #d2f0ff 98%, transparent),
+    radial-gradient(1px 1px at 82% 55%, #e5f7ff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 93% 32%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 11% 83%, #c4eaff 98%, transparent),
+    radial-gradient(1px 1px at 32% 88%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 68% 84%, #d2f0ff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 89% 78%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 4% 31%, #e5f7ff 98%, transparent),
+    radial-gradient(1.2px 1.2px at 10% 57%, #d2f0ff 98%, transparent),
+    radial-gradient(1px 1px at 14% 8%, #c4eaff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 19% 73%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 22% 30%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 29% 56%, #b8e4fa 98%, transparent),
+    radial-gradient(1.3px 1.3px at 34% 11%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 41% 38%, #d2f0ff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 45% 82%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 53% 28%, #c4eaff 98%, transparent),
+    radial-gradient(1px 1px at 57% 63%, #f6fdff 98%, transparent),
+    radial-gradient(1.2px 1.2px at 64% 9%, #d2f0ff 98%, transparent),
+    radial-gradient(1px 1px at 70% 49%, #e5f7ff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 76% 88%, #c4eaff 98%, transparent),
+    radial-gradient(1px 1px at 79% 34%, #f6fdff 98%, transparent),
+    radial-gradient(1.2px 1.2px at 85% 13%, #d2f0ff 98%, transparent),
+    radial-gradient(1px 1px at 91% 61%, #e5f7ff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 96% 42%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 25% 94%, #d2f0ff 98%, transparent),
+    radial-gradient(1px 1px at 59% 94%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 97% 91%, #c4eaff 98%, transparent),
+    radial-gradient(.8px .8px at 2% 72%, #d2f0ff 98%, transparent),
+    radial-gradient(.8px .8px at 5% 48%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 8% 94%, #c4eaff 98%, transparent),
+    radial-gradient(.8px .8px at 13% 25%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 17% 61%, #d2f0ff 98%, transparent),
+    radial-gradient(.8px .8px at 20% 16%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 24% 47%, #c4eaff 98%, transparent),
+    radial-gradient(.8px .8px at 28% 80%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 31% 5%, #d2f0ff 98%, transparent),
+    radial-gradient(.8px .8px at 36% 52%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 39% 91%, #c4eaff 98%, transparent),
+    radial-gradient(.8px .8px at 43% 24%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 47% 60%, #d2f0ff 98%, transparent),
+    radial-gradient(.8px .8px at 51% 76%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 55% 7%, #c4eaff 98%, transparent),
+    radial-gradient(.8px .8px at 62% 51%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 66% 91%, #d2f0ff 98%, transparent),
+    radial-gradient(.8px .8px at 72% 27%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 75% 67%, #c4eaff 98%, transparent),
+    radial-gradient(.8px .8px at 81% 96%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 87% 45%, #d2f0ff 98%, transparent),
+    radial-gradient(.8px .8px at 90% 82%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 94% 7%, #c4eaff 98%, transparent),
+    radial-gradient(.8px .8px at 98% 68%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 12% 99%, #d2f0ff 98%, transparent),
+    radial-gradient(.8px .8px at 33% 34%, #f6fdff 98%, transparent),
+    radial-gradient(1px 1px at 58% 39%, #c4eaff 98%, transparent),
+    radial-gradient(.8px .8px at 78% 8%, #e5f7ff 98%, transparent),
+    radial-gradient(1px 1px at 92% 23%, #d2f0ff 98%, transparent);
+  background-size: 100% 100%;
+  animation: constellation-sky-twinkle 7s ease-in-out infinite alternate;
+}
+
+.constellation-horizon {
+  z-index: 2;
+  inset: auto 0 0;
+  display: block;
+  width: 100%;
+  height: 25%;
+}
+
+.constellation-mountain-back {
+  fill: #17132d;
+}
+
+.constellation-mountain-front {
+  fill: #0b0a1c;
+}
+
+.constellation-tree-line {
+  fill: #03050d;
+}
+
+.constellation-map {
+  z-index: 1;
+  display: block;
+  width: min(92vw, 1100px);
+  height: min(76dvh, 640px);
+  overflow: visible;
+}
+
+.constellation-lines line {
+  fill: none;
+  stroke: rgba(221, 180, 255, 0.92);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 5px rgba(197, 119, 255, 0.75));
+}
+
+.constellation-lines line.is-visible {
+  animation: constellation-line-draw 520ms ease-out forwards;
+}
+
+.constellation-star {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  fill: #fffaff;
+}
+
+.constellation-star.is-lit {
+  animation: constellation-star-ignite 560ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.constellation-star circle {
+  filter: drop-shadow(0 0 4px rgba(239, 202, 255, 0.95));
+}
+
+.constellation-star-rays {
+  opacity: 0.78;
+  fill: #fffaff;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.constellation-star.is-prominent .constellation-star-rays {
+  opacity: 1;
+}
+
+.constellation-star.is-large .constellation-star-rays {
+  transform: scale(1.45);
+}
+
+.constellation-star.is-large circle {
+  filter: drop-shadow(0 0 8px rgba(239, 202, 255, 1));
+}
+
+.constellation-map.is-complete .constellation-star.is-primary circle {
+  animation: constellation-star-twinkle 4.8s ease-in-out var(--twinkle-delay, 0ms) infinite alternate;
+}
+
+@keyframes constellation-sky-twinkle {
+  from { opacity: 0.48; }
+  to { opacity: 0.9; }
+}
+
+@keyframes constellation-star-ignite {
+  0% {
+    opacity: 0;
+    transform: scale(0.18);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1.9);
+  }
+
+  100% {
+    opacity: 0.96;
+    transform: scale(1);
+  }
+}
+
+@keyframes constellation-line-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes constellation-star-twinkle {
+  from {
+    opacity: 0.82;
+    filter: drop-shadow(0 0 3px rgba(239, 202, 255, 0.65));
+  }
+
+  to {
+    opacity: 1;
+    filter: drop-shadow(0 0 7px rgba(239, 202, 255, 1));
+  }
+}
+
+@media (max-width: 760px) and (orientation: portrait) {
+  .constellation-page {
+    width: 100dvh;
+    height: 100dvw;
+    transform: rotate(90deg) translateY(-100%);
+    transform-origin: top left;
+  }
+
+  .constellation-map {
+    width: min(92dvh, 1100px);
+    height: min(76dvw, 640px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-starfield {
+    animation: none;
+  }
+}

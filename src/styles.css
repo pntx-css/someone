@@ -106,34 +106,6 @@ button { touch-action: manipulation; }
   }
 }
 
-.random-chapter-placeholder {
-  display: grid;
-  min-height: 100dvh;
-  place-content: center;
-  gap: 0.9rem;
-  padding: 2rem;
-  background:
-    radial-gradient(ellipse at 18% 20%, rgba(255, 255, 255, 0.82), transparent 34%),
-    radial-gradient(ellipse at 88% 78%, rgba(249, 213, 229, 0.6), transparent 38%),
-    var(--color-canvas);
-  text-align: center;
-}
-
-.random-chapter-placeholder__eyebrow {
-  color: var(--color-berry);
-  font: 0.72rem 'DM Mono', monospace;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.random-chapter-placeholder h1 {
-  font-size: clamp(2rem, 6vw, 3.5rem);
-}
-
-.random-chapter-placeholder > p:last-child {
-  color: rgba(59, 23, 39, 0.72);
-}
-
 /* Shared tactile language: controls stay easy to tap and surfaces never feel boxy. */
 button {
   display: inline-flex;

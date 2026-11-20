@@ -8,6 +8,7 @@ import { Memories } from './components/Memories';
 import { Wishlist } from './components/Wishlist';
 import { AdminPortal } from './components/AdminPortal';
 import { JourneyCatDecorations } from './components/JourneyCatDecorations';
+import { ConstellationChapter } from './components/ConstellationChapter';
 import { songs, type Song } from './data/music';
 
 const BirthdayJourney: React.FC = () => {
@@ -15,7 +16,7 @@ const BirthdayJourney: React.FC = () => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [planeArrived, setPlaneArrived] = useState(false);
   const [isCollapsing, setIsCollapsing] = useState(false);
-  const [showPlaceholder, setShowPlaceholder] = useState(false);
+  const [showConstellation, setShowConstellation] = useState(false);
   const [collapseOriginY, setCollapseOriginY] = useState(0);
 
   const handleSelectSong = (song: Song) => {
@@ -39,7 +40,7 @@ const BirthdayJourney: React.FC = () => {
   const handleOpenRandomChapter = () => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       window.scrollTo({ top: 0, behavior: 'auto' });
-      setShowPlaceholder(true);
+      setShowConstellation(true);
       return;
     }
 
@@ -47,15 +48,7 @@ const BirthdayJourney: React.FC = () => {
     setIsCollapsing(true);
   };
 
-  if (showPlaceholder) {
-    return (
-      <main className="random-chapter-placeholder">
-        <p className="random-chapter-placeholder__eyebrow">a little surprise</p>
-        <h1>Something new is coming...</h1>
-        <p>Halaman ini masih disiapkan ♡</p>
-      </main>
-    );
-  }
+  if (showConstellation) return <ConstellationChapter />;
 
   return (
     <main
@@ -67,7 +60,7 @@ const BirthdayJourney: React.FC = () => {
           event.animationName === 'journey-collapse'
         ) {
           window.scrollTo({ top: 0, behavior: 'auto' });
-          setShowPlaceholder(true);
+          setShowConstellation(true);
         }
       }}
     >
