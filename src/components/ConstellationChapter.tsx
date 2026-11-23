@@ -47,10 +47,39 @@ const CONSTELLATION_EDGES: ReadonlyArray<readonly [number, number]> = [
 
 const STAR_COUNT = SKY_STARS.length;
 const STAR_START_DELAY_MS = 1200;
-const STAR_INTERVAL_MS = 650;
+const STAR_INTERVAL_MS = 450;
 const LINE_START_DELAY_MS = 650;
 const LINE_INTERVAL_MS = 140;
 const STAR_POINTS = SKY_STARS;
+
+const CONSTELLATION_MEMORIES: readonly string[] = [
+  'IMG-20260418-WA0016.webp',
+  'IMG-20260418-WA0022.webp',
+  'IMG-20260927-WA0074.webp',
+  'PicRetouch_20250103_000911693.webp',
+  'Screenshot_20250708_004009_Mobile Legends Bang Bang.webp',
+  'Screenshot_20250921_193407_Magic Chess GO GO.webp',
+  'Screenshot_20251129_171826_Mobile Legends Bang Bang.webp',
+  'Screenshot_20260416_071657_WhatsApp.webp',
+  'Screenshot_20260430_214737_WhatsApp.webp',
+  'Screenshot_20260526_234226_Soul Knight.webp',
+  'Screenshot_20260531_005505_WhatsApp.webp',
+  'Screenshot_20260620_235855_TikTok.webp',
+  'Screenshot_20260701_235249_WhatsApp.webp',
+  'Screenshot_20260806_234754_Discord.webp',
+  'Screenshot_20260811_154832_WhatsApp.webp',
+  'Screenshot_20260927_173805_Instagram.webp',
+  'Screenshot_20260927_174554_Instagram.webp',
+  'Screenshot_20261112_195500_WhatsApp.webp',
+  'Screenshot_20261112_195558_WhatsApp.webp',
+  'Screenshot_20261112_195931_WhatsApp.webp',
+  'Screenshot_20261114_193401_Gallery (2).webp',
+  'Screenshot_20251202_045100_Magic Chess GO GO.webp',
+  'Screenshot_20260405_233325_Mobile Legends Bang Bang.webp',
+];
+
+const getMemoryAssetUrl = (fileName: string) =>
+  `${import.meta.env.BASE_URL}assets/something/${encodeURIComponent(fileName)}`;
 
 interface ConstellationChapterProps {
   immersiveError: string;
@@ -65,8 +94,10 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   const [litStarCount, setLitStarCount] = useState(0);
   const [visibleLineCount, setVisibleLineCount] = useState(0);
   const [selectedStarIndex, setSelectedStarIndex] = useState<number | null>(null);
+  const [isMemoryInfoOpen, setIsMemoryInfoOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const infoCloseButtonRef = useRef<HTMLButtonElement>(null);
   const isComplete = visibleLineCount === CONSTELLATION_EDGES.length;
   const handleGalaxyFormationComplete = useCallback(() => setIsGalaxyFormed(true), []);
 
@@ -129,13 +160,34 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   useEffect(() => {
     if (selectedStarIndex === null) return;
 
-    closeButtonRef.current?.focus();
+    if (isMemoryInfoOpen) {
+      infoCloseButtonRef.current?.focus();
+    } else {
+      closeButtonRef.current?.focus();
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSelectedStarIndex(null);
+      if (event.key === 'Escape') {
+        if (isMemoryInfoOpen) {
+          setIsMemoryInfoOpen(false);
+        } else {
+          setSelectedStarIndex(null);
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedStarIndex]);
+  }, [isMemoryInfoOpen, selectedStarIndex]);
+
+  const openMemoryPopup = (index: number) => {
+    setIsMemoryInfoOpen(false);
+    setSelectedStarIndex(index);
+  };
+
+  const closeMemoryPopup = () => {
+    setIsMemoryInfoOpen(false);
+    setSelectedStarIndex(null);
+  };
 
   return (
     <main className="constellation-page">
@@ -221,11 +273,11 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
                   role={canOpenMemory ? 'button' : undefined}
                   tabIndex={canOpenMemory ? 0 : undefined}
                   aria-label={canOpenMemory ? `Buka kenangan bintang ${index + 1}` : undefined}
-                  onClick={canOpenMemory ? () => setSelectedStarIndex(index) : undefined}
+                  onClick={canOpenMemory ? () => openMemoryPopup(index) : undefined}
                   onKeyDown={canOpenMemory ? (event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
-                      setSelectedStarIndex(index);
+                      openMemoryPopup(index);
                     }
                   } : undefined}
                 >
@@ -240,35 +292,74 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
       {selectedStarIndex !== null && (
         <div
           className="constellation-popup-backdrop"
-          onClick={() => setSelectedStarIndex(null)}
+          onClick={closeMemoryPopup}
         >
           <section
             className="constellation-popup"
             role="dialog"
+            aria-modal={!isMemoryInfoOpen}
+            aria-labelledby="constellation-photo-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="constellation-popup-header">
+              <button
+                className="constellation-popup-info"
+                type="button"
+                onClick={() => setIsMemoryInfoOpen(true)}
+                aria-label="Lihat caption kenangan"
+                aria-haspopup="dialog"
+                aria-expanded={isMemoryInfoOpen}
+              >
+                i
+              </button>
+              <h2 id="constellation-photo-title">Kenangan di bawah bintang</h2>
+              <button
+                ref={closeButtonRef}
+                className="constellation-popup-close"
+                type="button"
+                onClick={closeMemoryPopup}
+                aria-label="Tutup pop-up"
+              >
+                ×
+              </button>
+            </header>
+            <div className="constellation-popup-photo">
+              <img
+                className="constellation-popup-media"
+                src={getMemoryAssetUrl(CONSTELLATION_MEMORIES[selectedStarIndex])}
+                alt={`Kenangan bintang ${selectedStarIndex + 1}`}
+                decoding="async"
+              />
+            </div>
+          </section>
+        </div>
+      )}
+
+      {isMemoryInfoOpen && selectedStarIndex !== null && (
+        <div
+          className="constellation-info-backdrop"
+          onClick={() => setIsMemoryInfoOpen(false)}
+        >
+          <section
+            className="constellation-info-popup"
+            role="dialog"
             aria-modal="true"
-            aria-labelledby="constellation-popup-title"
+            aria-label="Caption kenangan"
             aria-describedby="constellation-popup-caption"
             onClick={(event) => event.stopPropagation()}
           >
             <button
-              ref={closeButtonRef}
+              ref={infoCloseButtonRef}
               className="constellation-popup-close"
               type="button"
-              onClick={() => setSelectedStarIndex(null)}
-              aria-label="Tutup pop-up"
+              onClick={() => setIsMemoryInfoOpen(false)}
+              aria-label="Tutup informasi kenangan"
             >
               ×
             </button>
-            <div className="constellation-popup-photo" role="img" aria-label="Placeholder foto">
-              <span>Foto sementara</span>
-            </div>
             <div className="constellation-popup-copy">
-              <p className="constellation-popup-eyebrow">
-                BINTANG {String(selectedStarIndex + 1).padStart(2, '0')}
-              </p>
-              <h2 id="constellation-popup-title">Kenangan di bawah bintang</h2>
               <p id="constellation-popup-caption">
-                Judul dan caption kenangan akan ditambahkan di sini.
+                Caption kenangan akan ditambahkan di sini.
               </p>
             </div>
           </section>
