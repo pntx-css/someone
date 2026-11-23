@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './ConstellationChapter.css';
 import { GalaxyBackground } from './GalaxyBackground';
+import { constellationMemories } from '../data/constellationMemories';
 
 interface StarCoordinate {
   id: string;
@@ -52,35 +53,6 @@ const LINE_START_DELAY_MS = 650;
 const LINE_INTERVAL_MS = 140;
 const STAR_POINTS = SKY_STARS;
 
-const CONSTELLATION_MEMORIES: readonly string[] = [
-  'IMG-20260418-WA0016.webp',
-  'IMG-20260418-WA0022.webp',
-  'IMG-20260927-WA0074.webp',
-  'PicRetouch_20250103_000911693.webp',
-  'Screenshot_20250708_004009_Mobile Legends Bang Bang.webp',
-  'Screenshot_20250921_193407_Magic Chess GO GO.webp',
-  'Screenshot_20251129_171826_Mobile Legends Bang Bang.webp',
-  'Screenshot_20260416_071657_WhatsApp.webp',
-  'Screenshot_20260430_214737_WhatsApp.webp',
-  'Screenshot_20260526_234226_Soul Knight.webp',
-  'Screenshot_20260531_005505_WhatsApp.webp',
-  'Screenshot_20260620_235855_TikTok.webp',
-  'Screenshot_20260701_235249_WhatsApp.webp',
-  'Screenshot_20260806_234754_Discord.webp',
-  'Screenshot_20260811_154832_WhatsApp.webp',
-  'Screenshot_20260927_173805_Instagram.webp',
-  'Screenshot_20260927_174554_Instagram.webp',
-  'Screenshot_20261112_195500_WhatsApp.webp',
-  'Screenshot_20261112_195558_WhatsApp.webp',
-  'Screenshot_20261112_195931_WhatsApp.webp',
-  'Screenshot_20261114_193401_Gallery (2).webp',
-  'Screenshot_20251202_045100_Magic Chess GO GO.webp',
-  'Screenshot_20260405_233325_Mobile Legends Bang Bang.webp',
-];
-
-const getMemoryAssetUrl = (fileName: string) =>
-  `${import.meta.env.BASE_URL}assets/something/${encodeURIComponent(fileName)}`;
-
 interface ConstellationChapterProps {
   immersiveError: string;
   onRequestImmersiveMode: () => Promise<void>;
@@ -95,11 +67,15 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   const [visibleLineCount, setVisibleLineCount] = useState(0);
   const [selectedStarIndex, setSelectedStarIndex] = useState<number | null>(null);
   const [isMemoryInfoOpen, setIsMemoryInfoOpen] = useState(false);
+  const [isTallMemory, setIsTallMemory] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const infoCloseButtonRef = useRef<HTMLButtonElement>(null);
   const isComplete = visibleLineCount === CONSTELLATION_EDGES.length;
   const handleGalaxyFormationComplete = useCallback(() => setIsGalaxyFormed(true), []);
+  const selectedMemory = selectedStarIndex === null
+    ? null
+    : constellationMemories[selectedStarIndex];
 
   useEffect(() => {
     const rootStyle = document.documentElement.style;
@@ -181,11 +157,13 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
 
   const openMemoryPopup = (index: number) => {
     setIsMemoryInfoOpen(false);
+    setIsTallMemory(false);
     setSelectedStarIndex(index);
   };
 
   const closeMemoryPopup = () => {
     setIsMemoryInfoOpen(false);
+    setIsTallMemory(false);
     setSelectedStarIndex(null);
   };
 
@@ -289,13 +267,13 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
         </g>
       </svg>
 
-      {selectedStarIndex !== null && (
+      {selectedStarIndex !== null && selectedMemory && (
         <div
           className="constellation-popup-backdrop"
           onClick={closeMemoryPopup}
         >
           <section
-            className="constellation-popup"
+            className={`constellation-popup${isTallMemory ? ' is-tall-photo' : ''}`}
             role="dialog"
             aria-modal={!isMemoryInfoOpen}
             aria-labelledby="constellation-photo-title"
@@ -312,7 +290,7 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
               >
                 i
               </button>
-              <h2 id="constellation-photo-title">Kenangan di bawah bintang</h2>
+              <h2 id="constellation-photo-title">{selectedMemory.title}</h2>
               <button
                 ref={closeButtonRef}
                 className="constellation-popup-close"
@@ -326,16 +304,20 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
             <div className="constellation-popup-photo">
               <img
                 className="constellation-popup-media"
-                src={getMemoryAssetUrl(CONSTELLATION_MEMORIES[selectedStarIndex])}
+                src={selectedMemory.src}
                 alt={`Kenangan bintang ${selectedStarIndex + 1}`}
                 decoding="async"
+                onLoad={(event) => {
+                  const { naturalWidth, naturalHeight } = event.currentTarget;
+                  setIsTallMemory(naturalWidth / naturalHeight <= 0.65);
+                }}
               />
             </div>
           </section>
         </div>
       )}
 
-      {isMemoryInfoOpen && selectedStarIndex !== null && (
+      {isMemoryInfoOpen && selectedStarIndex !== null && selectedMemory && (
         <div
           className="constellation-info-backdrop"
           onClick={() => setIsMemoryInfoOpen(false)}
@@ -359,7 +341,7 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
             </button>
             <div className="constellation-popup-copy">
               <p id="constellation-popup-caption">
-                Caption kenangan akan ditambahkan di sini.
+                {selectedMemory.caption}
               </p>
             </div>
           </section>
