@@ -180,8 +180,8 @@
   display: grid;
   place-items: center;
   padding: 1rem;
-  background: rgba(5, 4, 18, 0.68);
-  backdrop-filter: blur(8px);
+  background: rgba(89, 65, 62, 0.5);
+  backdrop-filter: blur(6px);
   animation: constellation-popup-backdrop-enter 420ms ease both;
 }
 
@@ -195,13 +195,13 @@
   max-height: 100%;
   overflow: auto;
   padding: clamp(1rem, 3vw, 2rem);
-  border: 1px solid rgba(226, 190, 255, 0.24);
-  border-radius: 1.25rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-dialog);
   background:
-    radial-gradient(ellipse at 15% 10%, rgba(116, 72, 162, 0.22), transparent 50%),
-    rgba(18, 13, 39, 0.97);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
-  color: #f7efff;
+    radial-gradient(ellipse at 15% 10%, rgba(232, 213, 181, 0.28), transparent 50%),
+    linear-gradient(135deg, #fffefa, var(--color-light) 55%, #fffaf4);
+  box-shadow: var(--shadow-paper);
+  color: var(--color-dark);
   animation: constellation-popup-reveal 620ms cubic-bezier(0.2, 0.8, 0.25, 1) both;
 }
 
@@ -215,10 +215,10 @@
   min-height: 2.5rem;
   place-items: center;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--color-line);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fffaff;
+  background: var(--color-blush);
+  color: var(--color-berry);
   font: inherit;
   font-size: 1.5rem;
   line-height: 1;
@@ -226,7 +226,7 @@
 }
 
 .constellation-popup-close:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(217, 154, 167, 0.32);
 }
 
 .constellation-popup-photo {
@@ -235,12 +235,12 @@
   aspect-ratio: 4 / 3;
   place-items: center;
   overflow: hidden;
-  border: 1px solid rgba(231, 207, 255, 0.22);
+  border: 1px solid rgba(168, 93, 112, 0.18);
   border-radius: 0.85rem;
   background:
-    radial-gradient(circle at 50% 40%, rgba(211, 176, 255, 0.24), transparent 42%),
-    linear-gradient(145deg, #21183f, #0d1029);
-  color: rgba(243, 231, 255, 0.7);
+    radial-gradient(circle at 50% 40%, rgba(217, 154, 167, 0.3), transparent 42%),
+    linear-gradient(145deg, var(--color-blush), var(--color-canvas));
+  color: rgba(89, 65, 62, 0.72);
   font: 500 0.82rem var(--font-body);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -252,21 +252,21 @@
 
 .constellation-popup-eyebrow {
   margin-bottom: 0.65rem;
-  color: #c9a8ff;
+  color: var(--color-rose);
   font: 600 0.72rem var(--font-body);
   letter-spacing: 0.18em;
 }
 
 .constellation-popup-copy h2 {
   margin: 0 2.5rem 0.8rem 0;
-  color: #fffaff;
+  color: var(--color-berry);
   font: 500 clamp(1.45rem, 3vw, 2.1rem) var(--font-display);
   line-height: 1.15;
 }
 
 .constellation-popup-copy > p:last-child {
   margin: 0;
-  color: rgba(235, 224, 248, 0.8);
+  color: rgba(89, 65, 62, 0.8);
   font: 400 clamp(1rem, 2.2vw, 1.25rem) var(--font-hand);
   line-height: 1.35;
 }
@@ -297,26 +297,8 @@
 }
 
 .constellation-star circle {
-  filter: drop-shadow(0 0 4px rgba(239, 202, 255, 0.95));
-}
-
-.constellation-star-rays {
-  opacity: 0.78;
-  fill: #fffaff;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.constellation-star.is-prominent .constellation-star-rays {
-  opacity: 1;
-}
-
-.constellation-star.is-large .constellation-star-rays {
-  transform: scale(1.45);
-}
-
-.constellation-star.is-large circle {
-  filter: drop-shadow(0 0 8px rgba(239, 202, 255, 1));
+  fill: #fff;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.95));
 }
 
 .constellation-star.is-clickable {
@@ -361,12 +343,12 @@
 @keyframes constellation-star-twinkle {
   from {
     opacity: 0.82;
-    filter: drop-shadow(0 0 3px rgba(239, 202, 255, 0.65));
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.72));
   }
 
   to {
     opacity: 1;
-    filter: drop-shadow(0 0 7px rgba(239, 202, 255, 1));
+    filter: drop-shadow(0 0 7px #fff);
   }
 }
 

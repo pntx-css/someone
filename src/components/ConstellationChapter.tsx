@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './ConstellationChapter.css';
+import { GalaxyBackground } from './GalaxyBackground';
 
 interface StarCoordinate {
   id: string;
@@ -50,7 +51,6 @@ const STAR_INTERVAL_MS = 650;
 const LINE_START_DELAY_MS = 650;
 const LINE_INTERVAL_MS = 140;
 const STAR_POINTS = SKY_STARS;
-const LARGE_STAR_INDICES = new Set([0, 6, 8, 10, 18]);
 
 interface ConstellationChapterProps {
   immersiveError: string;
@@ -61,12 +61,14 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   immersiveError,
   onRequestImmersiveMode,
 }) => {
+  const [isGalaxyFormed, setIsGalaxyFormed] = useState(false);
   const [litStarCount, setLitStarCount] = useState(0);
   const [visibleLineCount, setVisibleLineCount] = useState(0);
   const [selectedStarIndex, setSelectedStarIndex] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const isComplete = visibleLineCount === CONSTELLATION_EDGES.length;
+  const handleGalaxyFormationComplete = useCallback(() => setIsGalaxyFormed(true), []);
 
   useEffect(() => {
     const rootStyle = document.documentElement.style;
@@ -89,6 +91,8 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   }, []);
 
   useEffect(() => {
+    if (!isGalaxyFormed) return;
+
     let startTimer = 0;
     let nextStarTimer = 0;
 
@@ -104,7 +108,7 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
       window.clearTimeout(startTimer);
       window.clearTimeout(nextStarTimer);
     };
-  }, []);
+  }, [isGalaxyFormed]);
 
   useEffect(() => {
     if (litStarCount !== STAR_COUNT) return;
@@ -135,6 +139,7 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
 
   return (
     <main className="constellation-page">
+      <GalaxyBackground onFormationComplete={handleGalaxyFormationComplete} />
       <div className="constellation-nebula" aria-hidden="true" />
       <div className="constellation-starfield" aria-hidden="true" />
       <svg
@@ -211,7 +216,7 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
             return (
               <g key={`${point.x}-${point.y}`} transform={`translate(${point.x} ${point.y})`}>
                 <g
-                  className={`constellation-star${index < litStarCount ? ' is-lit' : ''}${point.isPrimary ? ' is-primary' : ''}${[0, 2, 4, 6, 8, 10, 12, 14, 17, 18].includes(index) ? ' is-prominent' : ''}${LARGE_STAR_INDICES.has(index) ? ' is-large' : ''}${canOpenMemory ? ' is-clickable' : ''}`}
+                  className={`constellation-star${index < litStarCount ? ' is-lit' : ''}${point.isPrimary ? ' is-primary' : ''}${canOpenMemory ? ' is-clickable' : ''}`}
                   style={{ '--twinkle-delay': `${index * 180}ms` } as React.CSSProperties}
                   role={canOpenMemory ? 'button' : undefined}
                   tabIndex={canOpenMemory ? 0 : undefined}
@@ -224,11 +229,7 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
                     }
                   } : undefined}
                 >
-                  <path
-                    className="constellation-star-rays"
-                    d="M 0 -22 C 0.45 -7 0.85 -0.8 22 0 C 0.85 0.8 0.45 7 0 22 C -0.45 7 -0.85 0.8 -22 0 C -0.85 -0.8 -0.45 -7 0 -22 Z"
-                  />
-                  <circle r={1.3 + (4.52 - point.magnitude) * 0.3 + (LARGE_STAR_INDICES.has(index) ? 0.6 : 0)} />
+                  <circle r={2.6} />
                 </g>
               </g>
             );
