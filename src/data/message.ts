@@ -48,19 +48,20 @@ asbunan yang lewat di kepala kmu
 
 aku juga mw minta maaff kalo selama
 kita kenal ada sikap atau perkataan
-aku yang kurang menyenangkan. *banyak
-sih klo kataku, tapi aku usaha biar
-gak toxic lagi kok, janjiikk, klo 
-toxic ntar aku janji lagi. dan jugaa,
-mungkin ada saatnya aku sibuk sama
-pikiranku sendiri dan gabisa critain
-apa-apa ke kmu, atau secara gak sadar
-ada sesuatu yang aku lakuin bikin kmu
-gak nyaman dan bete. im really really
-sorry for those moments(._.) aku
-masih belajar buat lebih ngertiin kmu,
-jadi tolong yaa, kasih tau aku klo
-aku salah atau bikin kmu gak nyaman.
+aku yang kurang menyenangkan. 
+*banyak sih klo kataku, tapi aku
+usaha biar gak toxic lagi kok,
+janjiikk, klo toxic ntar aku janji
+lagi. dan jugaa, mungkin ada saatnya
+aku sibuk sama pikiranku sendiri dan
+gabisa critain apa-apa ke kmu, atau
+secara gak sadar ada sesuatu yang
+aku lakuin bikin kmu gak nyaman
+dan bete. im really really sorry for
+those moments(._.) aku masih belajar
+buat lebih ngertiin kmu, jadi
+tolong yaa, kasih tau aku klo aku
+salah atau bikin kmu gak nyaman.
 jangan malah off trus repost vt yang
 rilet(._.)
 

@@ -501,16 +501,16 @@
 
   .constellation-popup {
     max-width: calc(100dvh - 2rem);
-    max-height: 85dvw;
+    max-height: 90dvw;
   }
 
   .constellation-popup-photo {
-    max-height: calc(85dvw - 7rem);
+    max-height: calc(90dvw - 7rem);
   }
 
   .constellation-popup-media {
     max-width: calc(100dvh - 5rem);
-    max-height: calc(85dvw - 7rem);
+    max-height: calc(90dvw - 7rem);
   }
 
   .constellation-map {
