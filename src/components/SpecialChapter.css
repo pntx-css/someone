@@ -727,6 +727,7 @@
 }
 
 .special-plan-actions {
+  position: relative;
   display: flex;
   gap: 0.75rem;
 }
@@ -735,6 +736,65 @@
   width: auto;
   min-width: 0;
   flex: 1 1 0;
+}
+
+.special-plan-actions.has-return.special-plan-actions--return-step-0 .special-plan-return-button {
+  flex: 0 0 calc((100% - 0.75rem) / 2);
+}
+
+.special-plan-actions.has-return.special-plan-actions--return-step-1 .special-plan-return-button {
+  flex: 0 0 calc((100% - 0.75rem) * 0.375);
+}
+
+.special-plan-actions.has-return.special-plan-actions--return-step-2 .special-plan-return-button {
+  flex: 0 0 calc((100% - 0.75rem) * 0.25);
+}
+
+.special-plan-actions.has-return.special-plan-actions--return-step-3 .special-plan-return-button {
+  flex: 0 0 calc((100% - 0.75rem) * 0.125);
+}
+
+.special-plan-return-button {
+  min-width: 0;
+  padding-inline: 0.35rem;
+  text-transform: none;
+  transition: flex-basis 420ms cubic-bezier(0.2, 0.75, 0.25, 1), background-color 160ms ease, transform 160ms ease, opacity 160ms ease;
+}
+
+.special-return-prompt {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: calc(100% + 0.65rem);
+  width: min(100%, 24rem);
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(131, 24, 67, 0.2);
+  border-radius: 1rem;
+  color: #651238;
+  background: #fff8fa;
+  box-shadow: 0 10px 26px rgba(89, 32, 57, 0.16);
+  font: 500 0.82rem/1.5 var(--font-body);
+  text-align: center;
+  transform-origin: bottom right;
+  animation: special-return-prompt-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes special-return-prompt-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.65);
+  }
+
+  72% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.06);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .special-save-plan-button {
@@ -1757,6 +1817,7 @@
   .special-custom-card,
   .special-empty-card,
   .special-save-plan-button,
+  .special-return-prompt,
   .special-dialog-actions button {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;

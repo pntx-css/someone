@@ -116,10 +116,9 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
   // Animate when a new song is selected
     useEffect(() => {
-      setIsSongChanging(false);
-
-      const frame = requestAnimationFrame(() => {
-        setIsSongChanging(true);
+      let frame = requestAnimationFrame(() => {
+        setIsSongChanging(false);
+        frame = requestAnimationFrame(() => setIsSongChanging(true));
       });
 
       const timeout = window.setTimeout(() => {
@@ -142,11 +141,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     const audio = new Audio(song.file);
     let lastSavedAt = 0;
     let hasRestoredPosition = false;
-    setProgress(0);
-    setCurrentTime(0);
-    setDuration(0);
-    setPlaybackMessage('');
-    setIsPlaying(false);
     audio.preload = 'metadata';
     audioRef.current = audio;
 

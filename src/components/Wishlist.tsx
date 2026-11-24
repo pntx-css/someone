@@ -1,5 +1,9 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { AnimatedText } from './AnimatedText';
+import {
+  readWishlistState,
+  saveWishlistState,
+} from '../state/wishlistSession';
 import './Wishlist.css';
 
 const SpecialChapter = lazy(() =>
@@ -7,57 +11,6 @@ const SpecialChapter = lazy(() =>
 );
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
-
-interface SavedWishlistState {
-  draft: string;
-  hasSent: boolean;
-}
-
-const WISHLIST_STATE_STORAGE_KEY = 'birthday-wishlist-state';
-const DEFAULT_WISHLIST_STATE: SavedWishlistState = { draft: '', hasSent: false };
-
-const saveWishlistState = (state: SavedWishlistState) => {
-  try {
-    window.sessionStorage.setItem(WISHLIST_STATE_STORAGE_KEY, JSON.stringify(state));
-  } catch (error) {
-    console.warn('Could not save the wishlist state', error);
-  }
-};
-
-const readWishlistState = (): SavedWishlistState => {
-  let storedState: string | null;
-  try {
-    storedState = window.sessionStorage.getItem(WISHLIST_STATE_STORAGE_KEY);
-  } catch (error) {
-    console.warn('Could not read the saved wishlist state', error);
-    return DEFAULT_WISHLIST_STATE;
-  }
-
-  if (!storedState) return DEFAULT_WISHLIST_STATE;
-
-  let parsedState: unknown;
-  try {
-    parsedState = JSON.parse(storedState);
-  } catch (error) {
-    console.warn('Could not parse the saved wishlist state', error);
-    return DEFAULT_WISHLIST_STATE;
-  }
-
-  if (
-    typeof parsedState !== 'object' ||
-    parsedState === null ||
-    typeof (parsedState as Record<string, unknown>).draft !== 'string' ||
-    typeof (parsedState as Record<string, unknown>).hasSent !== 'boolean'
-  ) {
-    console.warn('The saved wishlist state has an invalid format');
-    return DEFAULT_WISHLIST_STATE;
-  }
-
-  const savedState = parsedState as Record<string, unknown>;
-  const hasSent = savedState.hasSent as boolean;
-  const draft = savedState.draft as string;
-  return { draft: hasSent ? '' : draft.slice(0, 1200), hasSent };
-};
 
 interface WishlistProps {
   onRevealFootprint: () => void;

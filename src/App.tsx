@@ -10,6 +10,11 @@ import { AdminPortal } from './components/AdminPortal';
 import { JourneyCatDecorations } from './components/JourneyCatDecorations';
 import { ConstellationChapter } from './components/ConstellationChapter';
 import { songs, type Song } from './data/music';
+import {
+  JOURNEY_STORAGE_KEYS,
+  resetCandleAndMusicProgress,
+  resetPageStateAfterConstellation,
+} from './state/sessionStorage';
 
 type BirthdayPhase = 1 | 2 | 3 | 4 | 5;
 
@@ -20,7 +25,7 @@ interface BirthdayPageState {
   showConstellationFootprint: boolean;
 }
 
-const PAGE_STATE_STORAGE_KEY = 'birthday-journey-page-state';
+const PAGE_STATE_STORAGE_KEY = JOURNEY_STORAGE_KEYS.page;
 const DEFAULT_PAGE_STATE: BirthdayPageState = {
   phase: 1,
   showConstellation: false,
@@ -115,9 +120,13 @@ const BirthdayJourney: React.FC = () => {
 
 const handleBackToHome = () => {
   setPlaneArrived(false);
-  setPhase(1);
+  setPageState(resetPageStateAfterConstellation);
   setIsCollapsing(false);
-  setShowConstellation(false);
+  try {
+    resetCandleAndMusicProgress(window.sessionStorage);
+  } catch (error) {
+    console.warn('Could not reset the candle and music progress', error);
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   const unlockOrientation = () => {
@@ -254,6 +263,7 @@ const revealConstellationFootprint = () => {
       )}
       {currentSong && phase >= 4 && (
         <MusicPlayer
+          key={currentSong.id}
           song={currentSong}
           onSongEnd={handleSongEnd}
           variant={showConstellation ? 'side' : 'bottom'}

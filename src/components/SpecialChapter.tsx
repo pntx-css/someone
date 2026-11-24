@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { LngLatBounds, Map as MapLibreMap, Marker, setWorkerUrl } from 'maplibre-gl';
+import type { Map as MapLibreMap, Marker } from 'maplibre-gl';
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import {
   getProgressiveEmptyCardCount,
@@ -11,14 +11,15 @@ import {
 } from '../data/customPlace';
 import { specialPlaces} from '../data/specialPlaces';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import {
+  readSpecialChapterState,
+  saveSpecialChapterState,
+  type CustomPlace,
+  type PlannedVisit,
+} from '../state/specialChapterSession';
 import { AnimatedText } from './AnimatedText';
 import { ScrollWheel } from './ScrollWheel';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import './SpecialChapter.css';
-
-interface CustomPlace extends CustomPlaceDraft {
-  id: string;
-}
 
 interface MapPlace {
   id: string;
@@ -28,122 +29,13 @@ interface MapPlace {
   coordinates: Coordinates | null;
 }
 
-interface PlannedVisit {
-  placeId: string;
-  time: string;
-}
-
-interface SavedSpecialChapterState {
-  places: CustomPlace[];
-  plannedVisits: PlannedVisit[];
-  savedPlanSignature: string;
-}
-
 interface PlanSubmissionVisit {
   name: string;
   time: string;
   mapsUrl: string;
 }
 
-const SPECIAL_CHAPTER_STATE_STORAGE_KEY = 'birthday-special-chapter-state';
-const DEFAULT_SPECIAL_CHAPTER_STATE: SavedSpecialChapterState = {
-  places: [],
-  plannedVisits: [],
-  savedPlanSignature: '',
-};
-
-const isCoordinates = (value: unknown): value is Coordinates => {
-  if (typeof value !== 'object' || value === null) return false;
-  const coordinates = value as Record<string, unknown>;
-  return (
-    typeof coordinates.latitude === 'number' &&
-    Number.isFinite(coordinates.latitude) &&
-    coordinates.latitude >= -90 &&
-    coordinates.latitude <= 90 &&
-    typeof coordinates.longitude === 'number' &&
-    Number.isFinite(coordinates.longitude) &&
-    coordinates.longitude >= -180 &&
-    coordinates.longitude <= 180
-  );
-};
-
-const isCustomPlace = (value: unknown): value is CustomPlace => {
-  if (typeof value !== 'object' || value === null) return false;
-  const place = value as Record<string, unknown>;
-  return (
-    typeof place.id === 'string' &&
-    typeof place.mapsUrl === 'string' &&
-    typeof place.name === 'string' &&
-    typeof place.description === 'string' &&
-    (place.coordinates === null || isCoordinates(place.coordinates))
-  );
-};
-
-const isPlannedVisit = (value: unknown): value is PlannedVisit => {
-  if (typeof value !== 'object' || value === null) return false;
-  const visit = value as Record<string, unknown>;
-  if (typeof visit.placeId !== 'string' || typeof visit.time !== 'string') return false;
-
-  const [hour, minute] = visit.time.split(':').map(Number);
-  return (
-    /^\d{2}:\d{2}$/.test(visit.time) &&
-    Number.isInteger(hour) &&
-    hour >= 0 &&
-    hour <= 23 &&
-    Number.isInteger(minute) &&
-    minute >= 0 &&
-    minute <= 59
-  );
-};
-
-const readSpecialChapterState = (): SavedSpecialChapterState => {
-  let storedState: string | null;
-  try {
-    storedState = window.sessionStorage.getItem(SPECIAL_CHAPTER_STATE_STORAGE_KEY);
-  } catch (error) {
-    console.warn('Could not read the saved special place state', error);
-    return DEFAULT_SPECIAL_CHAPTER_STATE;
-  }
-
-  if (!storedState) return DEFAULT_SPECIAL_CHAPTER_STATE;
-
-  let parsedState: unknown;
-  try {
-    parsedState = JSON.parse(storedState);
-  } catch (error) {
-    console.warn('Could not parse the saved special place state', error);
-    return DEFAULT_SPECIAL_CHAPTER_STATE;
-  }
-
-  if (typeof parsedState !== 'object' || parsedState === null) {
-    console.warn('The saved special place state has an invalid format');
-    return DEFAULT_SPECIAL_CHAPTER_STATE;
-  }
-
-  const savedState = parsedState as Record<string, unknown>;
-  const places = savedState.places;
-  const plannedVisits = savedState.plannedVisits;
-  const savedPlanSignature = savedState.savedPlanSignature;
-  const knownPlaceIds = new Set([
-    ...specialPlaces.map((place) => place.id),
-    ...(Array.isArray(places) ? places.filter(isCustomPlace).map((place) => place.id) : []),
-  ]);
-
-  if (
-    !Array.isArray(places) ||
-    places.length > MAX_CUSTOM_PLACES ||
-    !places.every(isCustomPlace) ||
-    !Array.isArray(plannedVisits) ||
-    !plannedVisits.every(isPlannedVisit) ||
-    plannedVisits.some((visit) => !knownPlaceIds.has(visit.placeId)) ||
-    typeof savedPlanSignature !== 'string'
-  ) {
-    console.warn('The saved special place state has invalid values');
-    return DEFAULT_SPECIAL_CHAPTER_STATE;
-  }
-
-  return { places, plannedVisits, savedPlanSignature };
-};
+const FINAL_RETURN_PROMPT_DURATION = 4000;
 
 const HOME_COORDINATES: Coordinates = {
   latitude: -7.604534579811721,
@@ -173,8 +65,6 @@ const MAX_NAME_LENGTH = 80;
 const MAX_DESCRIPTION_LENGTH = 240;
 const HOURS = Array.from({ length: 24 }, (_, hour) => String(hour).padStart(2, '0'));
 const MINUTES = Array.from({ length: 60 }, (_, minute) => String(minute).padStart(2, '0'));
-
-setWorkerUrl(mapWorkerUrl);
 
 const haversineDistance = (from: Coordinates, to: Coordinates): number => {
   const radians = (degrees: number) => (degrees * Math.PI) / 180;
@@ -486,7 +376,9 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   wishlistSent,
   onRevealFootprint,
 }) => {
-  const [initialSpecialChapterState] = useState(readSpecialChapterState);
+  const [initialSpecialChapterState] = useState(() =>
+    readSpecialChapterState(new Set(specialPlaces.map((place) => place.id)))
+  );
   const [places, setPlaces] = useState<CustomPlace[]>(initialSpecialChapterState.places);
   const [plannedVisits, setPlannedVisits] = useState<PlannedVisit[]>(initialSpecialChapterState.plannedVisits);
   const [planningPlaceId, setPlanningPlaceId] = useState<string | null>(null);
@@ -496,30 +388,29 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   const [savedPlanSignature, setSavedPlanSignature] = useState(initialSpecialChapterState.savedPlanSignature);
   const [planSubmissionError, setPlanSubmissionError] = useState('');
   const [planSubmissionNotice, setPlanSubmissionNotice] = useState('');
+  const [returnPromptStep, setReturnPromptStep] = useState(0);
+  const [returnPrompt, setReturnPrompt] = useState<string | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const clockRef = useRef<HTMLDivElement>(null);
   const planVisitRefs = useRef(new Map<string, HTMLTableRowElement>());
   const flyingCardAnimations = useRef(new Map<HTMLElement, Animation>());
   const mapRef = useRef<MapLibreMap | null>(null);
+  const mapLibreModuleRef = useRef<typeof import('maplibre-gl') | null>(null);
   const markersRef = useRef<Marker[]>([]);
   const [mapReady, setMapReady] = useState(false);
+  const [mapLoadError, setMapLoadError] = useState('');
   const [chapterPhase, setChapterPhase] = useState<
   'waiting' | 'entering' | 'entered'
 >('waiting');
 
   const enterTimerRef = useRef<number | null>(null);
+  const returnPromptTimerRef = useRef<number | null>(null);
+  const returnPromptHideTimerRef = useRef<number | null>(null);
 
   useBodyScrollLock(Boolean(planningPlaceId || editingPlaceId || isAddingPlace));
 
   useEffect(() => {
-    try {
-      window.sessionStorage.setItem(
-        SPECIAL_CHAPTER_STATE_STORAGE_KEY,
-        JSON.stringify({ places, plannedVisits, savedPlanSignature })
-      );
-    } catch (error) {
-      console.warn('Could not save the special place state', error);
-    }
+    saveSpecialChapterState({ places, plannedVisits, savedPlanSignature });
   }, [places, plannedVisits, savedPlanSignature]);
 
   useEffect(() => {
@@ -555,6 +446,46 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
     });
     flyingCardAnimations.current.clear();
   }, []);
+
+  useEffect(() => () => {
+    if (returnPromptTimerRef.current !== null) {
+      window.clearTimeout(returnPromptTimerRef.current);
+    }
+    if (returnPromptHideTimerRef.current !== null) {
+      window.clearTimeout(returnPromptHideTimerRef.current);
+    }
+  }, []);
+
+  const handleReturnPrompt = () => {
+    if (returnPromptTimerRef.current !== null) return;
+
+    if (returnPromptStep === 3) {
+      setReturnPrompt('pokoknya kmu cari aja yang beda dihalaman ini. kuncinya itu jejak kaki');
+      returnPromptHideTimerRef.current = window.setTimeout(() => {
+        setReturnPrompt(null);
+        returnPromptHideTimerRef.current = null;
+      }, FINAL_RETURN_PROMPT_DURATION);
+      returnPromptTimerRef.current = window.setTimeout(() => {
+        setReturnPromptStep(4);
+        onRevealFootprint();
+        returnPromptTimerRef.current = null;
+      }, 460);
+      return;
+    }
+
+    const prompts = [
+      'beneran kmu mau balik? masih ada samting yang menarik loh',
+      'beneran nih gamau?',
+      'ihh cari aja gaksiiii',
+    ];
+    const durations = [3000, 2000, 2000];
+    setReturnPrompt(prompts[returnPromptStep]);
+    returnPromptTimerRef.current = window.setTimeout(() => {
+      setReturnPrompt(null);
+      setReturnPromptStep((step) => step + 1);
+      returnPromptTimerRef.current = null;
+    }, durations[returnPromptStep]);
+  };
 
   const allPlaces = useMemo<MapPlace[]>(
     () => [
@@ -607,43 +538,71 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
 
   useEffect(() => {
     if (!wishlistSent || !mapContainerRef.current || mapRef.current) return;
-    const map = new MapLibreMap({
-      container: mapContainerRef.current,
-      style: {
-        version: 8,
-        sources: {
-          osm: {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '© OpenStreetMap contributors',
+    let isCancelled = false;
+    let initializedMap: MapLibreMap | null = null;
+
+    const initializeMap = async () => {
+      const [mapLibre] = await Promise.all([
+        import('maplibre-gl'),
+        import('maplibre-gl/dist/maplibre-gl.css'),
+      ]);
+      if (isCancelled || !mapContainerRef.current) return;
+
+      mapLibre.setWorkerUrl(mapWorkerUrl);
+      mapLibreModuleRef.current = mapLibre;
+      const map = new mapLibre.Map({
+        container: mapContainerRef.current,
+        style: {
+          version: 8,
+          sources: {
+            osm: {
+              type: 'raster',
+              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+              tileSize: 256,
+              attribution: '© OpenStreetMap contributors',
+            },
           },
+          layers: [{ id: 'osm-raster', type: 'raster', source: 'osm', paint: { 'raster-saturation': -0.8, 'raster-brightness-max': 0.96 } }],
         },
-        layers: [{ id: 'osm-raster', type: 'raster', source: 'osm', paint: { 'raster-saturation': -0.8, 'raster-brightness-max': 0.96 } }],
-      },
-      center: [110.82, -7.56],
-      zoom: 11,
+        center: [110.82, -7.56],
+        zoom: 11,
+      });
+      initializedMap = map;
+      mapRef.current = map;
+      map.once('load', () => {
+        if (isCancelled) return;
+        setMapReady(true);
+        setMapLoadError('');
+      });
+    };
+
+    void initializeMap().catch((error: unknown) => {
+      if (isCancelled) return;
+      console.error('Failed to load the Special Places map', error);
+      setMapLoadError('Peta tidak dapat dimuat. Coba muat ulang halaman.');
     });
-    mapRef.current = map;
-    map.once('load', () => setMapReady(true));
+
     return () => {
+      isCancelled = true;
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
-      map.remove();
-      mapRef.current = null;
+      initializedMap?.remove();
+      if (mapRef.current === initializedMap) mapRef.current = null;
+      mapLibreModuleRef.current = null;
     };
   }, [wishlistSent]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapReady) return;
+    const mapLibre = mapLibreModuleRef.current;
+    if (!map || !mapLibre || !mapReady) return;
     markersRef.current.forEach((marker) => marker.remove());
     const homeMarkerElement = document.createElement('div');
     homeMarkerElement.className = 'special-map-home-marker';
     homeMarkerElement.setAttribute('role', 'img');
     homeMarkerElement.setAttribute('aria-label', 'Rumah');
     homeMarkerElement.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/></svg>';
-    const homeMarker = new Marker({ element: homeMarkerElement, anchor: 'bottom' })
+    const homeMarker = new mapLibre.Marker({ element: homeMarkerElement, anchor: 'bottom' })
       .setLngLat([HOME_COORDINATES.longitude, HOME_COORDINATES.latitude])
       .addTo(map);
 
@@ -654,7 +613,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
       markerElement.innerHTML = `<span>${index + 1}</span>`;
       markerElement.setAttribute('aria-label', `Atur waktu ${place.name}`);
       markerElement.addEventListener('click', () => setPlanningPlaceId(place.id));
-      return new Marker({ element: markerElement, anchor: 'bottom' })
+      return new mapLibre.Marker({ element: markerElement, anchor: 'bottom' })
         .setLngLat([place.coordinates.longitude, place.coordinates.latitude])
         .addTo(map);
     });
@@ -667,7 +626,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
         essential: false,
       });
     } else {
-      const bounds = new LngLatBounds();
+      const bounds = new mapLibre.LngLatBounds();
       mapLocations.forEach((coordinates) => bounds.extend([coordinates.longitude, coordinates.latitude]));
       map.fitBounds(bounds, { padding: 56, maxZoom: 13, duration: 500 });
     }
@@ -995,6 +954,11 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
             </h4>
             </div>
           </div>
+          {mapLoadError && (
+            <p className="special-plan-submit-feedback is-error" role="alert">
+              {mapLoadError}
+            </p>
+          )}
           <div ref={mapContainerRef} className="special-map" aria-label="Peta OpenStreetMap tempat yang direncanakan" />
         </div>
 
@@ -1090,7 +1054,14 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
           {planSubmissionNotice && (
             <p className="special-plan-submit-feedback" role="status">{planSubmissionNotice}</p>
           )}
-          <div className={`special-plan-actions${isCurrentPlanSaved ? ' has-return' : ''}`}>
+          <div
+            className={`special-plan-actions${isCurrentPlanSaved && returnPromptStep < 4 ? ` has-return special-plan-actions--return-step-${returnPromptStep}` : ''}`}
+          >
+            {returnPrompt && (
+              <p className="special-return-prompt" role="status" key={returnPrompt}>
+                {returnPrompt}
+              </p>
+            )}
             <button
               type="button"
               className="special-save-plan-button"
@@ -1103,13 +1074,13 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                   ? 'RENCANA TERKIRIM'
                   : 'SIMPAN RENCANA'}
             </button>
-            {isCurrentPlanSaved && (
+            {isCurrentPlanSaved && returnPromptStep < 4 && (
               <button
                 type="button"
                 className="special-save-plan-button special-plan-return-button"
-                onClick={onRevealFootprint}
+                onClick={handleReturnPrompt}
               >
-                KEMBALI
+                {['KEMBALI', 'gak ah', 'malas', 'gmw'][returnPromptStep]}
               </button>
             )}
           </div>

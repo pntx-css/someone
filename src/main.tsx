@@ -1,22 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
+import { resetJourneyForFreshNavigation } from './state/sessionStorage'
 import './styles.css'
 
 const navigationEntry = window.performance
   .getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
 
 if (navigationEntry?.type === 'navigate') {
-  const sessionStateKeys = [
-    'birthday-journey-page-state',
-    'birthday-cake-candles',
-    'birthday-special-chapter-state',
-    'birthday-music-player-expanded',
-    'birthday-music-playback',
-  ];
-
   try {
-    sessionStateKeys.forEach((key) => window.sessionStorage.removeItem(key));
+    resetJourneyForFreshNavigation(window.sessionStorage);
   } catch (error) {
     console.warn('Could not reset the previous birthday journey session', error);
   }

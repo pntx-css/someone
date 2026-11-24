@@ -86,6 +86,28 @@ const showHomeButton = clickedStarIds.size >= 5;
   const selectedMemory = selectedStarIndex === null
     ? null
     : constellationMemories[selectedStarIndex];
+  const closeMemoryPopup = useCallback(() => {
+    if (isPopupClosing) return;
+
+    setIsPopupClosing(true);
+
+    window.setTimeout(() => {
+      setIsPopupClosing(false);
+      setIsMemoryInfoOpen(false);
+      setIsTallMemory(false);
+      setSelectedStarIndex(null);
+    }, 350);
+  }, [isPopupClosing]);
+  const closeMemoryInfo = useCallback(() => {
+    if (isInfoClosing) return;
+
+    setIsInfoClosing(true);
+
+    window.setTimeout(() => {
+      setIsInfoClosing(false);
+      setIsMemoryInfoOpen(false);
+    }, 250);
+  }, [isInfoClosing]);
 
   useEffect(() => {
     const rootStyle = document.documentElement.style;
@@ -163,7 +185,7 @@ const showHomeButton = clickedStarIds.size >= 5;
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isMemoryInfoOpen, selectedStarIndex]);
+  }, [closeMemoryInfo, closeMemoryPopup, isMemoryInfoOpen, selectedStarIndex]);
 
   const openMemoryPopup = (index: number) => {
   const clickedStar = STAR_POINTS[index];
@@ -180,29 +202,6 @@ const showHomeButton = clickedStarIds.size >= 5;
   setIsTallMemory(false);
   setSelectedStarIndex(index);
 };
-  const closeMemoryPopup = () => {
-  if (isPopupClosing) return;
-
-  setIsPopupClosing(true);
-
-  window.setTimeout(() => {
-    setIsPopupClosing(false);
-    setIsMemoryInfoOpen(false);
-    setIsTallMemory(false);
-    setSelectedStarIndex(null);
-  }, 350);
-};
-  const closeMemoryInfo = () => {
-  if (isInfoClosing) return;
-
-  setIsInfoClosing(true);
-
-  window.setTimeout(() => {
-    setIsInfoClosing(false);
-    setIsMemoryInfoOpen(false);
-  }, 250);
-};
-
   return (
   <main className="constellation-page">
 
