@@ -88,8 +88,6 @@
   outline-offset: 4px;
 }
 
-.music-card:active { transform: scale(0.98); }
-
 .music-card-icon {
   width: 42px;
   height: 42px;

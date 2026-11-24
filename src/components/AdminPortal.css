@@ -207,15 +207,6 @@
   transform: translateY(-1px);
 }
 
-.admin-primary-button:active:not(:disabled),
-.admin-secondary-button:active:not(:disabled),
-.admin-logout-button:active:not(:disabled),
-.admin-delete-button:active:not(:disabled),
-.admin-text-button:active:not(:disabled) {
-  box-shadow: none;
-  transform: scale(0.97);
-}
-
 .admin-primary-button:focus-visible,
 .admin-secondary-button:focus-visible,
 .admin-logout-button:focus-visible,

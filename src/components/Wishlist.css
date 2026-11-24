@@ -165,12 +165,6 @@
   transform: translateY(-2px);
 }
 
-.wishlist-submit:active:not(:disabled),
-.wishlist-back:active:not(:disabled) {
-  box-shadow: none;
-  transform: scale(0.96);
-}
-
 .wishlist-submit:focus-visible {
   outline: 3px solid rgba(236, 72, 153, 0.42);
   outline-offset: 3px;

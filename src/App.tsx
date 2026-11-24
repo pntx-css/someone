@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BirthdayGate } from './components/BirthdayGate';
 import { BirthdayCake } from './components/BirthdayCake';
 import { HappyBirthday } from './components/HappyBirthday';
@@ -11,32 +11,142 @@ import { JourneyCatDecorations } from './components/JourneyCatDecorations';
 import { ConstellationChapter } from './components/ConstellationChapter';
 import { songs, type Song } from './data/music';
 
+type BirthdayPhase = 1 | 2 | 3 | 4 | 5;
+
+interface BirthdayPageState {
+  phase: BirthdayPhase;
+  showConstellation: boolean;
+  songId: string | null;
+  showConstellationFootprint: boolean;
+}
+
+const PAGE_STATE_STORAGE_KEY = 'birthday-journey-page-state';
+const DEFAULT_PAGE_STATE: BirthdayPageState = {
+  phase: 1,
+  showConstellation: false,
+  songId: null,
+  showConstellationFootprint: false,
+};
+
+const readBirthdayPageState = (): BirthdayPageState => {
+  let storedState: string | null;
+
+  try {
+    storedState = window.sessionStorage.getItem(PAGE_STATE_STORAGE_KEY);
+  } catch (error) {
+    console.warn('Could not read the saved birthday page state', error);
+    return DEFAULT_PAGE_STATE;
+  }
+
+  if (!storedState) return DEFAULT_PAGE_STATE;
+
+  let parsedState: unknown;
+  try {
+    parsedState = JSON.parse(storedState);
+  } catch (error) {
+    console.warn('Could not parse the saved birthday page state', error);
+    return DEFAULT_PAGE_STATE;
+  }
+
+  if (typeof parsedState !== 'object' || parsedState === null) {
+    console.warn('The saved birthday page state has an invalid format');
+    return DEFAULT_PAGE_STATE;
+  }
+
+  const savedState = parsedState as Record<string, unknown>;
+  const phase = savedState.phase;
+  const showConstellation = savedState.showConstellation;
+  const songId = savedState.songId ?? null;
+  const showConstellationFootprint = savedState.showConstellationFootprint ?? false;
+
+  if (
+    (phase !== 1 && phase !== 2 && phase !== 3 && phase !== 4 && phase !== 5) ||
+    typeof showConstellation !== 'boolean' ||
+    typeof showConstellationFootprint !== 'boolean' ||
+    (songId !== null && (typeof songId !== 'string' || !songs.some((song) => song.id === songId)))
+  ) {
+    console.warn('The saved birthday page state has invalid values');
+    return DEFAULT_PAGE_STATE;
+  }
+
+  return { phase, showConstellation, songId, showConstellationFootprint };
+};
+
 const BirthdayJourney: React.FC = () => {
-  const [phase, setPhase] = useState<1 | 2 | 3 | 4 | 5>(1);
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [pageState, setPageState] = useState(readBirthdayPageState);
+  const phase = pageState.phase;
+  const showConstellation = pageState.showConstellation;
+  const setPhase = (nextPhase: BirthdayPhase) => {
+    setPageState((currentState) => ({ ...currentState, phase: nextPhase }));
+  };
+  const setShowConstellation = (isShown: boolean) => {
+    setPageState((currentState) => ({ ...currentState, showConstellation: isShown }));
+  };
+  const currentSong = songs.find((song) => song.id === pageState.songId) ?? null;
   const [planeArrived, setPlaneArrived] = useState(false);
   const [isCollapsing, setIsCollapsing] = useState(false);
-  const [showConstellation, setShowConstellation] = useState(false);
   const [collapseOriginY, setCollapseOriginY] = useState(0);
   const [immersiveError, setImmersiveError] = useState('');
 
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(PAGE_STATE_STORAGE_KEY, JSON.stringify(pageState));
+    } catch (error) {
+      console.warn('Could not save the birthday page state', error);
+    }
+  }, [pageState]);
+
   const handleSelectSong = (song: Song) => {
-    setCurrentSong(song);
-    setPhase(4); // Move past music selection
+    setPageState((currentState) => ({
+      ...currentState,
+      phase: 4,
+      songId: song.id,
+    }));
   };
 
   const handleSongEnd = useCallback(() => {
-    setCurrentSong((playingSong) => {
-      const alternatives = songs.filter((song) => song.id !== playingSong?.id);
+    setPageState((currentState) => {
+      const alternatives = songs.filter((song) => song.id !== currentState.songId);
       const pool = alternatives.length > 0 ? alternatives : songs;
-      return pool[Math.floor(Math.random() * pool.length)];
+      const nextSong = pool[Math.floor(Math.random() * pool.length)];
+      return { ...currentState, songId: nextSong.id };
     });
   }, []);
 
-  const handleWishlistBack = () => {
-    setPlaneArrived(false);
-    setPhase(1);
+const handleBackToHome = () => {
+  setPlaneArrived(false);
+  setPhase(1);
+  setIsCollapsing(false);
+  setShowConstellation(false);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const unlockOrientation = () => {
+    const orientation = screen.orientation as (ScreenOrientation & {
+      unlock?: () => void;
+    }) | undefined;
+
+    try {
+      orientation?.unlock?.();
+    } catch (error) {
+      console.warn('Orientation unlock failed', error);
+    }
   };
+
+  unlockOrientation();
+  if (document.fullscreenElement && typeof document.exitFullscreen === 'function') {
+    void document.exitFullscreen().then(unlockOrientation).catch((error: unknown) => {
+      console.warn('Fullscreen exit failed', error);
+      unlockOrientation();
+    });
+  }
+};
+
+const revealConstellationFootprint = () => {
+  setPageState((currentState) => ({
+    ...currentState,
+    showConstellationFootprint: true,
+  }));
+};
 
   const requestImmersiveMode = useCallback(async () => {
     if (!document.fullscreenElement) {
@@ -98,11 +208,12 @@ const BirthdayJourney: React.FC = () => {
   return (
     <>
       {showConstellation ? (
-        <ConstellationChapter
-          immersiveError={immersiveError}
-          onRequestImmersiveMode={requestImmersiveMode}
-        />
-      ) : (
+            <ConstellationChapter
+              immersiveError={immersiveError}
+              onRequestImmersiveMode={requestImmersiveMode}
+              onBack={handleBackToHome}
+            />
+          ) : (
         <main
           className={`birthday-journey${isCollapsing ? ' birthday-journey--collapsing' : ''}`}
           style={{ '--journey-collapse-origin-y': `${collapseOriginY}px` } as React.CSSProperties}
@@ -126,9 +237,10 @@ const BirthdayJourney: React.FC = () => {
                 <Memories
                   onPlaneArrived={setPlaneArrived}
                   onOpenRandomChapter={handleOpenRandomChapter}
+                  showConstellationFootprint={pageState.showConstellationFootprint}
                 />
                 <Wishlist
-                  onBack={handleWishlistBack}
+                  onRevealFootprint={revealConstellationFootprint}
                   planeArrived={planeArrived}
                 />
               </>

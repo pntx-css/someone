@@ -194,10 +194,6 @@
 .player-btn:hover {
   background-color: var(--color-pink-500);
 }
-.player-btn:active {
-  filter: brightness(0.9);
-}
-
 .player-info {
   flex: 1;
   min-width: 0;

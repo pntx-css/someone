@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { songs } from '../data/music';
 import type { Song } from '../data/music';
 import { AnimatedText } from './AnimatedText';
@@ -9,6 +9,20 @@ interface HappyBirthdayProps {
 }
 
 export const HappyBirthday: React.FC<HappyBirthdayProps> = ({ onSelectSong }) => {
+  const [selectingSongId, setSelectingSongId] = useState<string | null>(null);
+
+  const handleSelectSong = (song: Song) => {
+    if (selectingSongId) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onSelectSong(song);
+      return;
+    }
+
+    setSelectingSongId(song.id);
+    window.setTimeout(() => onSelectSong(song), 480);
+  };
+
   return (
     <div className="hb-container">
       <h1 className="hb-title">
@@ -29,7 +43,12 @@ export const HappyBirthday: React.FC<HappyBirthdayProps> = ({ onSelectSong }) =>
             key={song.id}
             style={{ '--card-index': index } as React.CSSProperties}
           >
-            <button className="music-card" onClick={() => onSelectSong(song)}>
+            <button
+              className="music-card"
+              type="button"
+              onClick={() => handleSelectSong(song)}
+              disabled={selectingSongId !== null}
+            >
               <div className="music-card-icon">♪</div>
               <div className="music-card-info">
                 <div className="music-card-title">{song.title}</div>

@@ -57,11 +57,13 @@ const STAR_POINTS = SKY_STARS;
 interface ConstellationChapterProps {
   immersiveError: string;
   onRequestImmersiveMode: () => Promise<void>;
+  onBack: () => void;
 }
 
 export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   immersiveError,
   onRequestImmersiveMode,
+  onBack,
 }) => {
   const [isGalaxyFormed, setIsGalaxyFormed] = useState(false);
   const [litStarCount, setLitStarCount] = useState(0);
@@ -72,6 +74,11 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   const [isPopupClosing, setIsPopupClosing] = useState(false);
   const [isInfoClosing, setIsInfoClosing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
+  const [clickedStarIds, setClickedStarIds] = useState<Set<string>>(
+  () => new Set()
+);
+
+const showHomeButton = clickedStarIds.size >= 5;
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const infoCloseButtonRef = useRef<HTMLButtonElement>(null);
   const isComplete = visibleLineCount === CONSTELLATION_EDGES.length;
@@ -159,13 +166,20 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   }, [isMemoryInfoOpen, selectedStarIndex]);
 
   const openMemoryPopup = (index: number) => {
+  const clickedStar = STAR_POINTS[index];
+
+  setClickedStarIds((prev) => {
+    const next = new Set(prev);
+    next.add(clickedStar.id);
+    return next;
+  });
+
   setIsPopupClosing(false);
   setIsInfoClosing(false);
   setIsMemoryInfoOpen(false);
   setIsTallMemory(false);
   setSelectedStarIndex(index);
 };
-
   const closeMemoryPopup = () => {
   if (isPopupClosing) return;
 
@@ -190,9 +204,38 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
 };
 
   return (
-    <main className="constellation-page">
-      <GalaxyBackground onFormationComplete={handleGalaxyFormationComplete} />
-      <MiniGalaxy />
+  <main className="constellation-page">
+
+    {showHomeButton && (
+      <button
+        className="constellation-home-button"
+        type="button"
+        onClick={onBack}
+        aria-label="Kembali ke halaman awal"
+        title="Kembali ke halaman awal"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M9 14L4 9L9 4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M4 9H14C18 9 20 12 20 16V19"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
+    )}
+
+    <GalaxyBackground onFormationComplete={handleGalaxyFormationComplete} />
+    <MiniGalaxy />
       <div className="constellation-nebula" aria-hidden="true" />
       <div className="constellation-starfield" aria-hidden="true" />
       <div className="constellation-controls">

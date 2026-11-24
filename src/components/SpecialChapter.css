@@ -206,14 +206,6 @@
   box-shadow: 0 14px 30px rgba(89, 65, 62, 0.11), 0 2px 6px rgba(89, 65, 62, 0.05);
 }
 
-.special-custom-card:has(.special-card-select:active) {
-  transform: scale(0.985);
-}
-
-button.special-empty-card:active {
-  transform: scale(0.985);
-}
-
 .special-custom-card.is-selected {
   border-color: #D99AA7;
   background: #FFF8F0;
@@ -240,11 +232,6 @@ button.special-empty-card:active {
   border-radius: calc(var(--radius-paper) - 1px);
   outline: none;
   transition: opacity 200ms ease, transform 180ms var(--ease-soft);
-}
-
-.special-custom-card .special-card-select:active {
-  opacity: 0.82;
-  transform: none;
 }
 
 .special-card-select:focus-visible {
@@ -376,10 +363,6 @@ button.special-empty-card:active {
   transform: translateY(-2px);
   border-color: #c24578;
   background: #fff4f8;
-}
-
-.special-empty-card:active {
-  transform: scale(0.99);
 }
 
 .special-empty-card > span {
@@ -596,10 +579,6 @@ button.special-empty-card:active {
   box-shadow: 0 0 0 3px rgba(194, 69, 120, 0.2), 0 5px 12px rgba(89, 65, 62, 0.2);
 }
 
-.special-clock-dot:active {
-  transform: translate(-50%, -50%) scale(0.82);
-}
-
 .special-clock-label {
   position: absolute;
   color: rgba(131, 24, 67, 0.76);
@@ -747,6 +726,17 @@ button.special-empty-card:active {
   background: rgba(249, 213, 229, 0.72);
 }
 
+.special-plan-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.special-plan-actions.has-return .special-save-plan-button {
+  width: auto;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
 .special-save-plan-button {
   width: 100%;
   min-height: 2.8rem;
@@ -766,32 +756,9 @@ button.special-empty-card:active {
   transform: translateY(-1px);
 }
 
-.special-save-plan-button:active:not(:disabled) {
-  transform: scale(0.99);
-}
-
 .special-save-plan-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-
-.special-return-button {
-  width: 100%;
-  min-height: 2.8rem;
-  margin-top: 0.7rem;
-  border: 1px solid rgba(131, 24, 67, 0.42);
-  border-radius: var(--radius-control);
-  color: #831843;
-  background: rgba(255, 252, 247, 0.76);
-  font: 500 0.72rem var(--font-body);
-  letter-spacing: 0.07em;
-}
-
-.special-return-button:hover:not(:disabled) {
-  border-color: #831843;
-  background: #fff;
-  box-shadow: 0 5px 12px rgba(101, 18, 56, 0.12);
-  transform: translateY(-1px);
 }
 
 .special-modal-backdrop {
@@ -1333,6 +1300,10 @@ button.special-empty-card:active {
   animation: special-section-in 450ms cubic-bezier(0.16, 1, 0.3, 1) 7100ms both;
 }
 
+.special-chapter--entering .special-plan-return-button {
+  animation: none;
+}
+
 
 /* ================================
    SPECIAL CHAPTER EXIT
@@ -1390,25 +1361,13 @@ button.special-empty-card:active {
   --exit-delay: 135ms;
 }
 
-/* Map keluar */
 .special-chapter--exiting .special-map-panel {
   animation: special-panel-out 380ms ease-in 650ms both;
 }
 
-/* Panel rencana keluar */
 .special-chapter--exiting .special-plan-panel {
   animation: special-clock-out 380ms ease-in 820ms both;
 }
-
-/* Cegah klik tombol kembali berulang */
-.special-chapter--exiting .special-return-button {
-  pointer-events: none;
-}
-
-
-/* ================================
-   KEYFRAMES
-================================ */
 
 @keyframes special-header-in {
   from {

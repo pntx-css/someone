@@ -123,7 +123,34 @@ button.cat-illustration {
 }
 
 button:not(:disabled) { cursor: pointer; }
-button:not(:disabled):active { transform: scale(0.97); }
+
+@keyframes jelly-button-click {
+  0%,
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+
+  24% {
+    transform: scale3d(1.12, 0.84, 1);
+  }
+
+  48% {
+    transform: scale3d(0.9, 1.12, 1);
+  }
+
+  70% {
+    transform: scale3d(1.045, 0.96, 1);
+  }
+
+  86% {
+    transform: scale3d(0.985, 1.025, 1);
+  }
+}
+
+button.jelly-button-click,
+[role="button"].jelly-button-click {
+  animation: jelly-button-click 460ms cubic-bezier(0.2, 0.75, 0.25, 1) both !important;
+}
 
 @media (hover: hover) and (pointer: fine) {
   .music-card:hover,

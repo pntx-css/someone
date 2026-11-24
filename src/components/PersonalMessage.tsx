@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { personalMessage } from '../data/message';
 import { JourneyCatDecorations } from './JourneyCatDecorations';
 import './PersonalMessage.css';
@@ -61,6 +61,20 @@ const renderPersonalMessage = (): React.ReactNode[] => {
 };
 
 export const PersonalMessage: React.FC<PersonalMessageProps> = ({ onNext }) => {
+  const [isOpeningMemories, setIsOpeningMemories] = useState(false);
+
+  const handleOpenMemories = () => {
+    if (isOpeningMemories) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onNext();
+      return;
+    }
+
+    setIsOpeningMemories(true);
+    window.setTimeout(onNext, 480);
+  };
+
   return (
     <div className="letter-container" style={{ position: 'relative' }}>
       <div className="letter-paper">
@@ -74,7 +88,8 @@ export const PersonalMessage: React.FC<PersonalMessageProps> = ({ onNext }) => {
         <div style={{ textAlign: 'center', marginTop: '3rem' }}>
           <button
             className="gate-btn"
-            onClick={onNext}
+            onClick={handleOpenMemories}
+            disabled={isOpeningMemories}
             style={{ position: 'relative', zIndex: 10 }}
           >
             open memories

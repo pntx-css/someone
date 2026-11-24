@@ -17,6 +17,80 @@ const formatTime = (sec: number): string => {
 const isAbortError = (error: unknown): boolean =>
   error instanceof DOMException && error.name === 'AbortError';
 
+const PLAYER_EXPANDED_STORAGE_KEY = 'birthday-music-player-expanded';
+const PLAYBACK_STATE_STORAGE_KEY = 'birthday-music-playback';
+
+interface SavedPlaybackState {
+  songId: string;
+  currentTime: number;
+  isPlaying: boolean;
+}
+
+const readPlaybackState = (songId: string): SavedPlaybackState | null => {
+  let storedState: string | null;
+  try {
+    storedState = window.sessionStorage.getItem(PLAYBACK_STATE_STORAGE_KEY);
+  } catch (error) {
+    console.warn('Could not read the saved music playback state', error);
+    return null;
+  }
+
+  if (!storedState) return null;
+
+  let parsedState: unknown;
+  try {
+    parsedState = JSON.parse(storedState);
+  } catch (error) {
+    console.warn('Could not parse the saved music playback state', error);
+    return null;
+  }
+
+  if (typeof parsedState !== 'object' || parsedState === null) {
+    console.warn('The saved music playback state has an invalid format');
+    return null;
+  }
+
+  const savedState = parsedState as Record<string, unknown>;
+  if (
+    savedState.songId !== songId ||
+    typeof savedState.currentTime !== 'number' ||
+    !Number.isFinite(savedState.currentTime) ||
+    savedState.currentTime < 0 ||
+    typeof savedState.isPlaying !== 'boolean'
+  ) {
+    return null;
+  }
+
+  return {
+    songId,
+    currentTime: savedState.currentTime,
+    isPlaying: savedState.isPlaying,
+  };
+};
+
+const savePlaybackState = (state: SavedPlaybackState): void => {
+  try {
+    window.sessionStorage.setItem(PLAYBACK_STATE_STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.warn('Could not save the music playback state', error);
+  }
+};
+
+const readIsExpanded = (): boolean => {
+  try {
+    const storedState = window.sessionStorage.getItem(PLAYER_EXPANDED_STORAGE_KEY);
+    if (storedState === null) return false;
+    if (storedState === 'true') return true;
+    if (storedState === 'false') return false;
+
+    console.warn('The saved music player state has an invalid value');
+    return false;
+  } catch (error) {
+    console.warn('Could not read the saved music player state', error);
+    return false;
+  }
+};
+
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   song,
   onSongEnd,
@@ -30,7 +104,15 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackMessage, setPlaybackMessage] = useState('');
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(readIsExpanded);
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(PLAYER_EXPANDED_STORAGE_KEY, String(isExpanded));
+    } catch (error) {
+      console.warn('Could not save the music player state', error);
+    }
+  }, [isExpanded]);
 
   // Animate when a new song is selected
     useEffect(() => {
@@ -56,17 +138,40 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }, [onSongEnd]);
   useEffect(() => {
     let isActive = true;
+    const savedPlayback = readPlaybackState(song.id);
     const audio = new Audio(song.file);
+    let lastSavedAt = 0;
+    let hasRestoredPosition = false;
     setProgress(0);
     setCurrentTime(0);
     setDuration(0);
     setPlaybackMessage('');
+    setIsPlaying(false);
     audio.preload = 'metadata';
     audioRef.current = audio;
+
+    const persistPlayback = (isPlayingNow: boolean, force = false) => {
+      const now = Date.now();
+      if (!force && now - lastSavedAt < 1000) return;
+      lastSavedAt = now;
+      savePlaybackState({
+        songId: song.id,
+        currentTime: audio.currentTime,
+        isPlaying: isPlayingNow,
+      });
+    };
 
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
       setPlaybackMessage('');
+
+      if (hasRestoredPosition || !savedPlayback || !Number.isFinite(audio.duration)) return;
+      hasRestoredPosition = true;
+      const maxPosition = Math.max(0, audio.duration - 0.25);
+      const restoredPosition = Math.min(savedPlayback.currentTime, maxPosition);
+      audio.currentTime = restoredPosition;
+      setCurrentTime(restoredPosition);
+      setProgress(audio.duration > 0 ? (restoredPosition / audio.duration) * 100 : 0);
     };
 
     const handleTimeUpdate = () => {
@@ -74,14 +179,18 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
       }
+      persistPlayback(!audio.paused);
     };
 
     const handleEnded = () => {
         setIsPlaying(false);
         setProgress(0);
         setCurrentTime(0);
+        persistPlayback(false, true);
         onSongEndRef.current();
       };
+
+    const handlePageHide = () => persistPlayback(!audio.paused, true);
 
     const handleError = () => {
       const code = audio.error?.code;
@@ -114,13 +223,16 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
+    window.addEventListener('pagehide', handlePageHide);
 
-    // Autoplay after user selects
-    audio.play().then(() => {
-      if (!isActive) return;
-      setIsPlaying(true);
-      setPlaybackMessage('');
-    }).catch(handlePlayFailure);
+    if (savedPlayback?.isPlaying ?? true) {
+      audio.play().then(() => {
+        if (!isActive) return;
+        setIsPlaying(true);
+        setPlaybackMessage('');
+        persistPlayback(true, true);
+      }).catch(handlePlayFailure);
+    }
 
     return () => {
       isActive = false;
@@ -128,11 +240,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
+      window.removeEventListener('pagehide', handlePageHide);
       audio.pause();
       audio.src = '';
       audio.remove();
     };
-  }, [song.file]);
+  }, [song.file, song.id]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
@@ -141,12 +254,22 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
+      savePlaybackState({
+        songId: song.id,
+        currentTime: audio.currentTime,
+        isPlaying: false,
+      });
     } else {
       audio.play()
         .then(() => {
           if (audioRef.current !== audio || audio.paused) return;
           setIsPlaying(true);
           setPlaybackMessage('');
+          savePlaybackState({
+            songId: song.id,
+            currentTime: audio.currentTime,
+            isPlaying: true,
+          });
         })
         .catch((error: unknown) => {
           if (isAbortError(error)) return;
@@ -163,7 +286,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           setPlaybackMessage('Musik belum dapat diputar. Coba tekan tombol putar lagi.');
         });
     }
-  }, [isPlaying, song.file]);
+  }, [isPlaying, song.file, song.id]);
 
   const handleProgressChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

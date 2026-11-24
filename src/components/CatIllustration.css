@@ -28,14 +28,6 @@
   transform: scaleX(-1) scale(1.08);
 }
 
-.cat-illustration:active {
-  transform: scale(0.95);
-}
-
-.cat-illustration.cat-flipped:active {
-  transform: scaleX(-1) scale(0.95);
-}
-
 .cat-asset {
   display: block;
   width: 100%;

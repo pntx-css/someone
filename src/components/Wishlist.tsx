@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { AnimatedText } from './AnimatedText';
 import './Wishlist.css';
 
@@ -8,20 +8,77 @@ const SpecialChapter = lazy(() =>
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
 
+interface SavedWishlistState {
+  draft: string;
+  hasSent: boolean;
+}
+
+const WISHLIST_STATE_STORAGE_KEY = 'birthday-wishlist-state';
+const DEFAULT_WISHLIST_STATE: SavedWishlistState = { draft: '', hasSent: false };
+
+const saveWishlistState = (state: SavedWishlistState) => {
+  try {
+    window.sessionStorage.setItem(WISHLIST_STATE_STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.warn('Could not save the wishlist state', error);
+  }
+};
+
+const readWishlistState = (): SavedWishlistState => {
+  let storedState: string | null;
+  try {
+    storedState = window.sessionStorage.getItem(WISHLIST_STATE_STORAGE_KEY);
+  } catch (error) {
+    console.warn('Could not read the saved wishlist state', error);
+    return DEFAULT_WISHLIST_STATE;
+  }
+
+  if (!storedState) return DEFAULT_WISHLIST_STATE;
+
+  let parsedState: unknown;
+  try {
+    parsedState = JSON.parse(storedState);
+  } catch (error) {
+    console.warn('Could not parse the saved wishlist state', error);
+    return DEFAULT_WISHLIST_STATE;
+  }
+
+  if (
+    typeof parsedState !== 'object' ||
+    parsedState === null ||
+    typeof (parsedState as Record<string, unknown>).draft !== 'string' ||
+    typeof (parsedState as Record<string, unknown>).hasSent !== 'boolean'
+  ) {
+    console.warn('The saved wishlist state has an invalid format');
+    return DEFAULT_WISHLIST_STATE;
+  }
+
+  const savedState = parsedState as Record<string, unknown>;
+  const hasSent = savedState.hasSent as boolean;
+  const draft = savedState.draft as string;
+  return { draft: hasSent ? '' : draft.slice(0, 1200), hasSent };
+};
+
 interface WishlistProps {
-  onBack: () => void;
+  onRevealFootprint: () => void;
   planeArrived: boolean;
 }
 
-export const Wishlist: React.FC<WishlistProps> = ({ onBack, planeArrived }) => {
-  const [message, setMessage] = useState('');
+export const Wishlist: React.FC<WishlistProps> = ({ onRevealFootprint, planeArrived }) => {
+  const [initialWishlistState] = useState(readWishlistState);
+  const [message, setMessage] = useState(initialWishlistState.draft);
+  const [hasSent, setHasSent] = useState(initialWishlistState.hasSent);
   const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [validationMessage, setValidationMessage] = useState('');
   const [submissionError, setSubmissionError] = useState('');
 
+  useEffect(() => {
+    saveWishlistState({ draft: hasSent ? '' : message, hasSent });
+  }, [hasSent, message]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (status === 'submitting' || status === 'success') return;
+    if (status === 'submitting' || status === 'success' || hasSent) return;
 
     const trimmedMessage = message.trim();
     if (!trimmedMessage) {
@@ -55,7 +112,9 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack, planeArrived }) => {
         throw new Error('Server belum mengonfirmasi penyimpanan pesan. Coba lagi ya.');
       }
 
+      saveWishlistState({ draft: '', hasSent: true });
       setStatus('success');
+      setHasSent(true);
     } catch (error) {
       setSubmissionError(
         error instanceof Error ? error.message : 'Pesan belum berhasil dikirim. Coba lagi ya.'
@@ -65,8 +124,8 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack, planeArrived }) => {
   };
 
   const isSubmitting = status === 'submitting';
-  const isSent = status === 'success';
-  const stageStatus = isSubmitting ? 'pending' : status;
+  const isSent = status === 'success' || hasSent;
+  const stageStatus = isSubmitting ? 'pending' : isSent ? 'success' : status;
 
   return (
     <section className="wishlist-section" aria-labelledby="wishlist-title">
@@ -164,7 +223,7 @@ export const Wishlist: React.FC<WishlistProps> = ({ onBack, planeArrived }) => {
       </p>
 
       <Suspense fallback={null}>
-        <SpecialChapter wishlistSent={isSent} onBack={onBack} />
+        <SpecialChapter wishlistSent={isSent} onRevealFootprint={onRevealFootprint} />
       </Suspense>
     </section>
   );

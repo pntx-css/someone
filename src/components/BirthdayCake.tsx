@@ -1,11 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AnimatedText } from './AnimatedText';
 import './BirthdayCake.css';
 
 type CandleState = 'flame' | 'smoke' | 'extinguished';
 
+const CANDLE_STATE_STORAGE_KEY = 'birthday-cake-candles';
+const DEFAULT_CANDLES: CandleState[] = ['flame', 'flame', 'flame'];
+const isCandleState = (value: unknown): value is CandleState =>
+  value === 'flame' || value === 'smoke' || value === 'extinguished';
+
+const readCandles = (): CandleState[] => {
+  let storedCandles: string | null;
+  try {
+    storedCandles = window.sessionStorage.getItem(CANDLE_STATE_STORAGE_KEY);
+  } catch (error) {
+    console.warn('Could not read the saved birthday cake state', error);
+    return DEFAULT_CANDLES;
+  }
+
+  if (!storedCandles) return DEFAULT_CANDLES;
+
+  let parsedCandles: unknown;
+  try {
+    parsedCandles = JSON.parse(storedCandles);
+  } catch (error) {
+    console.warn('Could not parse the saved birthday cake state', error);
+    return DEFAULT_CANDLES;
+  }
+
+  if (
+    !Array.isArray(parsedCandles) ||
+    parsedCandles.length !== DEFAULT_CANDLES.length ||
+    !parsedCandles.every(isCandleState)
+  ) {
+    console.warn('The saved birthday cake state has an invalid format');
+    return DEFAULT_CANDLES;
+  }
+
+  return parsedCandles.map((candle) => candle === 'smoke' ? 'extinguished' : candle);
+};
+
 export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
-  const [candles, setCandles] = useState<CandleState[]>(['flame', 'flame', 'flame']);
+  const [candles, setCandles] = useState<CandleState[]>(readCandles);
   const [isCompleted, setIsCompleted] = useState(false);
   const candlesAreOut = candles.every((candle) => candle === 'extinguished');
   const instruction = candlesAreOut ? 'Selamat HBD!!!' : 'Make a wish...';
@@ -13,29 +49,41 @@ export const BirthdayCake: React.FC<{ onComplete: () => void }> = ({ onComplete 
     ? 'btw kucingnya bisa kmu klik loh'
     : 'tiup lilinnya (klik sih maksudku) *anggep aja lagi niup';
 
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(CANDLE_STATE_STORAGE_KEY, JSON.stringify(candles));
+    } catch (error) {
+      console.warn('Could not save the birthday cake state', error);
+    }
+  }, [candles]);
+
+  useEffect(() => {
+    if (!candlesAreOut) return;
+
+    let completionTimer = 0;
+    const transitionTimer = window.setTimeout(() => {
+      setIsCompleted(true);
+      completionTimer = window.setTimeout(onComplete, 2000);
+    }, 4500);
+
+    return () => {
+      window.clearTimeout(transitionTimer);
+      window.clearTimeout(completionTimer);
+    };
+  }, [candlesAreOut, onComplete]);
+
   const handleCandleClick = (index: number) => {
     if (candles[index] !== 'flame') return;
 
     const newCandles = [...candles];
     newCandles[index] = 'smoke';
     setCandles(newCandles);
-
-    // Smoke → Extinguished after animation
-    setTimeout(() => {
-      setCandles(prev => {
-        const updated = [...prev];
-        updated[index] = 'extinguished';
-
-        // Check if all 3 are now extinguished
-        const allOut = updated.every(c => c === 'extinguished');
-        if (allOut) {
-          setTimeout(() => {
-            setIsCompleted(true);
-            setTimeout(() => onComplete(), 2000);
-          }, 4500);
-        }
-
-        return updated;
+    window.setTimeout(() => {
+      setCandles((currentCandles) => {
+        if (currentCandles[index] !== 'smoke') return currentCandles;
+        const updatedCandles = [...currentCandles];
+        updatedCandles[index] = 'extinguished';
+        return updatedCandles;
       });
     }, 1400);
   };

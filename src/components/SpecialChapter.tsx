@@ -33,11 +33,117 @@ interface PlannedVisit {
   time: string;
 }
 
+interface SavedSpecialChapterState {
+  places: CustomPlace[];
+  plannedVisits: PlannedVisit[];
+  savedPlanSignature: string;
+}
+
 interface PlanSubmissionVisit {
   name: string;
   time: string;
   mapsUrl: string;
 }
+
+const SPECIAL_CHAPTER_STATE_STORAGE_KEY = 'birthday-special-chapter-state';
+const DEFAULT_SPECIAL_CHAPTER_STATE: SavedSpecialChapterState = {
+  places: [],
+  plannedVisits: [],
+  savedPlanSignature: '',
+};
+
+const isCoordinates = (value: unknown): value is Coordinates => {
+  if (typeof value !== 'object' || value === null) return false;
+  const coordinates = value as Record<string, unknown>;
+  return (
+    typeof coordinates.latitude === 'number' &&
+    Number.isFinite(coordinates.latitude) &&
+    coordinates.latitude >= -90 &&
+    coordinates.latitude <= 90 &&
+    typeof coordinates.longitude === 'number' &&
+    Number.isFinite(coordinates.longitude) &&
+    coordinates.longitude >= -180 &&
+    coordinates.longitude <= 180
+  );
+};
+
+const isCustomPlace = (value: unknown): value is CustomPlace => {
+  if (typeof value !== 'object' || value === null) return false;
+  const place = value as Record<string, unknown>;
+  return (
+    typeof place.id === 'string' &&
+    typeof place.mapsUrl === 'string' &&
+    typeof place.name === 'string' &&
+    typeof place.description === 'string' &&
+    (place.coordinates === null || isCoordinates(place.coordinates))
+  );
+};
+
+const isPlannedVisit = (value: unknown): value is PlannedVisit => {
+  if (typeof value !== 'object' || value === null) return false;
+  const visit = value as Record<string, unknown>;
+  if (typeof visit.placeId !== 'string' || typeof visit.time !== 'string') return false;
+
+  const [hour, minute] = visit.time.split(':').map(Number);
+  return (
+    /^\d{2}:\d{2}$/.test(visit.time) &&
+    Number.isInteger(hour) &&
+    hour >= 0 &&
+    hour <= 23 &&
+    Number.isInteger(minute) &&
+    minute >= 0 &&
+    minute <= 59
+  );
+};
+
+const readSpecialChapterState = (): SavedSpecialChapterState => {
+  let storedState: string | null;
+  try {
+    storedState = window.sessionStorage.getItem(SPECIAL_CHAPTER_STATE_STORAGE_KEY);
+  } catch (error) {
+    console.warn('Could not read the saved special place state', error);
+    return DEFAULT_SPECIAL_CHAPTER_STATE;
+  }
+
+  if (!storedState) return DEFAULT_SPECIAL_CHAPTER_STATE;
+
+  let parsedState: unknown;
+  try {
+    parsedState = JSON.parse(storedState);
+  } catch (error) {
+    console.warn('Could not parse the saved special place state', error);
+    return DEFAULT_SPECIAL_CHAPTER_STATE;
+  }
+
+  if (typeof parsedState !== 'object' || parsedState === null) {
+    console.warn('The saved special place state has an invalid format');
+    return DEFAULT_SPECIAL_CHAPTER_STATE;
+  }
+
+  const savedState = parsedState as Record<string, unknown>;
+  const places = savedState.places;
+  const plannedVisits = savedState.plannedVisits;
+  const savedPlanSignature = savedState.savedPlanSignature;
+  const knownPlaceIds = new Set([
+    ...specialPlaces.map((place) => place.id),
+    ...(Array.isArray(places) ? places.filter(isCustomPlace).map((place) => place.id) : []),
+  ]);
+
+  if (
+    !Array.isArray(places) ||
+    places.length > MAX_CUSTOM_PLACES ||
+    !places.every(isCustomPlace) ||
+    !Array.isArray(plannedVisits) ||
+    !plannedVisits.every(isPlannedVisit) ||
+    plannedVisits.some((visit) => !knownPlaceIds.has(visit.placeId)) ||
+    typeof savedPlanSignature !== 'string'
+  ) {
+    console.warn('The saved special place state has invalid values');
+    return DEFAULT_SPECIAL_CHAPTER_STATE;
+  }
+
+  return { places, plannedVisits, savedPlanSignature };
+};
 
 const HOME_COORDINATES: Coordinates = {
   latitude: -7.604534579811721,
@@ -46,7 +152,7 @@ const HOME_COORDINATES: Coordinates = {
 
 interface SpecialChapterProps {
   wishlistSent: boolean;
-  onBack: () => void;
+  onRevealFootprint: () => void;
 }
 
 interface PlaceFormProps {
@@ -376,14 +482,18 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
   );
 };
 
-export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, onBack }) => {
-  const [places, setPlaces] = useState<CustomPlace[]>([]);
-  const [plannedVisits, setPlannedVisits] = useState<PlannedVisit[]>([]);
+export const SpecialChapter: React.FC<SpecialChapterProps> = ({
+  wishlistSent,
+  onRevealFootprint,
+}) => {
+  const [initialSpecialChapterState] = useState(readSpecialChapterState);
+  const [places, setPlaces] = useState<CustomPlace[]>(initialSpecialChapterState.places);
+  const [plannedVisits, setPlannedVisits] = useState<PlannedVisit[]>(initialSpecialChapterState.plannedVisits);
   const [planningPlaceId, setPlanningPlaceId] = useState<string | null>(null);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
   const [isAddingPlace, setIsAddingPlace] = useState(false);
   const [isSubmittingPlan, setIsSubmittingPlan] = useState(false);
-  const [savedPlanSignature, setSavedPlanSignature] = useState('');
+  const [savedPlanSignature, setSavedPlanSignature] = useState(initialSpecialChapterState.savedPlanSignature);
   const [planSubmissionError, setPlanSubmissionError] = useState('');
   const [planSubmissionNotice, setPlanSubmissionNotice] = useState('');
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -394,13 +504,23 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
   const markersRef = useRef<Marker[]>([]);
   const [mapReady, setMapReady] = useState(false);
   const [chapterPhase, setChapterPhase] = useState<
-    'waiting' | 'entering' | 'entered' | 'exiting'
-  >('waiting');
+  'waiting' | 'entering' | 'entered'
+>('waiting');
 
   const enterTimerRef = useRef<number | null>(null);
-  const exitTimerRef = useRef<number | null>(null);
 
   useBodyScrollLock(Boolean(planningPlaceId || editingPlaceId || isAddingPlace));
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(
+        SPECIAL_CHAPTER_STATE_STORAGE_KEY,
+        JSON.stringify({ places, plannedVisits, savedPlanSignature })
+      );
+    } catch (error) {
+      console.warn('Could not save the special place state', error);
+    }
+  }, [places, plannedVisits, savedPlanSignature]);
 
   useEffect(() => {
     if (!wishlistSent) return;
@@ -427,29 +547,6 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
       }
     };
   }, [wishlistSent]);
-
-  useEffect(() => {
-    return () => {
-      if (exitTimerRef.current !== null) {
-        window.clearTimeout(exitTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleChapterBack = () => {
-    if (chapterPhase === 'exiting') return;
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      onBack();
-      return;
-    }
-
-    setChapterPhase('exiting');
-
-    exitTimerRef.current = window.setTimeout(() => {
-      onBack();
-    }, 1250);
-  };
 
   useEffect(() => () => {
     flyingCardAnimations.current.forEach((animation, card) => {
@@ -993,28 +1090,29 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({ wishlistSent, on
           {planSubmissionNotice && (
             <p className="special-plan-submit-feedback" role="status">{planSubmissionNotice}</p>
           )}
-          <button
-            type="button"
-            className="special-save-plan-button"
-            onClick={() => void submitPlan()}
-            disabled={planPayload.length === 0 || isSubmittingPlan || isCurrentPlanSaved}
-          >
-            {isSubmittingPlan
-              ? 'MENGIRIM RENCANA...'
-              : isCurrentPlanSaved
-                ? 'RENCANA TERKIRIM'
-                : 'SIMPAN RENCANA'}
-          </button>
-          {isCurrentPlanSaved && (
+          <div className={`special-plan-actions${isCurrentPlanSaved ? ' has-return' : ''}`}>
             <button
               type="button"
-              className="special-return-button"
-              onClick={handleChapterBack}
-              disabled={chapterPhase === 'exiting'}
+              className="special-save-plan-button"
+              onClick={() => void submitPlan()}
+              disabled={planPayload.length === 0 || isSubmittingPlan || isCurrentPlanSaved}
             >
-              KEMBALI KE AWAL
+              {isSubmittingPlan
+                ? 'MENGIRIM RENCANA...'
+                : isCurrentPlanSaved
+                  ? 'RENCANA TERKIRIM'
+                  : 'SIMPAN RENCANA'}
             </button>
-          )}
+            {isCurrentPlanSaved && (
+              <button
+                type="button"
+                className="special-save-plan-button special-plan-return-button"
+                onClick={onRevealFootprint}
+              >
+                KEMBALI
+              </button>
+            )}
+          </div>
         </div>
       </section>
 

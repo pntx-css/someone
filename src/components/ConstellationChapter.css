@@ -12,11 +12,12 @@
     linear-gradient(145deg, #080311 0%, #160b2b 44%, #151044 78%, #09071e 100%);
 }
 
-.constellation-nebula,
-.constellation-starfield,
-
 .constellation-nebula {
+  position: absolute;
+  inset: 0;
   z-index: -1;
+  pointer-events: none;
+
   background:
     radial-gradient(ellipse at 52% 54%, rgba(208, 112, 221, 0.2), transparent 20%),
     radial-gradient(ellipse at 23% 68%, rgba(115, 58, 158, 0.25), transparent 22%),
@@ -26,7 +27,11 @@
 }
 
 .constellation-starfield {
+  position: absolute;
+  inset: 0;
   z-index: -1;
+  pointer-events: none;
+
   opacity: 0.76;
   background-image:
     radial-gradient(1px 1px at 7% 13%, #e5f7ff 98%, transparent),
@@ -96,6 +101,65 @@
   animation: constellation-sky-twinkle 7s ease-in-out infinite alternate;
 }
 
+.constellation-home-button {
+  position: absolute;
+  top: max(1.25rem, env(safe-area-inset-top));
+  left: max(1.25rem, env(safe-area-inset-left));
+  z-index: 10;
+
+  display: grid;
+  place-items: center;
+
+  width: 2.8rem;
+  height: 2.8rem;
+  padding: 0;
+
+  border: 1px solid rgba(226, 190, 255, 0.35);
+  border-radius: 50%;
+
+  background: rgba(18, 13, 39, 0.78);
+  color: #ffb6d9;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  animation: constellation-home-appear 450ms ease both;
+
+  transition:
+    background 250ms ease,
+    border-color 250ms ease,
+    transform 250ms ease;
+}
+
+.constellation-home-button svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.constellation-home-button:hover {
+  background: rgba(255, 105, 180, 0.4);
+border-color: rgba(255, 182, 217, 0.9);
+  transform: scale(1.1);
+}
+
+.constellation-home-button:focus-visible {
+  outline: 2px solid #d6bdff;
+  outline-offset: 3px;
+}
+
+@keyframes constellation-home-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 .constellation-controls {
   position: absolute;
@@ -480,6 +544,10 @@
     transform-origin: top left;
   }
 
+  .constellation-home-button {
+    top: max(1rem, env(safe-area-inset-top));
+    left: max(1rem, env(safe-area-inset-left));
+  }
   .constellation-popup {
     max-width: calc(100dvh - 2rem);
     max-height: 90dvw;

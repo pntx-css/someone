@@ -20,8 +20,13 @@ interface SelectedMemory {
 interface MemoriesProps {
   onPlaneArrived: (arrived: boolean) => void;
   onOpenRandomChapter: () => void;
+  showConstellationFootprint: boolean;
 }
-export const Memories: React.FC<MemoriesProps> = ({ onPlaneArrived, onOpenRandomChapter }) => {
+export const Memories: React.FC<MemoriesProps> = ({
+  onPlaneArrived,
+  onOpenRandomChapter,
+  showConstellationFootprint,
+}) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const planeArrivedRef = useRef(false);
   const onPlaneArrivedRef = useRef(onPlaneArrived);
@@ -270,7 +275,7 @@ export const Memories: React.FC<MemoriesProps> = ({ onPlaneArrived, onOpenRandom
                 className="memory-cat-decoration"
               />
             )
-            : index === footprintMemoryIndex
+            : showConstellationFootprint && index === footprintMemoryIndex
               ? <RandomFootprint onClick={onOpenRandomChapter} />
               : null;
 
