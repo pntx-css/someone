@@ -14,11 +14,6 @@
 
 .constellation-nebula,
 .constellation-starfield,
-.constellation-horizon {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
 
 .constellation-nebula {
   z-index: -1;
@@ -101,25 +96,6 @@
   animation: constellation-sky-twinkle 7s ease-in-out infinite alternate;
 }
 
-.constellation-horizon {
-  z-index: 2;
-  inset: auto 0 0;
-  display: block;
-  width: 100%;
-  height: 25%;
-}
-
-.constellation-mountain-back {
-  fill: #17132d;
-}
-
-.constellation-mountain-front {
-  fill: #0b0a1c;
-}
-
-.constellation-tree-line {
-  fill: #03050d;
-}
 
 .constellation-controls {
   position: absolute;
@@ -166,13 +142,14 @@
 }
 
 .constellation-map {
+  position: absolute;
   z-index: 1;
-  display: block;
-  width: min(92vw, 1100px);
-  height: min(76dvh, 640px);
-  overflow: visible;
+  top: 50%;
+  left: 50%;
+  width: min(100vw, 900px);
+  height: auto;
+  transform: translate(-50%, -50%);
 }
-
 .constellation-popup-backdrop {
   position: absolute;
   z-index: 4;

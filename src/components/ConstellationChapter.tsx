@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './ConstellationChapter.css';
 import { GalaxyBackground } from './GalaxyBackground';
+import { MiniGalaxy } from './MiniGalaxy';
 import { constellationMemories } from '../data/constellationMemories';
 
 interface StarCoordinate {
@@ -191,28 +192,9 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   return (
     <main className="constellation-page">
       <GalaxyBackground onFormationComplete={handleGalaxyFormationComplete} />
+      <MiniGalaxy />
       <div className="constellation-nebula" aria-hidden="true" />
       <div className="constellation-starfield" aria-hidden="true" />
-      <svg
-        className="constellation-horizon"
-        viewBox="0 0 1440 300"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <path
-          className="constellation-mountain-back"
-          d="M0 300V205l96-72 74 40 122-111 105 91 98-59 106 78 98-107 99 84 127-98 120 102 101-64 123 82 71-34 100 68v95H0Z"
-        />
-        <path
-          className="constellation-mountain-front"
-          d="M0 300V240l105-58 85 44 108-91 93 86 110-51 88 61 118-99 106 86 115-65 118 63 105-80 95 66 103-45 89 51v92H0Z"
-        />
-        <path
-          className="constellation-tree-line"
-          d="M0 300v-47l18-39 18 39h-11l24 33 19-48 21-45 21 45h-12l27 49 18-40 19-37 20 37h-12l23 32 19-54 24-45 24 45h-14l27 54 18-43 20-37 20 37h-12l25 43 20-48 21-43 21 43h-13l26 48 19-44 21-38 21 38h-13l25 44 21-54 22-46 22 46h-14l29 53 18-39 20-35 20 35h-12l26 40 18-47 21-42 21 42h-13l27 47 20-50 23-45 23 45h-14l29 50 19-45 20-37 20 37h-12l25 41 18-47 22-43 22 43h-14l28 47 20-51 22-43 22 43h-13l27 49 20-45 20-38 20 38h-12l26 41 20-48 21-42 21 42h-13l27 47 19-48 21-43 21 43h-13l27 48 18-43 20-37 20 37h-12l24 41 19-47 21-42 21 42h-13l26 47 20-47 20-39 20 39h-12l24 41 19-48 20-42 20 42h-12l25 48v47H0Z"
-        />
-      </svg>
-
       <div className="constellation-controls">
         <button
           className="constellation-immersive-button"
