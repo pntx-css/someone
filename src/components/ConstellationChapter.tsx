@@ -68,6 +68,8 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   const [selectedStarIndex, setSelectedStarIndex] = useState<number | null>(null);
   const [isMemoryInfoOpen, setIsMemoryInfoOpen] = useState(false);
   const [isTallMemory, setIsTallMemory] = useState(false);
+  const [isPopupClosing, setIsPopupClosing] = useState(false);
+  const [isInfoClosing, setIsInfoClosing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const infoCloseButtonRef = useRef<HTMLButtonElement>(null);
@@ -144,28 +146,47 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (isMemoryInfoOpen) {
-          setIsMemoryInfoOpen(false);
-        } else {
-          setSelectedStarIndex(null);
-        }
-      }
+  if (isMemoryInfoOpen) {
+    closeMemoryInfo();
+  } else {
+    closeMemoryPopup();
+  }
+}
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isMemoryInfoOpen, selectedStarIndex]);
 
   const openMemoryPopup = (index: number) => {
-    setIsMemoryInfoOpen(false);
-    setIsTallMemory(false);
-    setSelectedStarIndex(index);
-  };
+  setIsPopupClosing(false);
+  setIsInfoClosing(false);
+  setIsMemoryInfoOpen(false);
+  setIsTallMemory(false);
+  setSelectedStarIndex(index);
+};
 
   const closeMemoryPopup = () => {
+  if (isPopupClosing) return;
+
+  setIsPopupClosing(true);
+
+  window.setTimeout(() => {
+    setIsPopupClosing(false);
     setIsMemoryInfoOpen(false);
     setIsTallMemory(false);
     setSelectedStarIndex(null);
-  };
+  }, 350);
+};
+  const closeMemoryInfo = () => {
+  if (isInfoClosing) return;
+
+  setIsInfoClosing(true);
+
+  window.setTimeout(() => {
+    setIsInfoClosing(false);
+    setIsMemoryInfoOpen(false);
+  }, 250);
+};
 
   return (
     <main className="constellation-page">
@@ -269,11 +290,11 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
 
       {selectedStarIndex !== null && selectedMemory && (
         <div
-          className="constellation-popup-backdrop"
+          className={`constellation-popup-backdrop${isPopupClosing ? ' is-closing' : ''}`}
           onClick={closeMemoryPopup}
         >
           <section
-            className={`constellation-popup${isTallMemory ? ' is-tall-photo' : ''}`}
+            className={`constellation-popup${isTallMemory ? ' is-tall-photo' : ''}${isPopupClosing ? ' is-closing' : ''}`}
             role="dialog"
             aria-modal={!isMemoryInfoOpen}
             aria-labelledby="constellation-photo-title"
@@ -319,11 +340,11 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
 
       {isMemoryInfoOpen && selectedStarIndex !== null && selectedMemory && (
         <div
-          className="constellation-info-backdrop"
+          className={`constellation-info-backdrop${isInfoClosing ? ' is-closing' : ''}`}
           onClick={() => setIsMemoryInfoOpen(false)}
         >
           <section
-            className="constellation-info-popup"
+            className={`constellation-info-popup${isInfoClosing ? ' is-closing' : ''}`}
             role="dialog"
             aria-modal="true"
             aria-label="Caption kenangan"
@@ -334,7 +355,7 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
               ref={infoCloseButtonRef}
               className="constellation-popup-close"
               type="button"
-              onClick={() => setIsMemoryInfoOpen(false)}
+              onClick={closeMemoryInfo}
               aria-label="Tutup informasi kenangan"
             >
               ×

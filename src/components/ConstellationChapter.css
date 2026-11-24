@@ -538,3 +538,64 @@
     animation: none;
   }
 }
+/* ========================================
+   POPUP CLOSING ANIMATION
+======================================== */
+
+/* Backdrop keluar */
+.constellation-popup-backdrop.is-closing,
+.constellation-info-backdrop.is-closing {
+  animation: constellation-popup-backdrop-exit 250ms ease forwards;
+}
+
+/* Konten popup keluar */
+.constellation-popup.is-closing,
+.constellation-info-popup.is-closing {
+  animation: constellation-popup-dismiss 250ms ease-in forwards;
+}
+
+/* Animasi backdrop */
+@keyframes constellation-popup-backdrop-exit {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+}
+
+@keyframes constellation-popup-dismiss {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+
+  25% {
+    opacity: 1;
+    transform: scale(1.06) translateY(-3px);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.82) translateY(12px);
+    filter: blur(5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-popup-backdrop,
+  .constellation-popup,
+  .constellation-info-backdrop,
+  .constellation-info-popup,
+  .constellation-popup-backdrop.is-closing,
+  .constellation-popup.is-closing,
+  .constellation-info-backdrop.is-closing,
+  .constellation-info-popup.is-closing {
+    animation: none !important;
+  }
+}

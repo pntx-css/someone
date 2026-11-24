@@ -23,17 +23,44 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   variant = 'bottom',
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const onSongEndRef = useRef(onSongEnd);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isSongChanging, setIsSongChanging] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackMessage, setPlaybackMessage] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Create audio element once and persist it
+  // Animate when a new song is selected
+    useEffect(() => {
+      setIsSongChanging(false);
+
+      const frame = requestAnimationFrame(() => {
+        setIsSongChanging(true);
+      });
+
+      const timeout = window.setTimeout(() => {
+        setIsSongChanging(false);
+      }, 750);
+
+      return () => {
+        cancelAnimationFrame(frame);
+        window.clearTimeout(timeout);
+      };
+    }, [song.file]);
+
+    // Keep the latest callback without recreating audio
+    useEffect(() => {
+      onSongEndRef.current = onSongEnd;
+    }, [onSongEnd]);
   useEffect(() => {
     let isActive = true;
     const audio = new Audio(song.file);
+    setProgress(0);
+    setCurrentTime(0);
+    setDuration(0);
+    setPlaybackMessage('');
     audio.preload = 'metadata';
     audioRef.current = audio;
 
@@ -50,11 +77,11 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     };
 
     const handleEnded = () => {
-      setIsPlaying(false);
-      setProgress(0);
-      setCurrentTime(0);
-      onSongEnd();
-    };
+        setIsPlaying(false);
+        setProgress(0);
+        setCurrentTime(0);
+        onSongEndRef.current();
+      };
 
     const handleError = () => {
       const code = audio.error?.code;
@@ -105,7 +132,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       audio.src = '';
       audio.remove();
     };
-  }, [song.file, onSongEnd]);
+  }, [song.file]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
@@ -148,7 +175,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   );
 
   return (
-    <div className={`music-player music-player--${variant}${isExpanded ? ' music-player--expanded' : ''}`}>
+    <div
+      className={[
+        'music-player',
+        `music-player--${variant}`,
+        isExpanded ? 'music-player--expanded' : '',
+        isSongChanging ? 'music-player--song-changing' : '',
+      ].filter(Boolean).join(' ')}>
       {variant === 'side' && !isExpanded ? (
         <button
           className="player-btn player-note-toggle"
