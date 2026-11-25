@@ -28,6 +28,7 @@ export const Memories: React.FC<MemoriesProps> = ({
   showConstellationFootprint,
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
+  const memoriesRef = useRef<HTMLDivElement>(null);
   const planeArrivedRef = useRef(false);
   const onPlaneArrivedRef = useRef(onPlaneArrived);
   const pathRef = useRef<SVGPathElement>(null);
@@ -118,10 +119,10 @@ export const Memories: React.FC<MemoriesProps> = ({
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      const timeline = timelineRef.current;
-      if (!timeline) return;
+      const memoriesSection = memoriesRef.current;
+      if (!memoriesSection) return;
 
-      const top = window.scrollY + timeline.getBoundingClientRect().top;
+      const top = window.scrollY + memoriesSection.getBoundingClientRect().top;
       window.scrollTo({ top, behavior: 'auto' });
     });
     return () => window.cancelAnimationFrame(frame);
@@ -164,6 +165,8 @@ export const Memories: React.FC<MemoriesProps> = ({
     if (!pathLength) return;
 
     let animationFrame = 0;
+    let previousScrollY = window.scrollY;
+    let isScrollingUp = false;
     const updatePlanePosition = () => {
       animationFrame = 0;
       const timeline = timelineRef.current;
@@ -214,7 +217,8 @@ export const Memories: React.FC<MemoriesProps> = ({
       const angle =
         (Math.atan2(nextPoint.y - previousPoint.y, nextPoint.x - previousPoint.x) * 180) /
           Math.PI +
-        45;
+        45 +
+        (isScrollingUp ? 180 : 0);
 
       const isVisible = targetY >= pathStartY && rect.bottom > 0;
       plane.style.opacity = isVisible ? '1' : '0';
@@ -227,12 +231,21 @@ export const Memories: React.FC<MemoriesProps> = ({
       }
     };
 
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY !== previousScrollY) {
+        isScrollingUp = currentScrollY < previousScrollY;
+        previousScrollY = currentScrollY;
+      }
+      scheduleUpdate();
+    };
+
     scheduleUpdate();
-    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', scheduleUpdate);
     return () => {
       window.cancelAnimationFrame(animationFrame);
-      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', scheduleUpdate);
     };
   }, [pathD]);
@@ -240,7 +253,7 @@ export const Memories: React.FC<MemoriesProps> = ({
   const openMemory = (memory: Memory) => setSelectedMemory({ memory });
 
   return (
-    <div className="memories-container" style={{ position: 'relative' }}>
+    <div ref={memoriesRef} className="memories-container" style={{ position: 'relative' }}>
       <h2 className="memories-title" style={{ position: 'relative', zIndex: 10 }}>
         <AnimatedText text="Our Memories" />
       </h2>
