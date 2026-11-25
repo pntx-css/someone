@@ -10,6 +10,14 @@ export interface PlannedVisit {
   time: string;
 }
 
+export const hasPlannedVisitTimeConflict = (
+  plannedVisits: readonly PlannedVisit[],
+  placeId: string,
+  time: string
+): boolean => plannedVisits.some(
+  (visit) => visit.placeId !== placeId && visit.time === time
+);
+
 export interface SavedSpecialChapterState {
   places: CustomPlace[];
   plannedVisits: PlannedVisit[];

@@ -509,9 +509,21 @@ border-color: rgba(255, 182, 217, 0.9);
   animation: constellation-star-ignite 560ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 
-.constellation-star circle {
+.constellation-star-aura {
+  fill: rgba(209, 183, 255, 0.78);
+  filter: blur(3px);
+  opacity: 0.68;
+}
+
+.constellation-star-shape {
+  fill: #fffaff;
+  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px rgba(215, 187, 255, 0.95));
+  opacity: 0.96;
+}
+
+.constellation-star-core {
   fill: #fff;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.95));
+  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px rgba(215, 187, 255, 0.95));
 }
 
 .constellation-star.is-clickable {
@@ -523,8 +535,12 @@ border-color: rgba(255, 182, 217, 0.9);
   outline: none;
 }
 
-.constellation-map.is-complete .constellation-star.is-primary circle {
+.constellation-map.is-complete .constellation-star.is-primary .constellation-star-core {
   animation: constellation-star-twinkle 4.8s ease-in-out var(--twinkle-delay, 0ms) infinite alternate;
+}
+
+.constellation-map.is-complete .constellation-star.is-primary .constellation-star-aura {
+  animation: constellation-star-aura-pulse 4.8s ease-in-out var(--twinkle-delay, 0ms) infinite alternate;
 }
 
 @keyframes constellation-sky-twinkle {
@@ -563,6 +579,11 @@ border-color: rgba(255, 182, 217, 0.9);
     opacity: 1;
     filter: drop-shadow(0 0 7px #fff);
   }
+}
+
+@keyframes constellation-star-aura-pulse {
+  from { opacity: 0.48; }
+  to { opacity: 0.82; }
 }
 
 @keyframes constellation-popup-backdrop-enter {

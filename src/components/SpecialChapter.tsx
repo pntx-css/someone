@@ -12,6 +12,7 @@ import {
 import { specialPlaces} from '../data/specialPlaces';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import {
+  hasPlannedVisitTimeConflict,
   readSpecialChapterState,
   saveSpecialChapterState,
   type CustomPlace,
@@ -57,7 +58,7 @@ interface PlanTimeDialogProps {
   place: MapPlace;
   initialTime: string;
   onCancel: () => void;
-  onSave: (time: string) => void;
+  onSave: (time: string) => string | null;
   onRemove?: () => void;
 }
 
@@ -88,6 +89,7 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
 }) => {
   const [hour, setHour] = useState(initialTime.slice(0, 2));
   const [minute, setMinute] = useState(initialTime.slice(3, 5));
+  const [saveError, setSaveError] = useState('');
   const [isEntering, setIsEntering] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -173,7 +175,12 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
     event.preventDefault();
     const time = `${hour}:${minute}`;
     if (isClosing || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)) return;
-    requestClose(() => onSave(time));
+    const error = onSave(time);
+    if (error) {
+      setSaveError(error);
+      return;
+    }
+    requestClose(onCancel);
   };
 
   return createPortal(
@@ -199,7 +206,10 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
               <ScrollWheel
                 options={HOURS}
                 value={hour}
-                onChange={(value) => setHour(String(value))}
+                onChange={(value) => {
+                  setHour(String(value));
+                  setSaveError('');
+                }}
                 label="Jam"
                 initialScroll
                 initialScrollDelay={0}
@@ -211,13 +221,17 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
               <ScrollWheel
                 options={MINUTES}
                 value={minute}
-                onChange={(value) => setMinute(String(value))}
+                onChange={(value) => {
+                  setMinute(String(value));
+                  setSaveError('');
+                }}
                 label="Menit"
                 initialScroll
                 initialScrollDelay={140}
               />
             </div>
           </div>
+          {saveError && <p className="special-time-error" role="alert">{saveError}</p>}
           <a className="special-maps-link" href={place.mapsUrl} target="_blank" rel="noopener noreferrer">
             Buka Google Maps 
           </a>
@@ -680,7 +694,10 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   const closePlanningDialog = useCallback(() => setPlanningPlaceId(null), []);
 
   const saveVisitTime = (placeId: string, time: string) => {
-    if (isPlanReadOnly) return;
+    if (isPlanReadOnly) return 'Rencana sudah dikirim dan tidak dapat diubah.';
+    if (hasPlannedVisitTimeConflict(plannedVisits, placeId, time)) {
+      return `Waktu ${time} sudah dipakai tempat lain. Pilih waktu yang berbeda.`;
+    }
 
     setPlannedVisits((current) => {
       const existing = current.find((visit) => visit.placeId === placeId);
@@ -688,7 +705,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
         ? current.map((visit) => visit.placeId === placeId ? { ...visit, time } : visit)
         : [...current, { placeId, time }];
     });
-    closePlanningDialog();
+    return null;
   };
 
   const removeVisit = (placeId: string) => {
@@ -700,6 +717,10 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
 
   const submitPlan = async () => {
     if (isPlanReadOnly || planPayload.length === 0) return;
+    if (new Set(planPayload.map((visit) => visit.time)).size !== planPayload.length) {
+      setPlanSubmissionError('Setiap tempat harus memiliki waktu yang berbeda.');
+      return;
+    }
     setIsSubmittingPlan(true);
     setPlanSubmissionError('');
     setPlanSubmissionNotice('');

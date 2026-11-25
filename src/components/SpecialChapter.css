@@ -988,6 +988,12 @@
   font: 500 0.82rem var(--font-body);
 }
 
+.special-time-error {
+  margin: 0.35rem 0;
+  color: #a32150;
+  font: 500 0.78rem/1.45 var(--font-body);
+}
+
 .special-time-wheels {
   position: relative;
   display: flex;

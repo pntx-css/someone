@@ -380,7 +380,15 @@ const showHomeButton = clickedStarIds.size >= 5;
                     }
                   } : undefined}
                 >
-                  <circle r={2.6} />
+                  <circle
+                    className="constellation-star-aura"
+                    r={point.isPrimary ? 11 : 8}
+                  />
+                  <path
+                    className="constellation-star-shape"
+                    d="M 0 -14 L 1 -3 L 8 -8 L 3 -1 L 14 0 L 3 1 L 8 8 L 1 3 L 0 14 L -1 3 L -8 8 L -3 1 L -14 0 L -3 -1 L -8 -8 L -1 -3 Z"
+                  />
+                  <circle className="constellation-star-core" r={2.6} />
                 </g>
               </g>
             );
