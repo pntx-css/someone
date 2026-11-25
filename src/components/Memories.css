@@ -113,11 +113,14 @@
   color: inherit;
   background: transparent;
   text-align: inherit;
+
   opacity: 0;
-  transform: translateY(26px) rotate(var(--rot)) scale(0.97);
+  transform: translateY(18px) rotate(var(--rot)) scale(0.98);
+
   transition:
-    opacity 700ms ease var(--memory-delay, 0ms),
-    transform 700ms cubic-bezier(0.2, 0.7, 0.25, 1) var(--memory-delay, 0ms);
+    opacity 450ms ease var(--memory-delay, 0ms),
+    transform 550ms cubic-bezier(0.22, 1, 0.36, 1)
+      var(--memory-delay, 0ms);
 }
 
 .memory-row--size-1 .memory-card {
@@ -156,11 +159,11 @@
 .memory-card .memory-img {
   opacity: 0.62;
   filter: grayscale(1) sepia(0.12);
-  transform: scale(0.82);
+  transform: scale(0.88);
   transition:
-    opacity 520ms ease,
-    filter 760ms ease,
-    transform 720ms var(--ease-soft);
+    opacity 400ms ease,
+    filter 450ms ease,
+    transform 450ms var(--ease-soft);
   transform-origin: center;
 }
 
@@ -168,7 +171,7 @@
   opacity: 1;
   filter: grayscale(0) sepia(0);
   transform: scale(1);
-  animation: memory-photo-pop 680ms var(--ease-soft) both;
+  animation: memory-photo-pop 450ms var(--ease-soft) both;
 }
 
 .memory-frame::after {
@@ -376,9 +379,17 @@
 }
 
 @keyframes memory-photo-pop {
-  0% { transform: scale(0.68); }
-  72% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.88);
+  }
+
+  75% {
+    transform: scale(1.025);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 @media (max-width: 900px) {

@@ -238,6 +238,10 @@
   outline: none;
 }
 
+.special-card-select:disabled {
+  cursor: default;
+}
+
 .special-card-select h4 {
   padding-right: 1.6rem;
   overflow-wrap: anywhere;
@@ -289,7 +293,7 @@
   stroke-width: 2.2;
 }
 
-.special-card-select:hover .special-card-heart,
+.special-card-select:not(:disabled):hover .special-card-heart,
 .special-card-select[aria-pressed='true'] .special-card-heart {
   background: var(--color-rose);
   color: var(--color-paper);
@@ -441,10 +445,15 @@
   display: inline-block;
 }
 
-.special-map-marker:hover,
-.special-map-marker:focus-visible {
+.special-map-marker:hover:not(:disabled),
+.special-map-marker:focus-visible:not(:disabled) {
   background: #a85d70;
   transform: scale(1.1);
+}
+
+.special-map-marker:disabled {
+  cursor: default;
+  opacity: 0.78;
 }
 
 .special-map-home-marker {
@@ -573,10 +582,15 @@
   transition: transform 160ms var(--ease-soft), background-color 160ms var(--ease-soft), box-shadow 160ms var(--ease-soft);
 }
 
-.special-clock-dot:hover,
-.special-clock-dot:focus-visible {
+.special-clock-dot:hover:not(:disabled),
+.special-clock-dot:focus-visible:not(:disabled) {
   background: #831843;
   box-shadow: 0 0 0 3px rgba(194, 69, 120, 0.2), 0 5px 12px rgba(89, 65, 62, 0.2);
+}
+
+.special-clock-dot:disabled {
+  cursor: default;
+  opacity: 0.78;
 }
 
 .special-clock-label {
@@ -699,6 +713,16 @@
 .special-plan-table .special-remove-plan:focus-visible {
   outline: 3px solid rgba(236, 72, 153, 0.35);
   outline-offset: 2px;
+}
+
+.special-plan-table .special-remove-plan:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.special-plan-submitted-label {
+  color: rgba(59, 23, 39, 0.62);
+  font: 500 0.65rem var(--font-body);
 }
 
 .special-plan-warnings {

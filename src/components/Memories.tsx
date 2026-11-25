@@ -142,14 +142,15 @@ export const Memories: React.FC<MemoriesProps> = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
-          } else {
-            entry.target.classList.remove('visible');
+            observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.15 }
+      {
+        threshold: 0.05,
+        rootMargin: '0px 0px 40px 0px',
+      }
     );
-
     cards.forEach((card) => observer.observe(card));
     return () => observer.disconnect();
   }, []);
@@ -290,7 +291,7 @@ export const Memories: React.FC<MemoriesProps> = ({
                 type="button"
                 style={{
                   '--rot': `${memory.rotation}deg`,
-                  '--memory-delay': `${Math.min(index * 65, 260)}ms`,
+                  '--memory-delay': `${Math.min(index * 30, 120)}ms`,
                 } as React.CSSProperties}
                 onClick={() => openMemory(memory)}
                 aria-label={`Lihat detail kenangan: ${memory.caption}`}

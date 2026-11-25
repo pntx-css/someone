@@ -52,6 +52,9 @@ const STAR_START_DELAY_MS = 1200;
 const STAR_INTERVAL_MS = 450;
 const LINE_START_DELAY_MS = 650;
 const LINE_INTERVAL_MS = 140;
+const MIN_PHOTO_ZOOM = 1;
+const MAX_PHOTO_ZOOM = 3;
+const PHOTO_ZOOM_STEP = 0.25;
 const STAR_POINTS = SKY_STARS;
 
 interface ConstellationChapterProps {
@@ -71,6 +74,9 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
   const [selectedStarIndex, setSelectedStarIndex] = useState<number | null>(null);
   const [isMemoryInfoOpen, setIsMemoryInfoOpen] = useState(false);
   const [isTallMemory, setIsTallMemory] = useState(false);
+  const [photoZoom, setPhotoZoom] = useState(MIN_PHOTO_ZOOM);
+  const [photoPan, setPhotoPan] = useState({ x: 0, y: 0 });
+  const [isDraggingPhoto, setIsDraggingPhoto] = useState(false);
   const [isPopupClosing, setIsPopupClosing] = useState(false);
   const [isInfoClosing, setIsInfoClosing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
@@ -81,6 +87,15 @@ export const ConstellationChapter: React.FC<ConstellationChapterProps> = ({
 const showHomeButton = clickedStarIds.size >= 5;
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const infoCloseButtonRef = useRef<HTMLButtonElement>(null);
+  const photoFrameRef = useRef<HTMLDivElement>(null);
+  const photoImageRef = useRef<HTMLImageElement>(null);
+  const photoDragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    startPanX: number;
+    startPanY: number;
+  } | null>(null);
   const isComplete = visibleLineCount === CONSTELLATION_EDGES.length;
   const handleGalaxyFormationComplete = useCallback(() => setIsGalaxyFormed(true), []);
   const selectedMemory = selectedStarIndex === null
@@ -200,8 +215,69 @@ const showHomeButton = clickedStarIds.size >= 5;
   setIsInfoClosing(false);
   setIsMemoryInfoOpen(false);
   setIsTallMemory(false);
+  setPhotoZoom(MIN_PHOTO_ZOOM);
+  setPhotoPan({ x: 0, y: 0 });
   setSelectedStarIndex(index);
 };
+
+  const clampPhotoPan = (x: number, y: number, zoom: number) => {
+    const frame = photoFrameRef.current;
+    const image = photoImageRef.current;
+    if (!frame || !image) return { x: 0, y: 0 };
+
+    const maxX = Math.max(0, (image.clientWidth * zoom - frame.clientWidth) / 2);
+    const maxY = Math.max(0, (image.clientHeight * zoom - frame.clientHeight) / 2);
+    return {
+      x: Math.max(-maxX, Math.min(maxX, x)),
+      y: Math.max(-maxY, Math.min(maxY, y)),
+    };
+  };
+
+  const zoomPhoto = (direction: -1 | 1) => {
+    const nextZoom = Math.min(
+      MAX_PHOTO_ZOOM,
+      Math.max(MIN_PHOTO_ZOOM, photoZoom + direction * PHOTO_ZOOM_STEP)
+    );
+    setPhotoZoom(nextZoom);
+    setPhotoPan((currentPan) => clampPhotoPan(currentPan.x, currentPan.y, nextZoom));
+  };
+
+  const handlePhotoPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (photoZoom <= MIN_PHOTO_ZOOM || event.target !== photoImageRef.current) return;
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    photoDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startPanX: photoPan.x,
+      startPanY: photoPan.y,
+    };
+    setIsDraggingPhoto(true);
+  };
+
+  const handlePhotoPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = photoDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    event.preventDefault();
+    setPhotoPan(clampPhotoPan(
+      drag.startPanX + event.clientX - drag.startX,
+      drag.startPanY + event.clientY - drag.startY,
+      photoZoom
+    ));
+  };
+
+  const handlePhotoPointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (photoDragRef.current?.pointerId !== event.pointerId) return;
+
+    photoDragRef.current = null;
+    setIsDraggingPhoto(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
   return (
   <main className="constellation-page">
 
@@ -346,17 +422,47 @@ const showHomeButton = clickedStarIds.size >= 5;
                 ×
               </button>
             </header>
-            <div className="constellation-popup-photo">
+            <div
+              ref={photoFrameRef}
+              className={`constellation-popup-photo${photoZoom > MIN_PHOTO_ZOOM ? ' is-zoomed' : ''}${isDraggingPhoto ? ' is-dragging' : ''}`}
+              onPointerDown={handlePhotoPointerDown}
+              onPointerMove={handlePhotoPointerMove}
+              onPointerUp={handlePhotoPointerEnd}
+              onPointerCancel={handlePhotoPointerEnd}
+            >
               <img
+                ref={photoImageRef}
                 className="constellation-popup-media"
                 src={selectedMemory.src}
                 alt={`Kenangan bintang ${selectedStarIndex + 1}`}
                 decoding="async"
+                draggable={false}
+                style={{
+                  transform: `translate3d(${photoPan.x}px, ${photoPan.y}px, 0) scale(${photoZoom})`,
+                }}
                 onLoad={(event) => {
                   const { naturalWidth, naturalHeight } = event.currentTarget;
                   setIsTallMemory(naturalWidth / naturalHeight <= 0.65);
                 }}
               />
+              <div className="constellation-photo-zoom" role="group" aria-label="Kontrol zoom foto">
+                <button
+                  type="button"
+                  onClick={() => zoomPhoto(-1)}
+                  disabled={photoZoom <= MIN_PHOTO_ZOOM}
+                  aria-label="Perkecil foto"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  onClick={() => zoomPhoto(1)}
+                  disabled={photoZoom >= MAX_PHOTO_ZOOM}
+                  aria-label="Perbesar foto"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </section>
         </div>

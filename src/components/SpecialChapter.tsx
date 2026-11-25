@@ -529,7 +529,8 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
     [allPlaces, orderedVisits]
   );
   const planSignature = JSON.stringify(planPayload);
-  const isCurrentPlanSaved = planPayload.length > 0 && planSignature === savedPlanSignature;
+  const hasSubmittedPlan = savedPlanSignature !== '';
+  const isPlanReadOnly = hasSubmittedPlan || isSubmittingPlan;
   const editingPlace = places.find((place) => place.id === editingPlaceId) ?? null;
   const planningPlace = allPlaces.find((place) => place.id === planningPlaceId) ?? null;
   const existingPlanningVisit = planningPlace
@@ -610,9 +611,12 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
       const markerElement = document.createElement('button');
       markerElement.type = 'button';
       markerElement.className = 'special-map-marker';
+      markerElement.disabled = isPlanReadOnly;
       markerElement.innerHTML = `<span>${index + 1}</span>`;
       markerElement.setAttribute('aria-label', `Atur waktu ${place.name}`);
-      markerElement.addEventListener('click', () => setPlanningPlaceId(place.id));
+      markerElement.addEventListener('click', () => {
+        if (!isPlanReadOnly) setPlanningPlaceId(place.id);
+      });
       return new mapLibre.Marker({ element: markerElement, anchor: 'bottom' })
         .setLngLat([place.coordinates.longitude, place.coordinates.latitude])
         .addTo(map);
@@ -630,7 +634,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
       mapLocations.forEach((coordinates) => bounds.extend([coordinates.longitude, coordinates.latitude]));
       map.fitBounds(bounds, { padding: 56, maxZoom: 13, duration: 500 });
     }
-  }, [mapReady, mappedPlaces]);
+  }, [isPlanReadOnly, mapReady, mappedPlaces]);
 
 
   const closeForm = useCallback(() => {
@@ -639,6 +643,10 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   }, []);
 
   const savePlace = (draft: CustomPlaceDraft): string | null => {
+    if (isPlanReadOnly && editingPlaceId && plannedVisits.some((visit) => visit.placeId === editingPlaceId)) {
+      return 'Tempat dalam rencana yang sudah dikirim tidak dapat diubah.';
+    }
+
     const duplicate = places.some(
       (place) =>
         place.id !== editingPlaceId &&
@@ -663,6 +671,8 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   };
 
   const deletePlace = (placeId: string) => {
+    if (isPlanReadOnly && plannedVisits.some((visit) => visit.placeId === placeId)) return;
+
     setPlaces((current) => current.filter((place) => place.id !== placeId));
     setPlannedVisits((current) => current.filter((visit) => visit.placeId !== placeId));
   };
@@ -670,6 +680,8 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   const closePlanningDialog = useCallback(() => setPlanningPlaceId(null), []);
 
   const saveVisitTime = (placeId: string, time: string) => {
+    if (isPlanReadOnly) return;
+
     setPlannedVisits((current) => {
       const existing = current.find((visit) => visit.placeId === placeId);
       return existing
@@ -680,12 +692,14 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   };
 
   const removeVisit = (placeId: string) => {
+    if (isPlanReadOnly) return;
+
     setPlannedVisits((current) => current.filter((visit) => visit.placeId !== placeId));
     closePlanningDialog();
   };
 
   const submitPlan = async () => {
-    if (isSubmittingPlan || planPayload.length === 0 || isCurrentPlanSaved) return;
+    if (isPlanReadOnly || planPayload.length === 0) return;
     setIsSubmittingPlan(true);
     setPlanSubmissionError('');
     setPlanSubmissionNotice('');
@@ -849,6 +863,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                   type="button"
                   className="special-card-select"
                   aria-pressed={Boolean(visit)}
+                  disabled={isPlanReadOnly}
                   onClick={() => setPlanningPlaceId(place.id)}
                 >
                   <span className="special-placeholder-number">0{index + 1}</span>
@@ -904,6 +919,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                   type="button"
                   className="special-card-select"
                   aria-pressed={isSelected}
+                  disabled={isPlanReadOnly}
                   onClick={() => setPlanningPlaceId(place.id)}
                 >
                   <span className="special-card-heart" aria-hidden="true">
@@ -922,9 +938,29 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                   Buka Google Maps
                 </a>
                 <div className="special-card-actions">
-                  <button type="button" onClick={() => setEditingPlaceId(place.id)}>Edit</button>
-                  <button type="button" onClick={() => deletePlace(place.id)}>Hapus</button>
-                  {visit && <button type="button" onClick={() => setPlanningPlaceId(place.id)}>Atur waktu</button>}
+                  <button
+                    type="button"
+                    disabled={Boolean(visit && isPlanReadOnly)}
+                    onClick={() => setEditingPlaceId(place.id)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    disabled={Boolean(visit && isPlanReadOnly)}
+                    onClick={() => deletePlace(place.id)}
+                  >
+                    Hapus
+                  </button>
+                  {visit && (
+                    <button
+                      type="button"
+                      disabled={isPlanReadOnly}
+                      onClick={() => setPlanningPlaceId(place.id)}
+                    >
+                      Atur waktu
+                    </button>
+                  )}
                 </div>
               </article>
             );
@@ -980,6 +1016,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                   key={visit.placeId}
                   className="special-clock-dot"
                   type="button"
+                  disabled={isPlanReadOnly}
                   title={`${place.name} · ${visit.time}`}
                   aria-label={`Atur waktu ${place.name}, saat ini ${visit.time}`}
                   onClick={() => setPlanningPlaceId(place.id)}
@@ -1003,7 +1040,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                   <tr>
                     <th scope="col">Tempat</th>
                     <th scope="col">Waktu</th>
-                    <th scope="col">Aksi</th>
+                    <th scope="col">{hasSubmittedPlan ? 'Status' : 'Aksi'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1030,13 +1067,18 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                           <span className="special-plan-time">{visit.time}</span>
                         </td>
                         <td>
-                          <button
-                            type="button"
-                            className="special-remove-plan"
-                            onClick={() => removeVisit(visit.placeId)}
-                          >
-                            Hapus
-                          </button>
+                          {hasSubmittedPlan
+                            ? <span className="special-plan-submitted-label">Terkirim</span>
+                            : (
+                              <button
+                                type="button"
+                                className="special-remove-plan"
+                                disabled={isSubmittingPlan}
+                                onClick={() => removeVisit(visit.placeId)}
+                              >
+                                Hapus
+                              </button>
+                            )}
                         </td>
                       </tr>
                     );
@@ -1055,7 +1097,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
             <p className="special-plan-submit-feedback" role="status">{planSubmissionNotice}</p>
           )}
           <div
-            className={`special-plan-actions${isCurrentPlanSaved && returnPromptStep < 4 ? ` has-return special-plan-actions--return-step-${returnPromptStep}` : ''}`}
+            className={`special-plan-actions${hasSubmittedPlan && returnPromptStep < 4 ? ` has-return special-plan-actions--return-step-${returnPromptStep}` : ''}`}
           >
             {returnPrompt && (
               <p className="special-return-prompt" role="status" key={returnPrompt}>
@@ -1066,15 +1108,15 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
               type="button"
               className="special-save-plan-button"
               onClick={() => void submitPlan()}
-              disabled={planPayload.length === 0 || isSubmittingPlan || isCurrentPlanSaved}
+              disabled={planPayload.length === 0 || isPlanReadOnly}
             >
               {isSubmittingPlan
                 ? 'MENGIRIM RENCANA...'
-                : isCurrentPlanSaved
+                : hasSubmittedPlan
                   ? 'RENCANA TERKIRIM'
                   : 'SIMPAN RENCANA'}
             </button>
-            {isCurrentPlanSaved && returnPromptStep < 4 && (
+            {hasSubmittedPlan && returnPromptStep < 4 && (
               <button
                 type="button"
                 className="special-save-plan-button special-plan-return-button"
