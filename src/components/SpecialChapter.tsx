@@ -5,6 +5,7 @@ import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import {
   getProgressiveEmptyCardCount,
   MAX_CUSTOM_PLACES,
+  parseCoordinateInputs,
   parseGoogleMapsUrl,
   type Coordinates,
   type CustomPlaceDraft,
@@ -66,6 +67,36 @@ const MAX_NAME_LENGTH = 80;
 const MAX_DESCRIPTION_LENGTH = 240;
 const HOURS = Array.from({ length: 24 }, (_, hour) => String(hour).padStart(2, '0'));
 const MINUTES = Array.from({ length: 60 }, (_, minute) => String(minute).padStart(2, '0'));
+const pendingJellyButtons = new WeakSet<HTMLButtonElement>();
+
+const runAfterButtonJelly = (button: HTMLButtonElement, action: () => void) => {
+  if (pendingJellyButtons.has(button)) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    action();
+    return;
+  }
+  pendingJellyButtons.add(button);
+  let completed = false;
+  let fallbackTimer = 0;
+  const finish = () => {
+    if (completed) return;
+    completed = true;
+    pendingJellyButtons.delete(button);
+    window.clearTimeout(fallbackTimer);
+    button.removeEventListener('animationend', handleAnimationEnd);
+    button.classList.remove('jelly-button-click');
+    action();
+  };
+  const handleAnimationEnd = (event: AnimationEvent) => {
+    if (event.target === button && event.animationName === 'jelly-button-click') finish();
+  };
+
+  button.addEventListener('animationend', handleAnimationEnd);
+  button.classList.remove('jelly-button-click');
+  void button.getBoundingClientRect();
+  button.classList.add('jelly-button-click');
+  fallbackTimer = window.setTimeout(finish, 520);
+};
 
 const haversineDistance = (from: Coordinates, to: Coordinates): number => {
   const radians = (degrees: number) => (degrees * Math.PI) / 180;
@@ -237,12 +268,35 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
           </a>
           <div className="special-dialog-actions">
             {onRemove && (
-              <button type="button" className="special-secondary-button" onClick={() => requestClose(onRemove)}>
+              <button
+                type="button"
+                className="special-secondary-button"
+                onClick={(event) => runAfterButtonJelly(
+                  event.currentTarget,
+                  () => requestClose(onRemove)
+                )}
+              >
                 Hapus 
               </button>
             )}
-            <button type="button" className="special-secondary-button" onClick={() => requestClose(onCancel)}>Batal</button>
-            <button type="submit" className="special-primary-button">Simpan waktu</button>
+            <button
+              type="button"
+              className="special-secondary-button"
+              onClick={(event) => runAfterButtonJelly(event.currentTarget, () => requestClose(onCancel))}
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              className="special-primary-button"
+              onClick={(event) => {
+                event.preventDefault();
+                const button = event.currentTarget;
+                runAfterButtonJelly(button, () => button.form?.requestSubmit(button));
+              }}
+            >
+              Simpan waktu
+            </button>
           </div>
         </form>
       </div>
@@ -253,6 +307,12 @@ const PlanTimeDialog: React.FC<PlanTimeDialogProps> = ({
 
 const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave }) => {
   const [mapsUrl, setMapsUrl] = useState(initialPlace?.mapsUrl ?? '');
+  const [latitude, setLatitude] = useState(
+    initialPlace?.coordinates ? String(initialPlace.coordinates.latitude) : ''
+  );
+  const [longitude, setLongitude] = useState(
+    initialPlace?.coordinates ? String(initialPlace.coordinates.longitude) : ''
+  );
   const [name, setName] = useState(initialPlace?.name ?? '');
   const [description, setDescription] = useState(initialPlace?.description ?? '');
   const [error, setError] = useState('');
@@ -262,7 +322,11 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    mapsInputRef.current?.focus();
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      dialogRef.current?.focus();
+    } else {
+      mapsInputRef.current?.focus();
+    }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Tab' || !dialogRef.current) return;
 
@@ -298,7 +362,8 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
       if (trimmedDescription.length > MAX_DESCRIPTION_LENGTH) {
         throw new Error(`Deskripsi maksimal ${MAX_DESCRIPTION_LENGTH} karakter.`);
       }
-      const coordinates = parseGoogleMapsUrl(mapsUrl);
+      const mapsCoordinates = parseGoogleMapsUrl(mapsUrl);
+      const coordinates = parseCoordinateInputs(latitude, longitude) ?? mapsCoordinates;
       const saveError = onSave({
         coordinates,
         mapsUrl: mapsUrl.trim(),
@@ -315,10 +380,11 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
     <div className="special-modal-backdrop">
       <div
         ref={dialogRef}
-        className="special-place-dialog"
+        className="special-place-dialog special-place-form-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="special-place-dialog-title"
+        tabIndex={-1}
       >
         <button className="special-dialog-close" type="button" onClick={onCancel} aria-label="Tutup form">
           ×
@@ -346,7 +412,40 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
             required
           />
           <p id="custom-place-hint" className="special-field-hint">
-            Tempel link Google Maps untuk menyimpan tempat ini.
+            Tempel link gmaps nya di sini yaa
+          </p>
+          <div className="special-coordinate-fields">
+            <div className="special-coordinate-field">
+              <label htmlFor="custom-place-latitude">Latitude <span>(opsional)</span></label>
+              <input
+                id="custom-place-latitude"
+                type="text"
+                inputMode="decimal"
+                value={latitude}
+                onChange={(event) => {
+                  setLatitude(event.target.value);
+                  setError('');
+                }}
+                placeholder="-7.5667"
+              />
+            </div>
+            <div className="special-coordinate-field">
+              <label htmlFor="custom-place-longitude">Longitude <span>(opsional)</span></label>
+              <input
+                id="custom-place-longitude"
+                type="text"
+                inputMode="decimal"
+                value={longitude}
+                onChange={(event) => {
+                  setLongitude(event.target.value);
+                  setError('');
+                }}
+                placeholder="110.8167"
+              />
+            </div>
+          </div>
+          <p className="special-field-hint">
+            Isi koordinat tempat yang kmu mw yaa, opsional sii. biar ntar tertampil di map yang ada di bawah.
           </p>
           <label htmlFor="custom-place-name">Nama tempat</label>
           <input
@@ -376,8 +475,24 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ initialPlace, onCancel, onSave })
             {error}
           </p>
           <div className="special-dialog-actions">
-            <button type="button" className="special-secondary-button" onClick={onCancel}>Batal</button>
-            <button type="submit" className="special-primary-button">Simpan tempat</button>
+            <button
+              type="button"
+              className="special-secondary-button"
+              onClick={(event) => runAfterButtonJelly(event.currentTarget, onCancel)}
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              className="special-primary-button"
+              onClick={(event) => {
+                event.preventDefault();
+                const button = event.currentTarget;
+                runAfterButtonJelly(button, () => button.form?.requestSubmit(button));
+              }}
+            >
+              Simpan tempat
+            </button>
           </div>
         </form>
       </div>
@@ -694,9 +809,9 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   const closePlanningDialog = useCallback(() => setPlanningPlaceId(null), []);
 
   const saveVisitTime = (placeId: string, time: string) => {
-    if (isPlanReadOnly) return 'Rencana sudah dikirim dan tidak dapat diubah.';
+    if (isPlanReadOnly) return 'rencananya udah dikirim jadi gkbisa diubah';
     if (hasPlannedVisitTimeConflict(plannedVisits, placeId, time)) {
-      return `Waktu ${time} sudah dipakai tempat lain. Pilih waktu yang berbeda.`;
+      return `Waktu ${time} waktu nya udah dipilih, cari waktu yang berbeda yaa`;
     }
 
     setPlannedVisits((current) => {
@@ -718,7 +833,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
   const submitPlan = async () => {
     if (isPlanReadOnly || planPayload.length === 0) return;
     if (new Set(planPayload.map((visit) => visit.time)).size !== planPayload.length) {
-      setPlanSubmissionError('Setiap tempat harus memiliki waktu yang berbeda.');
+      setPlanSubmissionError('setiap tempat harus memiliki waktu yang berbeda.');
       return;
     }
     setIsSubmittingPlan(true);
@@ -952,7 +1067,7 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                   <h4>{place.name}</h4>
                   {place.description && <p>{place.description}</p>}
                   <span className="special-custom-badge">
-                    {visit ? `Direncanakan · ${visit.time}` : 'Custom Place · klik untuk atur waktu'}
+                    {visit ? `Direncanakan · ${visit.time}` : 'Pilihanmu'}
                   </span>
                 </button>
                 <a className="special-maps-link" href={place.mapsUrl} target="_blank" rel="noopener noreferrer">
@@ -962,14 +1077,20 @@ export const SpecialChapter: React.FC<SpecialChapterProps> = ({
                   <button
                     type="button"
                     disabled={Boolean(visit && isPlanReadOnly)}
-                    onClick={() => setEditingPlaceId(place.id)}
+                    onClick={(event) => runAfterButtonJelly(
+                      event.currentTarget,
+                      () => setEditingPlaceId(place.id)
+                    )}
                   >
                     Edit
                   </button>
                   <button
                     type="button"
                     disabled={Boolean(visit && isPlanReadOnly)}
-                    onClick={() => deletePlace(place.id)}
+                    onClick={(event) => runAfterButtonJelly(
+                      event.currentTarget,
+                      () => deletePlace(place.id)
+                    )}
                   >
                     Hapus
                   </button>

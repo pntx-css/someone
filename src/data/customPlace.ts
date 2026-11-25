@@ -37,6 +37,37 @@ const parseCoordinatePair = (value: string): Coordinates | null => {
   return { latitude, longitude };
 };
 
+const parseManualCoordinatePair = (value: string): Coordinates | null => {
+  const match = value.match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+  if (!match) return null;
+  return parseCoordinatePair(`${match[1]},${match[2]}`);
+};
+
+export const parseCoordinateInputs = (latitudeValue: string, longitudeValue: string): Coordinates | null => {
+  const latitudeInput = latitudeValue.trim();
+  const longitudeInput = longitudeValue.trim();
+  if (!latitudeInput && !longitudeInput) return null;
+  if (!latitudeInput || !longitudeInput) {
+    const coordinatePair = parseManualCoordinatePair(latitudeInput || longitudeInput);
+    if (coordinatePair) return coordinatePair;
+    throw new Error('Isi latitude dan longitude untuk menampilkan tempat di peta.');
+  }
+
+  const latitude = Number(latitudeInput);
+  const longitude = Number(longitudeInput);
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    throw new Error('Koordinat tidak valid');
+  }
+  return { latitude, longitude };
+};
+
 export const parseGoogleMapsUrl = (value: string): Coordinates | null => {
   let url: URL;
   try {

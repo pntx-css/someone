@@ -4,6 +4,7 @@ import {
   readSpecialChapterState,
   saveSpecialChapterState,
 } from '../src/state/specialChapterSession.ts';
+import { parseCoordinateInputs } from '../src/data/customPlace.ts';
 import {
   FRESH_NAVIGATION_SESSION_KEYS,
   JOURNEY_STORAGE_KEYS,
@@ -70,6 +71,24 @@ test('custom places, planned visits, and saved plan signature survive a reload',
   saveSpecialChapterState(savedState, storage);
 
   assert.deepEqual(readSpecialChapterState(defaultPlaceIds, storage), savedState);
+});
+
+test('custom place coordinate inputs accept valid pairs and reject incomplete or out-of-range values', () => {
+  assert.deepEqual(parseCoordinateInputs('-7.5667', '110.8167'), {
+    latitude: -7.5667,
+    longitude: 110.8167,
+  });
+  assert.deepEqual(parseCoordinateInputs('-7.607630566878355, 110.8118047102339', ''), {
+    latitude: -7.607630566878355,
+    longitude: 110.8118047102339,
+  });
+  assert.deepEqual(parseCoordinateInputs('-7.607599, 110.811799', ''), {
+    latitude: -7.607599,
+    longitude: 110.811799,
+  });
+  assert.equal(parseCoordinateInputs('', ''), null);
+  assert.throws(() => parseCoordinateInputs('-7.5667', ''), /Isi latitude dan longitude/);
+  assert.throws(() => parseCoordinateInputs('-91', '110.8167'), /Koordinat tidak valid/);
 });
 
 test('returning from Constellation clears candles and music but preserves wishlist and places', () => {
