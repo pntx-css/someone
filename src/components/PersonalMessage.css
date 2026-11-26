@@ -15,7 +15,7 @@
     linear-gradient(135deg, #fffefa, var(--color-light) 55%, #fffaf4);
   width: 100%;
   max-width: 740px;
-  padding: clamp(3rem, 6vw, 4.5rem) clamp(1.35rem, 6vw, 4rem);
+  padding: clamp(3rem, 6vw, 4.5rem) clamp(1.1rem, 6vw, 4rem);
   box-shadow: var(--shadow-paper);
   border-radius: var(--radius-paper);
   position: relative;
@@ -61,21 +61,21 @@
 .letter-content {
   position: relative;
   z-index: 1;
-  padding-inline: clamp(3.25rem, 8vw, 4.5rem);
+  padding-inline: clamp(0rem, 2vw, 1.5rem);
   font-family: var(--font-body);
-  font-size: 1.08rem;
+  font-size: clamp(0.68rem, 3.3vw, 1.08rem);
   line-height: 1.85;
   color: var(--color-dark);
   text-align: center;
   text-justify: auto;
   text-align-last: center;
   hyphens: auto;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  white-space: pre;
+  overflow-wrap: normal;
 }
 
 .letter-content-visual {
-  white-space: inherit;
+  white-space: pre;
 }
 
 .letter-content-accessible {
@@ -134,8 +134,8 @@
   }
 
   .letter-content {
-    padding-inline: 1.25rem;
-    font-size: 1.08rem;
+    padding-inline: clamp(0rem, 2vw, 1.5rem);
+    font-size: clamp(0.68rem, 3.3vw, 1.08rem);
     line-height: 1.75;
   }
 }
@@ -158,8 +158,8 @@
   }
 
   .letter-content {
-    padding-inline: 0.75rem;
-    font-size: 1.08rem;
+    padding-inline: clamp(0rem, 2vw, 1.5rem);
+    font-size: clamp(0.68rem, 3.3vw, 1.08rem);
   }
 
   .letter-paper::after {
