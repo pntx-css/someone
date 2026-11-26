@@ -143,6 +143,7 @@ export const MiniGalaxy: React.FC<MiniGalaxyProps> = ({
     const motionPreference = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     );
+    const animationStartedAt = performance.now();
 
     let width = 0;
     let height = 0;
@@ -153,6 +154,7 @@ export const MiniGalaxy: React.FC<MiniGalaxyProps> = ({
       ctx.clearRect(0, 0, width, height);
 
       ctx.globalCompositeOperation = 'lighter';
+      const elapsedTime = Math.max(0, timestamp - animationStartedAt);
 
       for (const galaxy of GALAXIES) {
         drawMiniGalaxy(
@@ -162,7 +164,7 @@ export const MiniGalaxy: React.FC<MiniGalaxyProps> = ({
             x: galaxy.x * width,
             y: galaxy.y * height,
           },
-          timestamp,
+          elapsedTime,
         );
       }
 

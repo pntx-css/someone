@@ -40,6 +40,7 @@ interface GalaxyBackgroundProps {
 
 const ARM_COUNT = 3;
 const SPIRAL_TWIST = 6.6;
+const SPIRAL_ARM_WIDTH = 4;
 const GALAXY_TILT = -0.5;
 const FORMATION_STAGGER_MS = 1600;
 const FORMATION_JITTER_MS = 550;
@@ -97,9 +98,9 @@ const createGalaxyParticles = (count: number): Particle[] => {
 
     return {
       radius,
-      radialOffset: (random() - 0.5) * 0.08,
+      radialOffset: (random() - 0.5) * 0.08 * SPIRAL_ARM_WIDTH,
       arm: Math.floor(random() * ARM_COUNT),
-      angleOffset: (random() - 0.5) * (0.16 + radius * 0.18),
+      angleOffset: (random() - 0.5) * (0.16 + radius * 0.18) * SPIRAL_ARM_WIDTH,
       size: 0.45 + random() * 0.85,
       phase: random() * Math.PI * 2,
       color: colorPosition,
@@ -125,7 +126,7 @@ const createGalaxyStars = (count: number): GalaxyStar[] => {
     return {
       radius,
       arm: Math.floor(random() * ARM_COUNT),
-      angleOffset: (random() - 0.5) * (0.08 + radius * 0.12),
+      angleOffset: (random() - 0.5) * (0.08 + radius * 0.12) * SPIRAL_ARM_WIDTH,
       size: 1.35 + random() * 0.85,
       phase: random() * Math.PI * 2,
       formationDelay: radius * FORMATION_STAGGER_MS + random() * FORMATION_JITTER_MS,
@@ -175,7 +176,7 @@ export const GalaxyBackground: React.FC<GalaxyBackgroundProps> = ({ onFormationC
       const centerY = height * 0.5;
       const radiusX = Math.min(width * 0.35, height * 0.56);
       const radiusY = Math.min(height * 0.2, width * 0.18);
-      const rotation = timestamp * GALAXY_ROTATION_SPEED;
+      const rotation = Math.max(0, timestamp - formationStartedAt) * GALAXY_ROTATION_SPEED;
       const tiltCos = Math.cos(GALAXY_TILT);
       const tiltSin = Math.sin(GALAXY_TILT);
 
